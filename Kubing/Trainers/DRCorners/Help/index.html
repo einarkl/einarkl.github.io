@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DR Corners Help</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://einarkl.no/Kubing/Tools/tools.js"></script>
+    <script src='https://einarkl.github.io/Kubing/CubePlayer/CubePlayer.js' type='module'></script>
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <div id="content">
+        <h2>HTR Corner Subsets</h1>
+        <br>
+        <br>
+        <table id="subsets"></table>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <h4>Original post by Jayden McNeill: <a rel="stylesheet" href="https://www.speedsolving.com/threads/fmc-my-recommended-approach-for-recognizing-all-12-htr-corner-subsets.90515/">speedsolving.com</a></h4>
+        <br>
+        <!--
+            0CXE 3qt - NISS trace the U layer corners and see if they become a 1q lookalike or 2q lookalike pattern. If they become 1, you're safe to do a qt, otherwise insert 1-2 half turns and try again (1 is always possible)
+
+0CXE 4qt - NISS trace UFR+UFL and DFR+DBR (top front and bottom right) and see if they become 1q or 2q. If the become 2q, the correct first qt is U', if not, the correct first qt is U
+
+4CXE 2qt (U R2 U style) - If you want to skip brute force checking, set your corners up such that they're 3 moves from becoming oriented and NISS trace two misoriented corners from one layer and two oriented from the other. If they trace to 1q, you're good to go, otherwise you'll need to set the oriented/misoriented corners into a 3-1 split and do the U2 fix. This is the only case where I personally feel brute forcing is probably just faster than bothering with NISS trace stuff as it isn't too many moves
+
+4CXE 3qt (on the side of the scramble that looks like 1q) - If you want to skip brute force checking, set your corners up such that they're ready to be transformed to 2q lookalike and NISS trace the same set as 4CXE 2qt U R2 U style. If they become 2q, you're good to go, otherwise you'll need to do some sort of half turn manipulation beforehand
+
+2CXE 3qt/5qt - Instead of brute force checking to see whether or not you have 3q or 5q, you can set the 2 misoriented corners onto different DR layers like you're preparing for a U R2 U R2 U finish. NISS trace 3 oriented corners on one of these layers + the misoriented corner from the other layer, 1q = 5q and 2q = 3q. It's possible to also use a similar NISS trace system to 4CXE 2qt U R2 U style to know which way to do the first qt if it's 3qt, but similar to before I think brute forcing is likely good enough if not strictly better
+
+2CXE 4qt - For the optimal path (U R2 U' R2 U R2 U style), if you want to make sure your first qt gives 3q instead of 5q, when your corners are set up for a 1qt transformation to a difference 2XCE (aka both in same layer), NISS trace any 2 adjacent corners on the completely oriented layer, and any 2 diagonal corners on the layer containing both misoriented corners. 2q = first qt will work, 1q = you need to insert a half turn beforehand
+        -->
+    </div>
+</body>
+</html>

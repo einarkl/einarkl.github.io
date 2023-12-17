@@ -1,0 +1,114 @@
+html {
+    background-image: linear-gradient(to bottom, #181818, #464646);
+    background-attachment: fixed;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: transparent;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#scramble {
+    text-align: center;
+}
+
+#cubeDisplay {
+    position: absolute;
+    height: 100%;
+    margin: auto;
+    text-align: center;
+    z-index: 0;
+}
+
+#stats {
+    color: #aaa;
+    font-family: monospace;
+    height: 50%;
+    position: absolute;
+    top: 50%;
+    left: 2.5%;
+    z-index: 2;
+}
+
+#buttonDiv {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5%;
+    width: 75%;
+    height: 5vh;
+    margin: auto;
+}
+
+#btnDownload {
+    position: absolute;
+    top: 1%;
+    right: 1%;
+}
+
+label {
+    color: #aaaaaa;
+}
+
+input[type='checkbox'] {
+    margin: 0.1%;
+    height: 1vw;
+    width: 1vw;
+}
+
+h1 {
+    color: #aaaaaa;
+}
+
+#time {
+    font-size: 8vh;
+    text-align: end;
+}
+
+#moves, #tps {
+    font-size: 5vh;
+    text-align: end;
+}
+
+span {
+    color: #aaaaaa;
+}
+
+#keysDiv {
+    position: absolute;
+    left: 1%;
+}
+
+#keysDiv input {
+    width: 25%;
+    text-align: center;
+}
+
+#timeAndMoves {
+    position: absolute;
+    right: 1%;
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 0;
+}
+  
+/* Track */
+::-webkit-scrollbar-track {
+    background: transparent; 
+}
+   
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+  
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: transparent; 
+}

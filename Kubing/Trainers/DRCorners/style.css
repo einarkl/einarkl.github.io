@@ -1,0 +1,75 @@
+html {
+    background-image: linear-gradient(to bottom, #181818, #464646);
+    background-attachment: fixed;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: transparent;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+select {
+    font-size: 2.5vh;
+    font-family: monospace;
+}
+
+button {
+    font-size: 2.5vh;
+    font-family: monospace;
+}
+
+h1 {
+    color: #aaaaaa;
+    margin: 0;
+    cursor: default;
+    font-weight: normal;
+    font-family: monospace;
+    font-size: 10vh;
+}
+
+h2 {
+    color: #aaaaaa;
+    margin: 0;
+    cursor: default;
+    font-weight: normal;
+    font-family: monospace;
+    font-size: 5vh;
+}
+
+label {
+    color: #aaaaaa;
+    font-size: 2.5vh;
+    font-family: monospace;
+}
+
+#content {
+    text-align: center;
+}
+
+#cubePlayerDiv {
+    margin: auto;
+    width: 20%;
+    height: 20%;
+}
+
+#answerDiv {
+    margin: auto;
+    width: 50%;
+    border-collapse: collapse;
+    /* display: grid;
+    grid-template-columns: 1fr 1fr; */
+}
+
+#answerDiv th, td {
+    width: 50%;
+}
+
+#result {
+    color: red !important;
+}

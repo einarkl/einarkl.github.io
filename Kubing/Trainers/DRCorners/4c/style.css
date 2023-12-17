@@ -1,0 +1,120 @@
+html {
+    background-image: linear-gradient(to bottom, #181818, #464646);
+    background-attachment: fixed;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: transparent;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #aaaaaa;
+    margin: 0;
+    cursor: default;
+    font-weight: normal;
+    font-family: monospace;
+    font-size: 10vh;
+}
+
+h2 {
+    color: #aaaaaa;
+    margin: 0;
+    cursor: default;
+    font-weight: normal;
+    font-family: monospace;
+    font-size: 5vh;
+}
+
+h3 {
+    color: #aaaaaa;
+    margin: 0;
+    cursor: default;
+    font-weight: normal;
+    font-family: monospace;
+    font-size: 3vh;
+}
+
+h4 {
+    color: #aaaaaa;
+    margin: 0;
+    cursor: default;
+    font-weight: normal;
+    font-family: monospace;
+    font-size: 2vh;
+}
+
+a, a:visited {
+    color: #aaa;
+}
+
+#content {
+    text-align: center;
+}
+
+#subsets {
+    margin: auto;
+    width: 95%;
+    text-align: left;
+}
+
+#subsets h3 {
+    text-align: left;
+}
+
+#subsets th:nth-child(1), #subsets th:nth-child(2) {
+    width: 15%;
+}
+
+#subsets th:nth-child(3), #subsets th:nth-child(4) {
+    width: 35%;
+}
+
+.cornerSets {
+    font-weight: bold;
+}
+
+#btnGrid {
+    margin: auto;
+    width: 20%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1vh;
+}
+
+.sideGrid {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    row-gap: 1vh;
+}
+
+button {
+    font-size: 5vh;
+}
+
+/*Scrollbar*/
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+  
+/* Track */
+::-webkit-scrollbar-track {
+    background: linear-gradient(to bottom, #181818, #464646);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888888;
+    border-radius: 100px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555555; 
+}

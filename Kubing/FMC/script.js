@@ -105,16 +105,41 @@ function updateSolution() {
     }
 
     let sol = removeRedundantMoves(normal.join(" ").trim() + " " + inverseAlg(inverse.join(" ").trim())).trim();
-    $("#solution").html("<h1>" + [sol, (sol === "" ? 0 : sol.split(" ").length)].join("&nbsp;&nbsp;&nbsp;") + " (HTM)</h1>");
+    let btn = sol !== "" ? " <button onclick='copySolution()'>Copy</button>" : "";
+    let out = "<h1>" + [sol, (sol === "" ? 0 : sol.split(" ").length)].join("&nbsp;&nbsp;&nbsp;") + " (HTM)" + btn + "</h1>";
+    $("#solution").html(out);
     $("cube-player").attr("scramble", $("#inpScramble").val().trim());
     $("cube-player").attr("solution", sol);
     $("cube-player").attr("time", sol.split(" ").length * 500);
 }
 
+function copySolution() {
+    let normal = [];
+    let inverse = [];
+    let solution = "Scramble:\n" + $("#inpScramble").val() + "\n\n";
+    for (let s of Object.keys(steps)) {
+        let moves = steps[s].moves;
+        let comment = steps[s].comment;
+        let niss = steps[s].niss;
+        if (niss === "normal") {
+            solution += moves + " // " + comment + "\n";
+            normal.push(steps[s].moves);
+        }
+        else {
+            solution += "(" + moves + ") // " + comment + "\n";
+            inverse.push(steps[s].moves);
+        }
+    }
+    let sol = removeRedundantMoves(normal.join(" ").trim() + " " + inverseAlg(inverse.join(" ").trim())).trim();
+    solution += "\n\nFinal solution:\n" + sol + " (" + sol.split(" ").length + ")";
+    // console.log(solution);
+    navigator.clipboard.writeText(solution);
+}
+
 function updateURL() {
     let rawScramble = $("#inpScramble").val();
     let scramble = rawScramble !== "" ? "scramble=" + encodeURIComponent(rawScramble) : "";
-    let jsonSteps = steps !== {} ? "steps=" + encodeURIComponent(JSON.stringify(steps)) : "";
+    let jsonSteps = "steps=" + encodeURIComponent(JSON.stringify(steps));
 
     let urlRest = [scramble, jsonSteps].filter(u => u !== "").join("&");
     let urlExtra = urlRest !== "" ? "?" + urlRest : "";

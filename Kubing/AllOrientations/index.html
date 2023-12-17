@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Orientations</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../../Tools/tools.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js" defer></script>
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <div id="content">
+        <textarea id="taSolutions" wrap="off" placeholder="Solutions"></textarea>
+    </div>
+    <button id="btnConvert" onclick="convertSolution($('#taSolutions').val())">Convert</button><br><br>
+    <div id="progressBar">
+        <div id="innerBar"></div>
+        <h1 id="progress">0 %</h1>
+    </div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DR Corners Trainer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://einarkl.no/Kubing/Tools/tools.js"></script>
+    <!-- <script src='https://einarkl.no/Kubing/CubePlayer/CubePlayer.js' type='module'></script> -->
+    <script src="../../CubePlayer/CubePlayer.js" type="module"></script>
+    <script src="algs.js"></script>
+    <script src="script.js" defer></script>
+    <link id="linkCSS" rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <button id="btnRecognition" onclick="window.open('./Help','_blank')">Recognition</button>
+    <div id="content">
+        <h2 id="scrambleDisplay"></h2>
+        <div id="cubePlayerDiv">
+            <cube-player
+            scramble="" 
+            solution=""
+            time="1000"
+            cubestyle="solid" 
+            logo=""
+            colors=""
+            plastic="#000000"
+            playbutton="none"
+            smartcube="none"
+            solvedfunc="cubeFinished"
+            usecontrols="true">
+            </cube-player>
+        </div>
+        <!-- <div id="answerDiv">
+            <div>
+                <label for="selCx">Corner case</label><br>
+                <select id="selCx">
+                    <option value="0" selected>0/8</option>
+                    <option value="4">4</option>
+                    <option value="2">2/6</option>
+                </select>
+            </div>
+            <div>
+                <label for="inpQt">Quarter turns</label><br>
+                <input id="inpQt" type="number" step="1" min="0" max="5" value="0">
+            </div>
+        </div> -->
+        <table id="answerDiv">
+            <tr>
+                <th><label for="selCx">Corner case</label></th>
+                <th><label for="inpQt">Quarter turns</label></th>
+            </tr>
+            <tr>
+                <td><select id="selCx" onchange="updateQt()">
+                    <option value="0cxe" selected>0/8</option>
+                    <option value="4cxe">4</option>
+                    <option value="2cxe">2/6</option>
+                </select></td>
+                <td><select id="selQt"></select></td>
+            </tr>
+        </table>
+        <button id="btnAnswer" onclick="answer()">Answer</button>
+        <h1 id="result"></h1>
+    </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBOH Trainer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://einarkl.no/Kubing/Tools/tools.js"></script>
+    <script src='https://einarkl.github.io/Kubing/CubePlayer/CubePlayer.js' type='module'></script>
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <div id="content">
+        <div id="cubeDiv">
+            <cube-player
+                scramble="L2 R2 F2 L' R' D2 R L F2 U' D F2 U2 D2 L2 R2 F2 D' R L D'" 
+                solution="D' L' R' U B2 D2 F2 L2 F2 U2 L2 U2 L2" 
+                time="3000" 
+                cubestyle="stickerless" 
+                logo="./UB.png"
+                colors="
+                    #ffffff,
+                    #ffaa00,
+                    #00ff00,
+                    #ff0000,
+                    #0000ff,
+                    #ffff00" 
+                plastic="#aaa"
+                playbutton="button"
+                smartcube="none"
+                solvedfunc="none"
+                usecontrols="true">
+                </cube-player>
+        </div>
+    </div>
+</body>
+</html>

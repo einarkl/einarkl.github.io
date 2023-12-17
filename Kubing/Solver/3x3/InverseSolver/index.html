@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inverse Solver | EinarKL</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../../Tools/tools.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <h1 class="inpH1"><input type="text" placeholder="Scramble" id="inpScramble" oninput="drawScrambleNxN('#svgCube', 3, $(this).val())"></h1>
+    <h1 class="inpH1"><input type="text" placeholder="End state" id="inpEndState" value="wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy"></h1>
+    <div><svg id="svgCube"></svg></div>
+    <button id="btnScramble" onclick="$('#inpScramble').val(getScrambleNxN(3)); drawScrambleNxN('#svgCube', 3, $('#inpScramble').val())">Scramble</button>
+    <button id="btnSolve" onclick="solveCube($('#inpScramble').val())">Solve</button>
+    <div id="solution"></div>
+    <div id="searchDepth"></div>
+    <div id="solutionCube"></div>
+</body>
+<script src="index.js" defer></script>
+</html>

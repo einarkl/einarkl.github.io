@@ -469,8 +469,16 @@ function recon(scr, t, mvs, tps) {
     let steps = getSteps(scr, mvs);
 
     let i = 1;
+    let ori = "";
     for (let s of steps) {
-        stats[s[1]] = s[0];
+        if (s[1] === "orientation") {
+            ori = s[0];
+            stats[s[1]] = ori;
+        }
+        else {
+            stats[s[1]] = getMovesWithoutRotations(ori + " " + s[0]);
+        }
+        
         i++;
     }
 
@@ -504,22 +512,6 @@ function getSteps(scr, mvs) {
             let fD = state.split("").slice(45,54);
 
             let faces = [fU, fL, fF, fR, fB, fD];
-            function oppFace(n) {
-                switch (n) {
-                    case 0:
-                        return 5;
-                    case 1:
-                        return 3;
-                    case 2:
-                        return 4;
-                    case 3:
-                        return 1;
-                    case 4:
-                        return 2;
-                    case 5:
-                        return 1;
-                }
-            }
 
             if (s === "cross") {
                 if (fU[4] === fU[1] && fU[4] === fU[3] && fU[4] === fU[5] && fU[4] === fU[7] &&
@@ -572,7 +564,7 @@ function getSteps(scr, mvs) {
                     startInd = i + 1;
                     ori = "";
                     steps.push([ori, "orientation"]);
-                    steps.push([getMovesWithoutRotations(ori + " " + curMoves), s]);
+                    steps.push([curMoves, s]);
                     cross = 5;
                     break loop;
                 }
@@ -765,7 +757,7 @@ function getSteps(scr, mvs) {
                     fB[0] === fB[1] && fB[0] === fB[2] && fL[0] === fL[1] && fL[0] === fL[2]
                     ) {
                     startInd = i + 1;
-                    fruruf ? steps.push([getMovesWithoutRotations(ori + " " + curMoves), "fruruf"]) : steps.push([getMovesWithoutRotations(ori + " " + curMoves), s]);
+                    fruruf ? steps.push([getMovesWithoutRotations(ori + " " + curMoves), "fruruf"]) : ori === "" ? steps.push([curMoves, s]) : steps.push([getMovesWithoutRotations(ori + " " + curMoves), s]);
                     break loop;
                 }
             }
@@ -777,6 +769,23 @@ function getSteps(scr, mvs) {
     }
     
     return steps;
+}
+
+function oppFace(n) {
+    switch (n) {
+        case 0:
+            return 5;
+        case 1:
+            return 3;
+        case 2:
+            return 4;
+        case 3:
+            return 1;
+        case 4:
+            return 2;
+        case 5:
+            return 0;
+    }
 }
 
 function getHHmmsshh(ms) {
@@ -1476,8 +1485,11 @@ function submitStats() {
     console.log(stats);
 
     for (let k in stats) {
-        if (k.includes("pair")) {
+        if (k.includes("pair") || k === "oll" || k === "pll") {
             database.ref(k).push(stats[k]);
+            database.ref(k).push(getMovesWithoutRotations("y " + stats[k]));
+            database.ref(k).push(getMovesWithoutRotations("y2 " + stats[k]));
+            database.ref(k).push(getMovesWithoutRotations("y' " + stats[k]));
         }
     }
 
@@ -1485,25 +1497,25 @@ function submitStats() {
 }
 
 function downloadFirebaseData() {
-    var rootRef = database.ref();
+    let rootRef = database.ref();
 
     rootRef.once('value', function(snapshot) {
-        var rawData = snapshot.val();
-        var processedData = {};
+        let rawData = snapshot.val();
+        let processedData = {};
 
         // Process and deduplicate each key in the data
-        for (var key in rawData) {
+        for (let key in rawData) {
             if (rawData.hasOwnProperty(key)) {
                 // Convert object values to array and filter out duplicates
-                var uniqueValues = Array.from(new Set(Object.values(rawData[key])));
+                let uniqueValues = Array.from(new Set(Object.values(rawData[key])));
                 processedData[key] = uniqueValues;
             }
         }
 
         // Convert processed data to formatted JSON string
-        var formattedJson = JSON.stringify(processedData, null, 2); // Indent with 2 spaces for formatting
-        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(formattedJson);
-        var downloadAnchorNode = document.createElement('a');
+        let formattedJson = JSON.stringify(processedData, null, 4); // Indent with 4 spaces for formatting
+        let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(formattedJson);
+        let downloadAnchorNode = document.createElement('a');
         downloadAnchorNode.setAttribute("href", dataStr);
         downloadAnchorNode.setAttribute("download", "data.json");
         document.body.appendChild(downloadAnchorNode); // Required for Firefox

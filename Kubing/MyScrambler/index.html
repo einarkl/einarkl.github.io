@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Scrambler | Einar KL</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="../Tools/tools.js"></script>
+    <script src="crossTable.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div id="app">
+        <select id="scrambleType" onchange="selectScrambleType()">
+            <option value="3x3">3x3</option>
+            <option value="3x3 Hard">3x3 Hard</option>
+            <option value="2x2">2x2</option>
+            <option value="4x4">4x4</option>
+            <option value="5x5">5x5</option>
+            <option value="6x6">6x6</option>
+            <option value="7x7">7x7</option>
+            <option value="Clock">Clock</option>
+            <option value="Megaminx">Megaminx</option>
+            <option value="Pyraminx">Pyraminx</option>
+            <option value="Skewb">Skewb</option>
+            <option value="Square-1">Square-1</option>
+        </select>
+        <div id="scrambleDisplay"><h2>Scramble appears here...</h2></div>
+        <button id="newScramble" onclick="nextScramble()">New Scramble</button>
+        <button id="copyScramble" onclick="copyScramble()">Copy</button>
+    </div>
+</body>
+</html>

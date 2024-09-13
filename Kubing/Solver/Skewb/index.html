@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skewb Solver</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../Tools/tools.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <h1 id="inpH1"><input type="text" placeholder="Scramble" id="inpScramble" oninput="drawSkewb('#svgSkewb', $(this).val())"></h1>
+    <div><svg id="svgSkewb"></svg></div>
+    <button id="btnScramble" onclick="$('#inpScramble').val(getScrambleSkewb()); drawScrambleSkewb('#svgSkewb', $('#inpScramble').val())">Scramble</button>
+    <button id="btnSolve" onclick="solveCube($('#inpScramble').val())">Solve</button>
+    <div id="solution"></div>
+    <div id="searchDepth"></div>
+</body>
+<script src="index.js" defer></script>
+</html>

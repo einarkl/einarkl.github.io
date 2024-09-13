@@ -1,0 +1,30 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    margin: auto;
+    text-align: center;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+}
+
+#btnCount {
+    min-width: 40vw;
+    min-height: 40vw;
+    margin: auto;
+    font-size: 20vh;
+    font-family: monospace;
+}
+
+#leaderboardDiv {
+    text-align: left;
+    font-family: monospace;
+}
+
+h1 {
+    font-family: monospace;
+}
+
+#username {
+    font-size: large;
+    font-family: monospace;
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domino Reduction</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../../Tools/tools.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <h1 id="inpH1"><input type="text" placeholder="Scramble" id="inpScramble" oninput="draw333Svg('#svgCube', $(this).val())"></h1>
+    <div><svg id="svgCube"></svg></div>
+    <h2>Number of solutions:</h2>
+    <table>
+        <tr><td>EO</td><td>DR</td><td>HTR</td></tr>
+        <tr><td><input type="number" id="inpEO" value="1" min="1" max="20" step="1" oninput="changeSolValues()"></td>
+            <td><input type="number" id="inpDR" value="1" min="1" max="20" step="1" oninput="changeSolValues()"></td>
+            <td><input type="number" id="inpHTR" value="1" min="1" max="20" step="1" oninput="changeSolValues()"></td></tr>
+    </table>
+    <h2 id="totalSolutions">1 solution</h2>
+    <button id="btnScramble" onclick="$('#inpScramble').val(getScrambleNxN(3)); draw333Svg('#svgCube', $('#inpScramble').val())">Scramble</button>
+    <button id="btnSolve" onclick="solveCube($('#inpScramble').val())">Solve</button>
+    <div id="solution"></div>
+    <div id="searchDepth"></div>
+</body>
+<script src="index.js" defer></script>
+</html>

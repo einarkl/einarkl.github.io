@@ -1,0 +1,40 @@
+html {
+    background-image: linear-gradient(to bottom, #181818, #464646);
+    background-attachment: fixed;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: transparent;
+    height: 100%;
+    margin: 0;
+    padding: 1%;
+}
+
+#svgCube {
+    margin-top: 1%;
+    width: max-content;
+    height: max-content;
+}
+
+#btnSolve {
+    margin-top: 1%;
+}
+
+#inpScramble {
+    width: 80vw;
+}
+
+#solution {
+    color: white;
+}
+
+#searchDepth {
+    color: white;
+}
+
+label {
+    color: white;
+}

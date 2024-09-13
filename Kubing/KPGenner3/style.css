@@ -1,0 +1,27 @@
+html {
+    background-image: linear-gradient(to bottom, #181818, #464646);
+    background-attachment: fixed;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: monospace;
+    color: #aaaaaa;
+}
+
+html, body, h1, h2, input, label {
+    font-family: monospace;
+}
+
+body {
+    background: transparent;
+    width: 95%;
+    height: 95%;
+    margin: auto;
+}
+
+#scrambleDiv {
+    width: 90vw;
+    margin: auto;
+    text-align: center;
+}

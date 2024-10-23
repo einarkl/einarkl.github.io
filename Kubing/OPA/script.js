@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let scramble = "";
 let timing, showingParity, ready;
 let start;

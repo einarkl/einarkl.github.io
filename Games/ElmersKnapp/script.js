@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let username = "Anonymous";
 const database = firebase.database();
 let userId, userRef, userScore, userCheating;

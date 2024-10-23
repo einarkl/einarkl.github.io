@@ -1,9 +1,17 @@
+window.location = "https://einarkl.no" + location.pathname;
 let currentMove = "";
 let prevMove = "";
+let fromTo = [];
+let moveTime = 200;
+let loadedPGN = {};
+let currentPGNMove = 0;
+let playingPGN = false;
+let lastPGNMove = [];
+let pgnMoves = 0;
 let tiles = [];
 let moves = {};
 let legalMoves = [];
-let allLegalMoves = [];
+let allLegalMoves = {};
 let checks = [];
 let checks2 = {
     w: [],
@@ -58,6 +66,8 @@ let sfx = {
 const circLight ="#D8C3A3";
 const circDark ="#A37A59";
 
+const cellColor = "#494949";
+
 $(() => {
     $(window).on("keydown", e => {
         if (buttons.includes(e.key)) {
@@ -77,6 +87,53 @@ $(window).resize(() => {
 });
 
 function init() {
+    currentMove = "";
+    prevMove = "";
+    fromTo = [];
+    moveTime = 200;
+    loadedPGN = {};
+    currentPGNMove = 0;
+    playingPGN = false;
+    lastPGNMove = [];
+    pgnMoves = 0;
+    tiles = [];
+    moves = {};
+    legalMoves = [];
+    allLegalMoves = {};
+    checks = [];
+    checks2 = {
+        w: [],
+        b: []
+    };
+    mouseDown = 0;
+    curCol = "Light";
+    curPos = null;
+    curPiece = null;
+    locked = false;
+    promReady = false;
+    jadoubeLock = true;
+    dragging = false;
+    columns = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    rows = [8, 7, 6, 5, 4, 3, 2, 1];
+    flipped = false;
+    check = false;
+    castling = {
+        "K" : true,
+        "Q" : true,
+        "k" : true,
+        "q" : true
+    };
+    enPassant = "-";
+    halfMoves = 0;
+    fullMoves = 0;
+    buttons = ["Control", "Shift", "Alt"];
+    curBtn = null;
+    arrowDown = null;
+    arrowUp = null;
+    lastTouch = null;
+    fenPositions = {
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -" : 1
+    };
     loadSFX();
     adjustSize();
     createSquares();
@@ -91,6 +148,8 @@ function init() {
     $(document).on("mouseup", () => {
         mouseDown = 0;
     });
+    
+    updateSavedPGNsList();
 }
 
 function loadSFX() {
@@ -355,7 +414,7 @@ function placePieces(fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
     $(".tiles").on("mousedown", e => {
         onMouseDown(e);
     });
-    $(document).on("mousemove", e => {
+    /* $(document).on("mousemove", e => {
         if (dragging) {
             $(".dragging").removeClass("dragging");
             let targets = document.elementsFromPoint(e.clientX, e.clientY);
@@ -369,6 +428,46 @@ function placePieces(fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
             preTileHover = tarTile;
             $(tarTile).addClass("dragging");
             $(".dragging").css("cursor", "grabbing");
+        }
+    }); */
+    $(document).on("mousemove", e => {
+        if (dragging) {
+            if (!flipped) {
+                $(".dragging").removeClass("dragging");
+                let targets = document.elementsFromPoint(e.clientX, e.clientY);
+                let tarI = -1;
+                for (let i = 0; i < targets.length; i++) {
+                    if (targets[i].className.includes("tiles")) {
+                        tarI = i;
+                    }
+                }
+                let tarTile = targets[tarI];
+                preTileHover = tarTile;
+                $(tarTile).addClass("dragging");
+                $(".dragging").css("cursor", "grabbing");
+            }
+            else {
+                let boardOffset = $("#board").offset(); // Get board's position
+                let size = $("#board").width() / 8;
+                let offsetX, offsetY;
+        
+                if (flipped) {
+                    offsetX = (boardOffset.left + $("#board").width()) - e.pageX - size/2;
+                    offsetY = (boardOffset.top + $("#board").height()) - e.pageY - size/2;
+                } else {
+                    offsetX = e.pageX - boardOffset.left - size/2;
+                    offsetY = e.pageY - boardOffset.top - size/2;
+                }
+        
+                $(curPiece).css({
+                    position: 'absolute',
+                    left: offsetX + 'px',
+                    top: offsetY + 'px',
+                    width: size + 'px',
+                    height: size + 'px',
+                    transform: flipped ? 'rotate(180deg)' : ''
+                });
+            }
         }
     });
     $(document).on("mouseup", e => {
@@ -437,8 +536,7 @@ function onMouseDown(e) {
         else {
             mouseDown = 1;
             curPiece = e.target;
-
-            if (curPiece && curCol === curPiece.dataset.color && curPiece.className === "pieces") {
+            if (curPiece && curCol === curPiece.dataset.color && curPiece.className.includes("pieces")) {
                 dragging = true;
                 $("#" + tarDownTile).addClass("selectedPieceTile");
 
@@ -602,7 +700,7 @@ function onTouchStart(e) {
         mouseDown = 1;
         curPiece = e.target;
 
-        if (curPiece && curCol === curPiece.dataset.color && curPiece.className === "pieces") {
+        if (curPiece && curCol === curPiece.dataset.color && curPiece.className.includes("pieces")) {
             dragging = true;
             $("#" + tarDownTile).addClass("selectedPieceTile");
 
@@ -638,7 +736,6 @@ function onTouchStart(e) {
                     });
                 }
             });
-    
             $(document).on("touchend", e => {
                 if (!locked && curPiece) {
                     locked = true;
@@ -683,13 +780,12 @@ function onTouchStart(e) {
     }
 }
 
-function drawArrow() {
+function drawArrow(arrowFrom = arrowDown, arrowTo = arrowUp, aCol = null) {
     let s = $("#board").width() / 8;
 
     let cs = flipped ? columns.reverse() : columns;
     let rs = flipped ? rows.reverse() : rows;
-
-    if (arrowDown === arrowUp) {
+    if (arrowFrom === arrowTo) {
         drawSquare();
     }
     else {
@@ -700,11 +796,11 @@ function drawArrow() {
             "rgba(255, 170, 0, 0.8)",//yellow ""
         ];
 
-        let tileFrom = arrowDown;
-        let tileTo = arrowUp;
+        let tileFrom = arrowFrom ? arrowFrom : "a1";
+        let tileTo = arrowTo ? arrowTo : "a1";
 
         let id = "arr" + tileFrom + "_" + tileTo;
-        let arrowCol = (curBtn === null ? arrowStyles[arrowStyles.length - 1] : arrowStyles[buttons.indexOf(curBtn)]);
+        let arrowCol = aCol !== null ? aCol : (curBtn === null ? arrowStyles[arrowStyles.length - 1] : arrowStyles[buttons.indexOf(curBtn)]);
         
         if ($("#" + id).length !== 0 && $("#" + id).css("fill") === arrowCol) {
             $("#" + id).remove();
@@ -824,7 +920,7 @@ function drawArrow() {
             let poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
             $(poly).attr("id", id);
             $(poly).attr("points", points.join(" "));
-            $(poly).attr("style", "fill: " + (curBtn === null ? arrowStyles[arrowStyles.length - 1] : arrowStyles[buttons.indexOf(curBtn)]) + "; opacity: 0.8;");
+            $(poly).attr("style", "fill: " + arrowCol);
 
             $("#arrowLayer").append(poly);
         }
@@ -857,7 +953,7 @@ function drawSquare() {
         $(rect).attr("width", s);
         $(rect).attr("height", s);
         $(rect).attr("id", id);
-        $(rect).attr("style", "fill: " + (curBtn === null ? squareStyles[squareStyles.length - 1] : squareStyles[buttons.indexOf(curBtn)]) + "; opacity: 0.8;");
+        $(rect).attr("style", "fill: " + squareCol);
 
         $("#squareLayer").append(rect);
     }
@@ -918,10 +1014,11 @@ function getAngle(p0x, p0y, px, py) {
     return angle;
 }
 
-function movePiece(piece, oldPos, newPos, drag = true) {
+function movePiece(piece, oldPos, newPos, drag = true, promotedPiece = null) {
     let style = "position: relative; width: 100%; height: 100%; z-index: 2;";
     $(piece).attr("style", style);
     let clickEnPassant = null;
+    let capture = "";
 
     if (oldPos !== newPos && legalMoves.includes(newPos) && curPiece !== null) {
         $(".movedPieceTile").removeClass("movedPieceTile");
@@ -940,13 +1037,13 @@ function movePiece(piece, oldPos, newPos, drag = true) {
                 if (checks[i].pos.substr(checks[i].pos.length - 2) === newPos && checks[i].piece === p) {
                     check = true;
                     chck = mate ? "#" : "+";
-                    console.log("Check!");
+                    // console.log("Check!");
                     break loop;
                 }
             }
         }
 
-        let capture = $("#" + newPos).children().length === 1 ? "x" : "";
+        capture = $("#" + newPos).children().length === 1 ? "x" : "";
         let pieceType = piece.dataset.piece === "P" ? (capture ? piece.dataset.position.split("")[0] : "") : piece.dataset.piece;
         let multipPos = true ? "" : "x"; // If multiple possible pieces
         let castle = null;
@@ -1068,7 +1165,6 @@ function movePiece(piece, oldPos, newPos, drag = true) {
         }
 
         if (!drag) {
-            let moveTime = 200;
             let s = $("#board").width() / 8;
             let nX = columns.indexOf(newPos.split("")[0]) - columns.indexOf(oldPos.split("")[0]);
             let nY = rows.indexOf(parseInt(newPos.split("")[1])) - rows.indexOf(parseInt(oldPos.split("")[1]));
@@ -1154,9 +1250,9 @@ function movePiece(piece, oldPos, newPos, drag = true) {
             fenPositions[fenPos] = 1;
         }
 
-        /* if (legalMoves.length === 0) {
+        if (allLegalMoves.length === 0) {
             gameDraw("Stalemate");
-        } */
+        }
         if (halfMoves === 100) {
             gameDraw("50-Move Rule");
         }
@@ -1187,6 +1283,38 @@ function movePiece(piece, oldPos, newPos, drag = true) {
         }
     }
     jadoubeLock = true;
+
+    if (oldPos !== newPos) {
+        $("th, td").css("background", "");
+        let curIdx = (1 + Math.floor(pgnMoves / 2));
+        let curTd = 1 + (pgnMoves % 2);
+        $("#th" + curIdx + ", #td" + curIdx + curTd).css("background", cellColor);
+
+        lastPGNMove = [
+            (piece.dataset.piece === "P" ? "" : piece.dataset.piece) + capture + newPos + (promotedPiece ? "=" + promotedPiece : ""),
+            (piece.dataset.piece === "P" ? "" : piece.dataset.piece) + oldPos + capture + newPos + (promotedPiece ? "=" + promotedPiece : ""),
+            (piece.dataset.piece === "P" ? "" : piece.dataset.piece) + oldPos.substring(0, 1) + capture + newPos + (promotedPiece ? "=" + promotedPiece : ""),
+            (piece.dataset.piece === "P" ? "" : piece.dataset.piece) + oldPos.substring(1, 2) + capture + newPos + (promotedPiece ? "=" + promotedPiece : "")
+        ];
+        if (lastPGNMove.includes("Ke8g8") || lastPGNMove.includes("Ke1g1")) {
+            lastPGNMove = ["O-O"]
+        }
+        else if (lastPGNMove.includes("Ke8c8") || lastPGNMove.includes("Ke1c1")) {
+            lastPGNMove = ["O-O-O"]
+        }
+        
+        if (playingPGN) {
+            pgnMoves++;
+        
+            if (pgnMoves % 2 === 0) {
+                currentPGNMove++;
+            }
+
+            if ((pgnMoves % 2 === 0) === flipped) {
+                computerMove();
+            }
+        }
+    }
 }
 
 function getTileColor(tile) {
@@ -1447,7 +1575,7 @@ function getLegalMoves() {
             }
 
             break;
-        case "K":console.log(checks);
+        case "K":
             for (let i = 1; i < 2; i++) {
                 if (u && parseInt(pos[1]) + i <= 8) {
                     if (!getPieceAt(pos[0] + (parseInt(pos[1]) + i))) {
@@ -1919,10 +2047,12 @@ function getLegalMoves() {
 
 function getAllLegalMoves() {
     // Also check checks, mates and discovered checks
-    allLegalMoves = [];
+    allLegalMoves = {};
     let boardPieces = tiles.filter(t => $(t).children().length > 0).map(t => ($(t).children()[0]));
-console.log(boardPieces);
     for (let currentPiece of boardPieces) {
+        if (!(currentPiece.dataset.piece in allLegalMoves)) {
+            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position] = [];
+        }
         let pos = currentPiece.dataset.position.split("");
         let u = true;
         let d = true;
@@ -1936,72 +2066,72 @@ console.log(boardPieces);
             case "P":
                 if (currentPiece.dataset.color === "Light") {
                     if (!getPieceAt(pos[0] + (parseInt(pos[1]) + 1))) {
-                        allLegalMoves.push(pos[0] + (parseInt(pos[1]) + 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) + 1));
                         if (pos[1] === "2" && !getPieceAt(pos[0] + (parseInt(pos[1]) + 2))) {
-                            allLegalMoves.push(pos[0] + (parseInt(pos[1]) + 2));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) + 2));
                         }
                     }
                     if (columns[columns.indexOf(pos[0]) - 1]) {
                         let po = columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) + 1);
                         let p = getPieceAt(po);
                         if (p && p.dataset.color === "Dark") {
-                            allLegalMoves.push("x" + po);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + po);
                         }
                     }
                     if (columns[columns.indexOf(pos[0]) + 1]) {
                         let po = columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) + 1);
                         let p = getPieceAt(po);
                         if (p && p.dataset.color === "Dark") {
-                            allLegalMoves.push("x" + po);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + po);
                         }
                     }
                     if (enPassant !== "-") {
                         let po1 = columns[columns.indexOf(enPassant.split("")[0]) - 1] + (parseInt(enPassant.split("")[1]) - 1);
                         let po2 = columns[columns.indexOf(enPassant.split("")[0]) + 1] + (parseInt(enPassant.split("")[1]) - 1);
                         if (pos.join("") === po1 || pos.join("") === po2) {
-                            allLegalMoves.push("x" + enPassant);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + enPassant);
                         }
                     }
                 }
                 else if (currentPiece.dataset.color === "Dark") {
                     if (!getPieceAt(pos[0] + (parseInt(pos[1]) - 1))) {
-                        allLegalMoves.push(pos[0] + (parseInt(pos[1]) - 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) - 1));
                         if (pos[1] === "7" && !getPieceAt(pos[0] + (parseInt(pos[1]) - 2))) {
-                            allLegalMoves.push(pos[0] + (parseInt(pos[1]) - 2));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) - 2));
                         }
                     }
                     if (columns[columns.indexOf(pos[0]) - 1]) {
                         let po = columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) - 1);
                         let p = getPieceAt(po);
                         if (p && p.dataset.color === "Light") {
-                            allLegalMoves.push("x" + po);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + po);
                         }
                     }
                     if (columns[columns.indexOf(pos[0]) + 1]) {
                         let po = columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) - 1);
                         let p = getPieceAt(po);
                         if (p && p.dataset.color === "Light") {
-                            allLegalMoves.push("x" + po);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + po);
                         }
                     }
                     if (enPassant !== "-") {
                         let po1 = columns[columns.indexOf(enPassant.split("")[0]) - 1] + (parseInt(enPassant.split("")[1]) + 1);
                         let po2 = columns[columns.indexOf(enPassant.split("")[0]) + 1] + (parseInt(enPassant.split("")[1]) + 1);
                         if (pos.join("") === po1 || pos.join("") === po2) {
-                            allLegalMoves.push("x" + enPassant);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + enPassant);
                         }
                     }
                 }
 
                 break;
-            case "K":console.log(checks);
+            case "K":
                 for (let i = 1; i < 2; i++) {
                     if (u && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(pos[0] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(pos[0] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) + i));
                         }
                         else if (getPieceAt(pos[0] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + pos[0] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + pos[0] + (parseInt(pos[1]) + i));
                             u = false;
                         }
                         else {
@@ -2013,10 +2143,10 @@ console.log(boardPieces);
                     }
                     if (d && parseInt(pos[1]) - i >= 1) {
                         if (!getPieceAt(pos[0] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(pos[0] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) - i));
                         }
                         else if (getPieceAt(pos[0] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + pos[0] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + pos[0] + (parseInt(pos[1]) - i));
                             d = false;
                         }
                         else {
@@ -2028,10 +2158,10 @@ console.log(boardPieces);
                     }
                     if (r && columns.indexOf(pos[0]) + i < 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + pos[1])) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + pos[1]);
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + pos[1]).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + pos[1]);
                             r = false;
                         }
                         else {
@@ -2043,10 +2173,10 @@ console.log(boardPieces);
                     }
                     if (l && columns.indexOf(pos[0]) - i > 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + pos[1])) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + pos[1]);
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + pos[1]).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + pos[1]);
                             l = false;
                         }
                         else {
@@ -2060,10 +2190,10 @@ console.log(boardPieces);
                 for (let i = 1; i < 2; i++) {
                     if (ur && columns.indexOf(pos[0]) + i < 8 && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i));
                             ur = false;
                         }
                         else {
@@ -2075,10 +2205,10 @@ console.log(boardPieces);
                     }
                     if (ul && columns.indexOf(pos[0]) - i >= 0 && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i));
                             ul = false;
                         }
                         else {
@@ -2090,10 +2220,10 @@ console.log(boardPieces);
                     }
                     if (dr && columns.indexOf(pos[0]) + i < 8 && parseInt(pos[1]) - i > 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i));
                             dr = false;
                         }
                         else {
@@ -2105,10 +2235,10 @@ console.log(boardPieces);
                     }
                     if (dl && columns.indexOf(pos[0]) - i >= 0 && parseInt(pos[1]) - i > 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i));
                             dl = false;
                         }
                         else {
@@ -2121,18 +2251,18 @@ console.log(boardPieces);
                 }
                 if (currentPiece.dataset.color === "Light") {
                     if (castling["K"] && !getPieceAt("f1") && !getPieceAt("g1")) {
-                        allLegalMoves.push("g1");
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("g1");
                     }
                     if (castling["Q"] && !getPieceAt("b1") && !getPieceAt("c1") && !getPieceAt("d1")) {
-                        allLegalMoves.push("c1");
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("c1");
                     }
                 }
                 else {
                     if (castling["k"] && !getPieceAt("f8") && !getPieceAt("g8")) {
-                        allLegalMoves.push("g8");
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("g8");
                     }
                     if (castling["q"] && !getPieceAt("b8") && !getPieceAt("c8") && !getPieceAt("d8")) {
-                        allLegalMoves.push("c8");
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("c8");
                     }
                 }
                 break;
@@ -2140,10 +2270,10 @@ console.log(boardPieces);
                 for (let i = 1; i < 8; i++) {
                     if (u && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(pos[0] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(pos[0] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) + i));
                         }
                         else if (getPieceAt(pos[0] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + pos[0] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + pos[0] + (parseInt(pos[1]) + i));
                             u = false;
                         }
                         else {
@@ -2155,10 +2285,10 @@ console.log(boardPieces);
                     }
                     if (d && parseInt(pos[1]) - i >= 1) {
                         if (!getPieceAt(pos[0] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(pos[0] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) - i));
                         }
                         else if (getPieceAt(pos[0] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + pos[0] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + pos[0] + (parseInt(pos[1]) - i));
                             d = false;
                         }
                         else {
@@ -2170,10 +2300,10 @@ console.log(boardPieces);
                     }
                     if (r && columns.indexOf(pos[0]) + i < 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + pos[1])) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + pos[1]);
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + pos[1]).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + pos[1]);
                             r = false;
                         }
                         else {
@@ -2185,10 +2315,10 @@ console.log(boardPieces);
                     }
                     if (l && columns.indexOf(pos[0]) - i >= 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + pos[1])) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + pos[1]);
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + pos[1]).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + pos[1]);
                             l = false;
                         }
                         else {
@@ -2202,10 +2332,10 @@ console.log(boardPieces);
                 for (let i = 1; i < 8; i++) {
                     if (ur && columns.indexOf(pos[0]) + i < 8 && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i));
                             ur = false;
                         }
                         else {
@@ -2217,10 +2347,10 @@ console.log(boardPieces);
                     }
                     if (ul && columns.indexOf(pos[0]) - i >= 0 && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i));
                             ul = false;
                         }
                         else {
@@ -2232,10 +2362,10 @@ console.log(boardPieces);
                     }
                     if (dr && columns.indexOf(pos[0]) + i < 8 && parseInt(pos[1]) - i > 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i));
                             dr = false;
                         }
                         else {
@@ -2247,10 +2377,10 @@ console.log(boardPieces);
                     }
                     if (dl && columns.indexOf(pos[0]) - i >= 0 && parseInt(pos[1]) - i > 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i));
                             dl = false;
                         }
                         else {
@@ -2266,10 +2396,10 @@ console.log(boardPieces);
                 for (let i = 1; i < 8; i++) {
                     if (ur && columns.indexOf(pos[0]) + i < 8 && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) + i));
                             ur = false;
                         }
                         else {
@@ -2281,10 +2411,10 @@ console.log(boardPieces);
                     }
                     if (ul && columns.indexOf(pos[0]) - i >= 0 && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) + i));
                             ul = false;
                         }
                         else {
@@ -2296,10 +2426,10 @@ console.log(boardPieces);
                     }
                     if (dr && columns.indexOf(pos[0]) + i < 8 && parseInt(pos[1]) - i > 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + (parseInt(pos[1]) - i));
                             dr = false;
                         }
                         else {
@@ -2311,10 +2441,10 @@ console.log(boardPieces);
                     }
                     if (dl && columns.indexOf(pos[0]) - i >= 0 && parseInt(pos[1]) - i > 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).toString();
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).toString();
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + (parseInt(pos[1]) - i));
                             dl = false;
                         }
                         else {
@@ -2329,66 +2459,66 @@ console.log(boardPieces);
             case "N":
                 if (columns.indexOf(pos[0]) + 1 < 8 && parseInt(pos[1]) + 2 <= 8) {
                     if (!getPieceAt(columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) + 2))) {
-                        allLegalMoves.push(columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) + 2));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) + 2));
                     }
                     else if (getPieceAt(columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) + 2)).dataset.color !== currentPiece.dataset.color) {
-                        allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) + 2));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) + 2));
                     }
                 }
                 if (columns.indexOf(pos[0]) + 2 < 8 && parseInt(pos[1]) + 1 <= 8) {
                     if (!getPieceAt(columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) + 1))) {
-                        allLegalMoves.push(columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) + 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) + 1));
                     }
                     else if (getPieceAt(columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) + 1)).dataset.color !== currentPiece.dataset.color) {
-                        allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) + 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) + 1));
                     }
                 }
                 if (columns.indexOf(pos[0]) + 1 < 8 && parseInt(pos[1]) - 2 > 0) {
                     if (!getPieceAt(columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) - 2))) {
-                        allLegalMoves.push(columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) - 2));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) - 2));
                     }
                     else if (getPieceAt(columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) - 2)).dataset.color !== currentPiece.dataset.color) {
-                        allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) - 2));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + 1] + (parseInt(pos[1]) - 2));
                     }
                 }
                 if (columns.indexOf(pos[0]) + 2 < 8 && parseInt(pos[1]) - 1 > 0) {
                     if (!getPieceAt(columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) - 1))) {
-                        allLegalMoves.push(columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) - 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) - 1));
                     }
                     else if (getPieceAt(columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) - 1)).dataset.color !== currentPiece.dataset.color) {
-                        allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) - 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + 2] + (parseInt(pos[1]) - 1));
                     }
                 }
                 if (columns.indexOf(pos[0]) - 1 >= 0 && parseInt(pos[1]) + 2 <= 8) {
                     if (!getPieceAt(columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) + 2))) {
-                        allLegalMoves.push(columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) + 2));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) + 2));
                     }
                     else if (getPieceAt(columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) + 2)).dataset.color !== currentPiece.dataset.color) {
-                        allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) + 2));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) + 2));
                     }
                 }
                 if (columns.indexOf(pos[0]) - 2 >= 0 && parseInt(pos[1]) + 1 <= 8) {
                     if (!getPieceAt(columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) + 1))) {
-                        allLegalMoves.push(columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) + 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) + 1));
                     }
                     else if (getPieceAt(columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) + 1)).dataset.color !== currentPiece.dataset.color) {
-                        allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) + 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) + 1));
                     }
                 }
                 if (columns.indexOf(pos[0]) - 1 >= 0 && parseInt(pos[1]) - 2 > 0) {
                     if (!getPieceAt(columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) - 2))) {
-                        allLegalMoves.push(columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) - 2));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) - 2));
                     }
                     else if (getPieceAt(columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) - 2)).dataset.color !== currentPiece.dataset.color) {
-                        allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) - 2));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - 1] + (parseInt(pos[1]) - 2));
                     }
                 }
                 if (columns.indexOf(pos[0]) - 2 >= 0 && parseInt(pos[1]) - 1 > 0) {
                     if (!getPieceAt(columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) - 1))) {
-                        allLegalMoves.push(columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) - 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) - 1));
                     }
                     else if (getPieceAt(columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) - 1)).dataset.color !== currentPiece.dataset.color) {
-                        allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) - 1));
+                        allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - 2] + (parseInt(pos[1]) - 1));
                     }
                 }
                 break;
@@ -2396,10 +2526,10 @@ console.log(boardPieces);
                 for (let i = 1; i < 8; i++) {
                     if (u && parseInt(pos[1]) + i <= 8) {
                         if (!getPieceAt(pos[0] + (parseInt(pos[1]) + i))) {
-                            allLegalMoves.push(pos[0] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) + i));
                         }
                         else if (getPieceAt(pos[0] + (parseInt(pos[1]) + i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + pos[0] + (parseInt(pos[1]) + i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + pos[0] + (parseInt(pos[1]) + i));
                             u = false;
                         }
                         else {
@@ -2411,10 +2541,10 @@ console.log(boardPieces);
                     }
                     if (d && parseInt(pos[1]) - i >= 1) {
                         if (!getPieceAt(pos[0] + (parseInt(pos[1]) - i))) {
-                            allLegalMoves.push(pos[0] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(pos[0] + (parseInt(pos[1]) - i));
                         }
                         else if (getPieceAt(pos[0] + (parseInt(pos[1]) - i)).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + pos[0] + (parseInt(pos[1]) - i));
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + pos[0] + (parseInt(pos[1]) - i));
                             d = false;
                         }
                         else {
@@ -2426,10 +2556,10 @@ console.log(boardPieces);
                     }
                     if (r && columns.indexOf(pos[0]) + i < 8) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) + i] + pos[1])) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) + i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) + i] + pos[1]);
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) + i] + pos[1]).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) + i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) + i] + pos[1]);
                             r = false;
                         }
                         else {
@@ -2441,10 +2571,10 @@ console.log(boardPieces);
                     }
                     if (l && columns.indexOf(pos[0]) - i >= 0) {
                         if (!getPieceAt(columns[columns.indexOf(pos[0]) - i] + pos[1])) {
-                            allLegalMoves.push(columns[columns.indexOf(pos[0]) - i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push(columns[columns.indexOf(pos[0]) - i] + pos[1]);
                         }
                         else if (getPieceAt(columns[columns.indexOf(pos[0]) - i] + pos[1]).dataset.color !== currentPiece.dataset.color) {
-                            allLegalMoves.push("x" + columns[columns.indexOf(pos[0]) - i] + pos[1]);
+                            allLegalMoves[currentPiece.dataset.piece + "_" + currentPiece.dataset.color + "_" + currentPiece.dataset.position].push("x" + columns[columns.indexOf(pos[0]) - i] + pos[1]);
                             l = false;
                         }
                         else {
@@ -2461,7 +2591,6 @@ console.log(boardPieces);
         // Check for checks before moving
         findChecks();
     }
-    console.log(allLegalMoves);
 }
 
 function findChecks() {
@@ -2764,13 +2893,14 @@ function drawMoves() {
 
     let cs = flipped ? columns.reverse() : columns;
     let rs = flipped ? rows.reverse() : rows;
-
+    
     let i = 0;
     for (let m of legalMoves) {
+        let mf = flipped ? flipMove(m.replace("x", "")) : m.replace("x", "");
         let col = "#000";
         let circ = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        $(circ).attr("cx", s * (parseInt(cs.indexOf(m.replace("x", "").split("")[0])) + 0.5));
-        $(circ).attr("cy", s * (parseInt(rs.indexOf(parseInt(m.replace("x", "").split("")[1]))) + 0.5));
+        $(circ).attr("cx", s * (parseInt(cs.indexOf(mf.split("")[0])) + 0.5));
+        $(circ).attr("cy", s * (parseInt(rs.indexOf(parseInt(mf.split("")[1]))) + 0.5));
 
         if (m.includes("x")) {
             $(circ).attr("r", s * 0.45);
@@ -2804,6 +2934,379 @@ function getPieceAt(tile) {
 
 function clickTile(tile) {
 
+}
+
+function purifyPgn(pgn) {
+    // Remove metadata enclosed in square brackets
+    function removeMetadata(text) {
+        return text.replace(/^\[\s*.*?\s*\][\r\n]*/gm, '');
+    }
+
+    // Removes content enclosed in the specified brackets, handles nesting
+    function removeEnclosedContent(text, open, close) {
+        let result = '';
+        let depth = 0; // Track depth of nested brackets
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === open) {
+                depth++;
+                continue; // Skip adding the opening bracket to result
+            }
+            if (text[i] === close && depth > 0) {
+                depth--;
+                continue; // Skip adding the closing bracket to result
+            }
+            if (depth === 0) {
+                result += text[i]; // Add characters outside brackets
+            }
+        }
+        return result;
+    }
+
+    // Remove instances of move numbers followed by "..."
+    function removeMoveNumbersWithEllipsis(text) {
+        return text.replace(/\d+\.\.\./g, '');
+    }
+
+    // Sequentially apply text cleaning operations
+    pgn = removeMetadata(pgn);
+    pgn = removeEnclosedContent(pgn, '(', ')');
+    pgn = removeEnclosedContent(pgn, '{', '}');
+    pgn = removeMoveNumbersWithEllipsis(pgn);
+
+    // Replace line breaks with a space
+    pgn = pgn.replace(/[\r\n]+/g, ' ');
+
+    return pgn.replace(/\s*(1-0|0-1|1\/2-1\/2)\s*$/, '').replaceAll("*", "").replaceAll("?", "").replaceAll("!", "").replace(/\s\s+/g, ' ').trim();
+}
+
+function loadPGN() {
+    $("#btnFlip").prop("disabled", "");
+    $("#btnPlay").prop("disabled", "");
+    $("#content").html(`
+        <table id="board"></table>
+        <svg id="lettersNumbers"></svg>
+        <svg id="dots"></svg>
+        <svg id="arrowLayer"></svg>
+        <svg id="squareLayer"></svg>
+        <svg id="promotionLayer"></svg>
+        <button id="btnFlip" onclick="flipTable()">Flip</button>
+    `);
+    $("#moves").html("");
+    init();
+    let pgn = $("#taPGN").val();
+    $('.selected').removeClass('selected');
+
+    if (pgn.trim() !== "") {
+        pgn = purifyPgn(pgn);
+        $("#taPGN").val("");
+    
+        let curIndex = "";
+        let tdIndex = 1;
+        for (let m of pgn.split(" ")) {
+            if (m.includes("*")) {
+                continue;
+            }
+            else if (m.includes(".")) {
+                curIndex = m.replace(".", "");
+                loadedPGN[curIndex] = [];
+                $("#moves").append("<tr id='tr" + curIndex + "'><th id='th" + curIndex + "'>" + m + "</th></tr>");
+                tdIndex = 1;
+            }
+            else {
+                $("#tr" + curIndex).append("<td id='td" + curIndex + tdIndex + "'>" + m + "</td>");
+                loadedPGN[curIndex].push(m);
+                tdIndex++;
+            }
+        }
+
+        $("#btnPlay").prop("disabled", "");
+    }
+}
+
+function savePGN() {
+    const pgn = $('#taPGN').val();
+    const pgnName = prompt('Enter a name for the PGN:');
+
+    if (pgnName) {
+        let savedPGNs = localStorage.getItem('savedPGNs');
+        savedPGNs = savedPGNs ? JSON.parse(savedPGNs) : {};
+
+        if (savedPGNs.hasOwnProperty(pgnName)) {
+            alert('A PGN with this name already exists.');
+        } else {
+            savedPGNs[pgnName] = pgn;
+            localStorage.setItem('savedPGNs', JSON.stringify(savedPGNs));
+            updateSavedPGNsList();
+            alert('PGN saved!');
+        }
+    }
+}
+
+function updateSavedPGNsList() {
+    let savedPGNs = localStorage.getItem('savedPGNs');
+    savedPGNs = savedPGNs ? JSON.parse(savedPGNs) : {};
+    const savedPGNsContainer = $('#savedPGNs');
+    savedPGNsContainer.empty();
+
+    // Get the keys (names) and sort them alphabetically
+    const sortedNames = Object.keys(savedPGNs).sort();
+
+    // Iterate over the sorted names
+    $.each(sortedNames, function(index, name) {
+        const pgn = savedPGNs[name];
+        const entry = $('<div></div>').addClass('entry');
+
+        const pgnNameText = $('<span></span>').text(name);
+        const deleteButton = $('<button></button>').addClass('deleteButton').text('X').click(function(e) {
+            e.stopPropagation(); // Prevent the click event from reaching the entry
+            if (confirm('Are you sure you want to delete this PGN?')) {
+                delete savedPGNs[name];
+                localStorage.setItem('savedPGNs', JSON.stringify(savedPGNs));
+                updateSavedPGNsList();
+            }
+        });
+
+        entry.append(pgnNameText, deleteButton).click(function() {
+            $('#taPGN').val(pgn);
+            $('.selected').removeClass('selected'); // Remove the selection from previously selected entries
+            $(this).addClass('selected'); // Highlight the selected entry
+        });
+
+        savedPGNsContainer.append(entry);
+    });
+}
+
+function playPGN() {
+    playingPGN = true;
+    currentPGNMove = 1;
+    getAllLegalMoves();
+    fromTo = getFromTo(loadedPGN[1][flipped ? 1 : 0]);
+    $("#btnFlip").prop("disabled", "disabled");
+    $("#btnPlay").prop("disabled", "disabled");
+
+    $("th, td").css("background", "");
+
+    if (flipped) {
+        computerMove();
+    }
+}
+
+function getFromTo(pgnMove) {
+    pgnMove = pgnMove.replace('+', '').replace('#', '').replace('x', '');
+    let pieceType = "P";
+    let destination = pgnMove.substring(pgnMove.length - 2);
+    let fromPosition = "a1";
+    let promotion = pgnMove.includes('=');
+    // pieceColor is opposite of curCol since curCol hasn't changed yet
+    let pieceColor = curCol === "Light" ? "Dark" : "Light";
+
+    if (promotion) {
+        destination = pgnMove.split('=')[0].substring(pgnMove.length - 3, pgnMove.length - 1);
+    }
+
+    if (pgnMove === "O-O") {
+        if (pieceColor === "Light") {
+            fromPosition = "e1";
+            destination = "g1";
+        }
+        else {
+            fromPosition = "e8";
+            destination = "g8";
+        }
+    }
+    else if (pgnMove === "O-O-O") {
+        if (pieceColor === "Light") {
+            fromPosition = "e1";
+            destination = "c1";
+        }
+        else {
+            fromPosition = "e8";
+            destination = "c8";
+        }
+    }
+    else {
+        if (pgnMove[0].toUpperCase() === pgnMove[0] && isNaN(pgnMove[0])) {
+            pieceType = pgnMove[0];
+            pgnMove = pgnMove.substring(1);
+        }
+
+        let pos = pgnMove.replace(pieceType, "").replace(destination, "");
+        for (let key of Object.keys(allLegalMoves)) {
+            const k = key.split("_");
+            const lMoves = allLegalMoves[key].map(m => m.substring(m.length - 2, m.length));
+            if (key.includes(pieceType + "_" + pieceColor + "_") && k[2].includes(pos) && lMoves.includes(pgnMove.substring(pgnMove.length - 2))) {
+                fromPosition = k[2];
+                break;
+            };
+        };
+    }
+
+    console.log(pgnMove, fromPosition, destination);
+    
+    if (flipped) {
+        fromPosition = flipMove(fromPosition);
+        destination = flipMove(destination);
+    }
+    
+    return [fromPosition, destination];
+}
+
+function flipMove(move) {
+    let letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
+    let numbers = ["1", "2", "3", "4", "5", "6", "7", "8"];
+    let rLetters = ["h", "g", "f", "e", "d", "c", "b", "a"];
+    let rNumbers = ["8", "7", "6", "5", "4", "3", "2", "1"];
+    return rLetters[letters.indexOf(move[0])] + rNumbers[numbers.indexOf(move[1])];
+}
+
+function computerMove() {
+    getAllLegalMoves();
+    let nextMove = loadedPGN[currentPGNMove];
+    if (nextMove && nextMove[flipped ? 0 : 1]) {
+        if ((lastPGNMove.length === 0 && flipped) || lastPGNMove.map(m => m.replace("+", "").replace("x", "")).includes(loadedPGN[currentPGNMove - (flipped ? 1 : 0)][flipped ? 1 : 0].replace("+", "").replace("x", ""))) {
+            setTimeout(() => {
+                if (flipped) { // CPU starts
+                    movePiecePGN(nextMove[0]);
+                }
+                else { // Player starts
+                    movePiecePGN(nextMove[1]);
+                }
+            }, moveTime * 1.5);
+        }
+        else {
+            let col = "rgba(248, 85, 63, 0.8)";
+            setTimeout(() => {
+                fromTo = getFromTo(loadedPGN[currentPGNMove - (flipped ? 1 : 0)][flipped ? 1 : 0]);
+                console.log(loadedPGN[currentPGNMove - (flipped ? 1 : 0)][flipped ? 1 : 0], fromTo);
+                drawArrow(fromTo[0], fromTo[1], col);
+                setTimeout(() => {
+                    if (confirm("Exit study?")){
+                        console.log("Exiting study");
+                        $("#btnFlip").prop("disabled", "");
+                        $("#btnPlay").prop("disabled", "disabled");
+                        $("#content").html(`
+                            <table id="board"></table>
+                            <svg id="lettersNumbers"></svg>
+                            <svg id="dots"></svg>
+                            <svg id="arrowLayer"></svg>
+                            <svg id="squareLayer"></svg>
+                            <svg id="promotionLayer"></svg>
+                            <button id="btnFlip" onclick="flipTable()">Flip</button>
+                        `);
+                        $("#moves").html("");
+                        init();
+                    }
+                }, moveTime);
+            }, moveTime);
+            /* setTimeout(() => {
+                if (confirm("Start over?")){
+                    
+                }
+            }, moveTime); */
+        }
+    }
+    else {
+        setTimeout(() => {
+            if (confirm("No more moves! Exit study?")){
+                console.log("Exiting study");
+                $("#btnFlip").prop("disabled", "");
+                $("#btnPlay").prop("disabled", "disabled");
+                $("#content").html(`
+                    <table id="board"></table>
+                    <svg id="lettersNumbers"></svg>
+                    <svg id="dots"></svg>
+                    <svg id="arrowLayer"></svg>
+                    <svg id="squareLayer"></svg>
+                    <svg id="promotionLayer"></svg>
+                    <button id="btnFlip" onclick="flipTable()">Flip</button>
+                `);
+                $("#moves").html("");
+                init();
+            }
+        }, moveTime * 1.5);
+    }
+}
+
+function movePiecePGN(pgnMove) {
+    pgnMove = pgnMove.replace('+', '').replace('#', '').replace('x', '');
+
+    let pieceType = "P";
+    let destination = pgnMove.substring(pgnMove.length - 2);
+
+    // For promotions (e.g., e8=Q), handle the promotion aspect
+    let promotion = pgnMove.includes('=');
+    let promotedPiece = null;
+    if (promotion) {
+        promotedPiece = pgnMove.split('=')[1][0];
+        destination = pgnMove.split('=')[0].substring(pgnMove.length - 2);
+    }
+
+    // Castling is a special move
+    if (pgnMove === "O-O") {
+        if (curCol === "Light") {
+            movePieceAlgebraic("K", "g1", "e1");
+        }
+        else {
+            movePieceAlgebraic("K", "g8", "e8");
+        }
+        return;
+    }
+    else if (pgnMove === "O-O-O") {
+        if (curCol === "Light") {
+            movePieceAlgebraic("K", "c1", "e1");
+        }
+        else {
+            movePieceAlgebraic("K", "c8", "e8");
+        }
+        return;
+    }
+    
+    if (pgnMove[0].toUpperCase() === pgnMove[0]) {
+        // It's an uppercase letter, meaning it's a piece (not a pawn)
+        pieceType = pgnMove[0];
+        pgnMove = pgnMove.substring(1); // Remove piece notation for further processing
+    }
+
+    let pos = pgnMove.replace(pieceType, "").replace(destination, "");
+    movePieceAlgebraic(pieceType, destination, pos, promotedPiece);
+}
+
+function movePieceAlgebraic(pieceType, destination, pos = "", promotedPiece = null) {
+    getAllLegalMoves();
+    let pieceToMove = null;
+    let pieces = $('.pieces').toArray();
+
+    for (let key of Object.keys(allLegalMoves)) {
+        const k = key.split("_");
+        const lMoves = allLegalMoves[key].map(m => m.substring(m.length - 2, m.length));
+        if (lMoves.includes(destination) && pieceType === k[0]) {
+            for (let piece of pieces) {
+                const pPiece = $(piece).attr("data-piece");
+                const pColor = $(piece).attr("data-color");
+                const pPosition = $(piece).attr("data-position");
+                if (pieceType === pPiece && curCol === pColor) {
+                    if (k[0] === pPiece &&
+                        k[1] === curCol && k[1] === pColor &&
+                        k[2].includes(pos) && k[2].includes(pPosition)) {
+                        pieceToMove = piece;
+                        break;
+                    };
+                }
+            };
+        };
+    };
+
+    if (pieceToMove) {
+        curPiece = pieceToMove;
+        getLegalMoves();
+        movePiece($(pieceToMove)[0], $(pieceToMove).attr("data-position"), destination, drag=false, promotedPiece=promotedPiece);
+    }
+    else {
+        console.log(`No legal piece found for ${curCol} ${pieceType} to ${destination}:`);
+        console.log(pieceType, destination, pos);
+        console.log(allLegalMoves);
+        console.log($(pieces));
+    }
 }
 
 function adjustSize() {

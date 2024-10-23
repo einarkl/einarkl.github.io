@@ -79,7 +79,7 @@ function genOPs() {
                 }
                 state = getNumberState(4, inverseAlg(alg));
 
-                let states = [getNumberState(4, inverseAlg(alg + " U")), getNumberState(4, inverseAlg(alg + " U2")), getNumberState(4, inverseAlg(alg + " U'"))];
+                let states = [getNumberState(4, alg + " U"), getNumberState(4, alg + " U2"), getNumberState(4, alg + " U'")];
                 let nState = getNewState(state);
                 let dup = "";
 
@@ -165,13 +165,23 @@ function goodState(state) {
 
     return l2 === l1 && f2 === f1 && r2 === r1 && b2 === b1 && d2 === d1;
 }
+/* 
+function getNewState(state) {
+    let u = state.slice(0, 16);
+    let l = state.slice(16, 20);
+    let f = state.slice(32, 36);
+    let r = state.slice(48, 52);
+    let b = state.slice(64, 68);
+
+    return (u + l + f + r + b).replaceAll("2", "0").replaceAll("3", "0").replaceAll("4", "0").replaceAll("5", "0").replaceAll("6", "0");
+} */
 
 function getNewState(state) {
     /* 
     Codes:
     Number axyz 
     a = number of edges flipped, always 1 flipped UF and 1 non-flipped UL
-    x,y,z = code for how UFL, UFR, UBR are twisted respectively. 0 = top color up, 1 = top color R/L, 2 = top color on F/B
+    x,y,z = code for how UFL, UFR, UBR are flipped respectively. 0 = top color up, 1 = top color R/L, 2 = top color on F/B
     */
     let u = state.slice(0, 16);
     let l = state.slice(16, 20);
@@ -213,6 +223,7 @@ function getNewState(state) {
 
     let xyz = [ufl, ufr, ubr].map(c => c.indexOf("1")).join("");
 
+    // return (u + l + f + r + b).replaceAll("2", "0").replaceAll("3", "0").replaceAll("4", "0").replaceAll("5", "0").replaceAll("6", "0");
     return a + xyz;
 }
 

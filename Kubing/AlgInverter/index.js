@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 function inverseAlg(alg) {
     let invAlg = "";
 

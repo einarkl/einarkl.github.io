@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let boardTiles = ["","","","","","","","",""];
 const moves = ["X","O",""];
 let index = 0;

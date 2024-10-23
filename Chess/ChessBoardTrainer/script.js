@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let currentTile = "";
 let prevTile = "";
 let tiles = [];

@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let showing = null;
 let showingLetters = false;
 let selectedButton = null;

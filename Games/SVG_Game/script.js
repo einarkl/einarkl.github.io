@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let player;
 let position = {
     x: 0,

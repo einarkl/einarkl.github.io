@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let cubeState = [];
 let drawScrambleArray = [];
 let gap = 3;

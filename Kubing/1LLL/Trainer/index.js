@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let currentAlgset = localStorage.getItem("currentAlgset") || 0;
 let nextAlg = 0;
 let algList = [];

@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let w, h;
 let interval;
 let length;

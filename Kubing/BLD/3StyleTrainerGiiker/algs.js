@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 const ufr = [
     {target:"UBL_UBR", alg:"[R' B' R: [R D R', U']]", scramble:"R2 U' F2 U B2 U' F2 U B2 R2"},
     {target:"UBL_UFL", alg:"[R' D' R U': [U', R' D R]]", scramble:"R2 F2 U' F2 U B2 U' F2 U B2 F2 R2"},

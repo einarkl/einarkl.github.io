@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 export function drawRect(svgID, x, y, width, height, rx = 0, ry = rx, fill = "none", stroke = "black", strokeWidth = "1") {
     let rect = document.createElementNS('http://www.w3.org/2000/svg', "rect");
     rect.setAttribute("x", x);

@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let svg;
 let interval;
 let w, h;

@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 const oll1 = {
     "name": "Oll1",
     "1": ["U2 R' U' F' U F R U' R' U' R U' R' U F' U F R", "U2 R' F' U' F U' R U R' U R F R U R' U' F'", "R U2 R2 F R U R' U' F' U R U R' F R F'", "U2 R' F' U' F U' R U R' U R U R' F' U' F U R", "Rw' U' R U' R' U2 Rw U Rw U2 R' U' R U' Rw'", "Rw U R' U R U2 Rw' U' Rw' U2 R U R' U Rw", "F R U' R2 F2 Rw U Rw' F R2 U R' U R U' R' F'", "Rw' R2 U R' U R U' R' U Rw U2 Rw' U' M'"],

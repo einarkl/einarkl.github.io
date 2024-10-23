@@ -54,7 +54,7 @@ let colors222 = [
         let movesExtra = ["", "'", "2"];
         let axises = n > 2 ? [["U","D"], ["F","B"], ["R","L"]] : [["U"], ["F"], ["R"]];
         let movesAxis = [["",""]];
-        let num = n > 3 ? 20*(n-2) : (n === 3 ? Math.floor(Math.random() * 4 + 19) : Math.floor(Math.random() * 3 + 9));
+        let num = n > 3 ? 20*(n-2) : (n === 3 ? Math.floor(Math.random() * 4 + 21) : Math.floor(Math.random() * 3 + 9));
 
         for (let i = 4; i <= n; i++) {
             let nW = Math.floor(i/2) === 2 ? "" : Math.floor(i/2);
@@ -704,6 +704,9 @@ let colors222 = [
         const clean = ["white", "#FFAA00", "#00FF00", "red", "blue", "yellow"];
         $(svgID).empty();
     
+        // ignore () and ,
+        scr = scr.replaceAll("(", "").replaceAll(")", "").replaceAll(",", "");
+
         let cube = getState_new(n, scr);
         let indCube = [];
 
@@ -897,6 +900,9 @@ let colors222 = [
             inpFlags["all"] = "";
         }
         else {
+            if (flagsStr === "--nautilus") {
+                flagsStr = "-layer_f gray -layer_u gray -f2l_fl clean -u clean -f clean -df clean -fr_ white -uf_ white -ur_ white -ub_ white -ul_ white";
+            }
             let flagsArr = flagsStr.split("-").filter(f => f.trim() !== "");
             for (let f of flagsArr) {
                 const fs = f.split(" ");

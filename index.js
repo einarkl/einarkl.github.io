@@ -1,13 +1,8 @@
+window.location = "https://einarkl.no" + location.pathname;
 let tabContents = [];
 let currentTab = 0;
 
 $(function() {
-    console.log("Full URL: " + window.location.href);
-    console.log("Domain: " + window.location.hostname);
-    console.log("Path: " + window.location.pathname);
-    console.log("Protocol: " + window.location.protocol);
-    console.log("Port: " + window.location.port);
-
     tabContents = $(".tabContent");
 
     adjustImg();

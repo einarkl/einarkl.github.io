@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 const firebaseConfig = {
     apiKey: "AIzaSyCs9aTWJja_YW8g-mN-ji8-MNs627v3Uh8",
     authDomain: "elmers-knapp.firebaseapp.com",

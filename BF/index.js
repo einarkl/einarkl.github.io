@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let cells = new Array(30000).fill(0);
 let commands = ["<",">","+","-","[","]",",","."];
 let pointer = 0;

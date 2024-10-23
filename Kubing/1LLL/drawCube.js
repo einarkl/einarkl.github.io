@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 const c = $("#cubeCanvas")[0];
 const ctx = c.getContext("2d");
 let cubeState = [];

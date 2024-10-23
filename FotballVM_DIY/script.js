@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let brazil = "Brazil";
 let belgium = "Belgium";
 let argentina = "Argentina";

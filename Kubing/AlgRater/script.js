@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 function rateAlg(moves) {
     let allMoves = [["U", "D", "E", "y"], ["R", "L", "M", "x"], ["F", "B", "S", "z"]];
 

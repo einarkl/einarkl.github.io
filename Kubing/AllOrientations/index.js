@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let step = "0";
 let start;
 let scrambles;

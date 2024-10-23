@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 $(function () {
     $("html").fadeIn(2000);
     $("header").fadeIn(2000);

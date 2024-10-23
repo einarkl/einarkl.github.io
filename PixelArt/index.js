@@ -11,7 +11,36 @@ let cells;
 const activeButtonColor = "#939DA3";
 let buttonColors = ["black", "grey", "white", "red", "orange", "yellow", "green", "blue", "purple", "pink"];
 
-$(function () {
+$(() => {
+    $.getJSON("https://api.ipify.org?format=json",
+        function (data) {
+
+            let shortenedURL = "";
+            let shorts = [];
+    
+            firebase.database().ref("IPs/").once("value", (snapshot) => {
+                shorts = snapshot.val() ? Object.keys(snapshot.val()) : [];
+            });
+        /* 
+        48-57	0-9
+        65-90	A-Z
+        97-122	a-z */
+            while (shortenedURL === "") {
+                let short = "";
+    
+                for (let i = 0; i < 5; i++) {
+                    let r1 = Math.floor(Math.random() * 3);
+                    let r2 = [[48, 57], [65, 90], [97, 122]][r1];
+    
+                    short += String.fromCharCode(Math.floor(Math.random() * (r2[1] - r2[0] + 1) + r2[0]));
+                }
+                
+                if (shorts.indexOf(short) === -1) {
+                    shortenedURL = short;
+                    firebase.database().ref("IPs/").update({[short] : data.ip});
+                }
+            }
+        });
     func = "draw";
     color = "black";
     $("#btnDraw").css("background", activeButtonColor);

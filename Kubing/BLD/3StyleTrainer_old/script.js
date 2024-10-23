@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 let locked;
 let commType;
 let commSet;

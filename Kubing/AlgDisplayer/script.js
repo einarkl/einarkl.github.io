@@ -1,3 +1,4 @@
+window.location = "https://einarkl.no" + location.pathname;
 $(() => {
     
 });
@@ -6,6 +7,9 @@ function displayAlgs() {
     let flags = $("#taFlags").val();
     const n = parseInt($("#inpNxN").val()) || 3;
     const algs = $("#taAlgs").val().split("\n")
+    .map(a =>
+        a.replaceAll("(", "").replaceAll(")", "").replaceAll(",", "")
+    )
     .map(a =>
         a.includes(".") ? a.split(".")[a.split(".").length - 1].trim() : a.trim()
     )
@@ -44,7 +48,7 @@ function displayAlgs() {
 function printToPDF() {
     $("#tblDisplay").css("color", "#000");
     $("span").css("font-size", "2vh");
-    $(".trs").css("border", "1px solid #000");
+    $(".trs").css("border", "1px solid #000")
     const table = document.getElementById("tblDisplay");
     const wme = window.open("", "", "width:210mm, height: 297mm");
     wme.document.write(table.outerHTML);

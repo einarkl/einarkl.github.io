@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ZBLL Timer</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <script src="../Tools/tools.js"></script>
+    <script src="algs.js"></script>
+    <script src="drawCube.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <div id="outerOptions" class="outer" onmousedown="closeOptions()">
+        <div id="innerOptions" class="inner">
+            <h1 style="text-align: center">Settings</h1>
+            <div>
+                <label>Show time <input type="radio" name="showTime" value="1" onclick="toggleShowTime(value)"></label>
+                <label>Hide time <input type="radio" name="showTime" value="0" onclick="toggleShowTime(value)"></label><br/>
+                <label>Custom text <input id="inpCustomPlaceholder" type="text" name="showTime" onchange="changeCustomPlaceholder(value)"></label>
+            </div><br/>
+            <div>
+                Waiting time before solving:<br/>
+                <label>0s <input type="radio" name="wait055" value="0" onclick="toggleWaitingTime(value)"></label>
+                <label>0.55s <input type="radio" name="wait055" value="1" onclick="toggleWaitingTime(value)"></label>
+            </div><br/>
+            <button onclick="importFromCSTimer()">Import from CSTimer</button>
+            <button onclick="exportToCSTimer()">Export to CSTimer</button>
+        </div>
+    </div>
+    <div id="outerTimeStats" class="outer" onmousedown="closeTimeStats()">
+        <div id="innerTimeStats" class="inner"><div></div></div>
+    </div>
+    
+    <div id="content">
+        <div id="left">
+            <div id="notTimeList">
+                <img id="btnOptions" src="./resources/settings.png" onclick="showOptions()">
+                <div id="sessionOptions">
+                    <select id="sessionList" onchange="changeSession()"></select>
+                    <button id="btnNew" onclick="createSession()">New</button>
+                    <button id="btnRename" onclick="renameSession()">Rename</button>
+                    <button id="btnReset" onclick="resetSession()">Reset</button>
+                    <button id="btnDelete" onclick="deleteSession()">Delete</button>
+                </div><br/>
+                <div>
+                    <table id="pbListHeading">
+                        <tr><th></th><th>Current</th><th>Best</th></tr>
+                    </table>
+                    <table id="pbList"></table>
+                </div><br/>
+                <div>
+                    <table id="timeListHeading">
+                        <tr><th class="cellToClick" onclick="changeListingOrder()">#</th><th>Time</th><th>Ao5</th><th>Ao12</th></tr>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <table id="timeList">
+                </table>
+            </div>
+        </div>
+        <div id="middle">
+            <div id="scramble">
+                <div id="selectDiv">
+                    <label for='dropdown-toggle'>Choose algset</label>
+                    <button id="btnDropdown" class="dropdown-toggle" href="#" id="drop" data-bs-toggle="dropdown">
+                        Dropdown menu
+                    </button>
+                    <div id="dropdownAlgset" class="dropdown-menu"></div>
+                    <div id="cbSubsetDiv"></div>
+                    <select id='selectAlgset' onchange='setAlgset(this.value); this.blur()'></select>
+                    <select id='selectAuf' onchange='setAuf(this.value); this.blur()'>
+                        <option value="0"></option>
+                        <option value="1">U</option>
+                        <option value="2">U'</option>
+                        <option value="3">U2</option>
+                    </select>
+                </div>
+                <h1>Scramble</h1>
+            </div>
+            <div id="display">
+                <h1 class="unselectable">0.00</h1>
+            </div>
+        </div>
+        <div id="right">
+        </div>
+    </div>
+    <div id="hiddenDiv" hidden></div>
+    <div id="loader"><div style="position: relative;"><div id="loaderWheel"></div></div></div>
+</body>
+<script src="index.js"></script>
+<script src="db.js"></script>
+</html>

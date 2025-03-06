@@ -1,5 +1,5 @@
 let currentAlgset = localStorage.getItem("currentAlgset") || 0;
-let currentAUFs = $.parseJSON(localStorage.getItem("currentAUFs")) || {"U" : false, "U'" : false, "U2" : false};
+let currentAUFs = $.parseJSON(localStorage.getItem("currentAUFs")) || {"U0" : true, "U" : false, "U'" : false, "U2" : false};
 let nextAlg = 0;
 let algList = [];
 let currentAlg = "";
@@ -301,14 +301,17 @@ function getScramble() {
     if (!doNotScramble) {
         let curZBLL = algs[parseInt(currentAlgset)];
         let r = Math.floor(Math.random() * (Object.keys(curZBLL).length - 1));
-        let aufs = [""];
+        let aufs = [];
         for (let k of Object.keys(currentAUFs)) {
             if (currentAUFs[k]) {
                 aufs.push(k);
             }
         }
         let rauf = aufs[Math.floor(Math.random() * (aufs.length - 1))].replace("U", "y");
-        if (rauf === "y'") {
+        if (rauf === "-") {
+            rauf = "";
+        }
+        else if (rauf === "y'") {
             rauf = "y";
         }
         else if (rauf === "y") {
@@ -1134,18 +1137,26 @@ function getSettings() {
         $("input:radio[name=wait055]").filter("[value=0]").prop('checked', true);
     }
 
+    $("#aufu1").prop('checked', currentAUFs["U0"]);
     $("#aufu1").prop('checked', currentAUFs["U"]);
     $("#aufu3").prop('checked', currentAUFs["U'"]);
     $("#aufu2").prop('checked', currentAUFs["U2"]);
 }
 
 function updateAUF() {
-    currentAUFs = {"U" : $("#aufu1").is(':checked'), "U'" : $("#aufu3").is(':checked'), "U2" : $("#aufu2").is(':checked')};
+    let u1 = $("#aufu1").is(':checked');
+    let u2 = $("#aufu2").is(':checked');
+    let u3 = $("#aufu3").is(':checked');
+    let u0 = $("#aufu0").is(':checked') || (!u1 && !u2 && !u3);
+    currentAUFs = {"U0" : u0, "U" : u1, "U2" : u2, "U'" : u3};
     localStorage.setItem("currentAUFs", JSON.stringify(currentAUFs));
+    
+    $("#aufu0").prop('checked', currentAUFs["U0"]);
 }
 
 function initActions() {
     calcStats = false;
+    updateAUF();
     getSettings();
 
     connectAndGetDataFromDB();

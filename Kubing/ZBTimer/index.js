@@ -301,9 +301,8 @@ function resetTimer() {
 }
 
 function getScramble() {
-    if (!doNotScramble) {
+    // if (!doNotScramble) {
         let curZBLL = algs[parseInt(currentAlgset)];
-        let r = Math.floor(Math.random() * (Object.keys(curZBLL).length - 1));
         let aufs = [];
         for (let k of Object.keys(currentAUFs)) {
             if (currentAUFs[k]) {
@@ -311,9 +310,10 @@ function getScramble() {
             }
         }
         currentAUF = aufs[Math.floor(Math.random() * (aufs.length))];
-        console.log(currentAUF);
         
         let rauf = currentAUF.replace("U", "y");
+        console.log(rauf);
+        
         if (rauf === "-") {
             rauf = "";
         }
@@ -321,15 +321,17 @@ function getScramble() {
             rauf = "y";
         }
         else if (rauf === "y") {
-            rauf === "y'";
+            rauf = "y'";
         }
 
+        let r = Math.floor(Math.random() * (Object.keys(curZBLL).length - 1));
         currentAlg = curZBLL[r];
+        
         scramble = getMovesWithoutRotations(rauf + " " + currentAlg);
         $("#scramble h1").html(scramble);
     
         drawScramble();
-    }
+    // }
 
     doNotScramble = false;
 }
@@ -442,6 +444,7 @@ function resetSession() {
         sessionList[curSession].solutions = [];
         doNotScramble = true;
         openDB(editDB, sessionList[curSession].id, sessionList[curSession]);
+        getScramble();
     }
 }
 
@@ -1147,8 +1150,8 @@ function getSettings() {
 
     $("#aufu0").prop('checked', currentAUFs["-"]);
     $("#aufu1").prop('checked', currentAUFs["U"]);
-    $("#aufu3").prop('checked', currentAUFs["U'"]);
     $("#aufu2").prop('checked', currentAUFs["U2"]);
+    $("#aufu3").prop('checked', currentAUFs["U'"]);
 }
 
 function updateAUF() {
@@ -1160,6 +1163,8 @@ function updateAUF() {
     localStorage.setItem("currentAUFs", JSON.stringify(currentAUFs));
     
     $("#aufu0").prop('checked', currentAUFs["-"]);
+
+    getScramble();
 }
 
 function initActions() {

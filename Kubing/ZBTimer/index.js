@@ -1,12 +1,13 @@
 let currentAlgset = localStorage.getItem("currentAlgset") || 0;
-let currentAUFs = $.parseJSON(localStorage.getItem("currentAUFs")) || {"U0" : true, "U" : false, "U'" : false, "U2" : false};
+let currentAUFs = $.parseJSON(localStorage.getItem("currentAUFs")) || {"-" : true, "U" : false, "U2" : false, "U'" : false};
 let nextAlg = 0;
 let algList = [];
 let currentAlg = "";
+let currentAUF = "";
 
 class Solution {
     constructor(
-        time, penalty, scramble, comment, date, totalTime, index,
+        time, penalty, scramble, comment, date, totalTime, index, alg, auf,
         ao3 = "-", ao5 = "-", ao12 = "-", ao25 = "-", ao50 = "-", ao100 = "-",
         ao200 = "-", ao500 = "-", ao1000 = "-", ao2000 = "-", ao5000 = "-", ao10000 = "-"
     ) {
@@ -17,6 +18,8 @@ class Solution {
         this.date = date;
         this.totalTime = totalTime;
         this.index = index;
+        this.alg = alg;
+        this.auf = auf;
         this.ao3 = ao3;
         this.ao5 = ao5;
         this.ao12 = ao12;
@@ -307,7 +310,10 @@ function getScramble() {
                 aufs.push(k);
             }
         }
-        let rauf = aufs[Math.floor(Math.random() * (aufs.length - 1))].replace("U", "y");
+        currentAUF = aufs[Math.floor(Math.random() * (aufs.length))];
+        console.log(currentAUF);
+        
+        let rauf = currentAUF.replace("U", "y");
         if (rauf === "-") {
             rauf = "";
         }
@@ -317,7 +323,9 @@ function getScramble() {
         else if (rauf === "y") {
             rauf === "y'";
         }
-        scramble = getMovesWithoutRotations(rauf + " " + curZBLL[r]);
+
+        currentAlg = curZBLL[r];
+        scramble = getMovesWithoutRotations(rauf + " " + currentAlg);
         $("#scramble h1").html(scramble);
     
         drawScramble();
@@ -335,7 +343,7 @@ function saveSolution() {
     //Add solution to solutions
     calcStats = true;
     const date = Date.now().toString().split("").slice(0, 10).join("");
-    const newSolution = new Solution(rawTime, 0, scramble, "", date, rawTime, sessionList[curSession].solutions.length);
+    const newSolution = new Solution(rawTime, 0, scramble, "", date, rawTime, sessionList[curSession].solutions.length, currentAlg, currentAUF);
     sessionList[curSession].solutions.push(newSolution);
     
     updateFromIndex = sessionList[curSession].solutions.length - 1;
@@ -1137,7 +1145,7 @@ function getSettings() {
         $("input:radio[name=wait055]").filter("[value=0]").prop('checked', true);
     }
 
-    $("#aufu1").prop('checked', currentAUFs["U0"]);
+    $("#aufu0").prop('checked', currentAUFs["-"]);
     $("#aufu1").prop('checked', currentAUFs["U"]);
     $("#aufu3").prop('checked', currentAUFs["U'"]);
     $("#aufu2").prop('checked', currentAUFs["U2"]);
@@ -1148,16 +1156,16 @@ function updateAUF() {
     let u2 = $("#aufu2").is(':checked');
     let u3 = $("#aufu3").is(':checked');
     let u0 = $("#aufu0").is(':checked') || (!u1 && !u2 && !u3);
-    currentAUFs = {"U0" : u0, "U" : u1, "U2" : u2, "U'" : u3};
+    currentAUFs = {"-" : u0, "U" : u1, "U2" : u2, "U'" : u3};
     localStorage.setItem("currentAUFs", JSON.stringify(currentAUFs));
     
-    $("#aufu0").prop('checked', currentAUFs["U0"]);
+    $("#aufu0").prop('checked', currentAUFs["-"]);
 }
 
 function initActions() {
     calcStats = false;
-    updateAUF();
     getSettings();
+    updateAUF();
 
     connectAndGetDataFromDB();
     keyActions();

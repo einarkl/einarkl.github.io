@@ -68,19 +68,26 @@
         <div id="middle">
             <div id="scramble">
                 <div id="selectDiv">
-                    <label for='dropdown-toggle'>Choose algset</label>
-                    <button id="btnDropdown" class="dropdown-toggle" href="#" id="drop" data-bs-toggle="dropdown">
-                        Dropdown menu
-                    </button>
-                    <div id="dropdownAlgset" class="dropdown-menu"></div>
-                    <div id="cbSubsetDiv"></div>
-                    <select id='selectAlgset' onchange='setAlgset(this.value); this.blur()'></select>
-                    <select id='selectAuf' onchange='setAuf(this.value); this.blur()'>
-                        <option value="0"></option>
-                        <option value="1">U</option>
-                        <option value="2">U'</option>
-                        <option value="3">U2</option>
-                    </select>
+                    <div style="display: grid; grid-template-columns: 1fr 2fr;">
+                        <div>
+                            <label for='dropdown-toggle'>Choose algset</label>
+                            <button id="btnDropdown" class="dropdown-toggle" href="#" id="drop" data-bs-toggle="dropdown">
+                                Dropdown menu
+                            </button>
+                            <div id="dropdownAlgset" class="dropdown-menu"></div>
+                            <div id="cbSubsetDiv"></div>
+                            <select id='selectAlgset' onchange='setAlgset(this.value); this.blur()'></select>
+                        </div>
+                        <div id="cbAUF" style="margin-left: 2vw;">
+                            <span>AUF:&nbsp&nbsp</span>
+                            <label for="aufu1">&nbsp U </label>
+                            <input type="checkbox" id="aufu1" name="u1" value="u1" onchange="updateAUF()">
+                            <label for="aufu3">&nbsp U'</label>
+                            <input type="checkbox" id="aufu3" name="u3" value="u3" onchange="updateAUF()">
+                            <label for="aufu2">&nbsp U2</label>
+                            <input type="checkbox" id="aufu2" name="u2" value="u2" onchange="updateAUF()">
+                        </div>
+                    </div>
                 </div>
                 <h1>Scramble</h1>
             </div>

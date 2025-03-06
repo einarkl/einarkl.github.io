@@ -1,4 +1,5 @@
 let currentAlgset = localStorage.getItem("currentAlgset") || 0;
+let currentAUFs = $.parseJSON(localStorage.getItem("currentAUFs")) || {"U" : false, "U'" : false, "U2" : false};
 let nextAlg = 0;
 let algList = [];
 let currentAlg = "";
@@ -173,7 +174,7 @@ function listImages() {
 
     let i = 0;
     for (let a of algs) {
-        let algorithm = Object.values(a)[0][0];
+        let algorithm = Object.values(a)[0];
         if (a.name !== "Custom") {
             algorithm = algorithm.split("/")[0].replaceAll("(", "").replaceAll(")", "");
         }
@@ -184,7 +185,7 @@ function listImages() {
         let c = $("#canvas"+i)[0];
         let ctx = c.getContext("2d");
 
-        drawBnW(ctx, canvasSize, inverseAlg(algorithm));
+        drawBnW(ctx, canvasSize, algorithm);
         let img = c.toDataURL("image/png");
 
         $("#algImg"+i).attr("src", img);
@@ -300,8 +301,20 @@ function getScramble() {
     if (!doNotScramble) {
         let curZBLL = algs[parseInt(currentAlgset)];
         let r = Math.floor(Math.random() * (Object.keys(curZBLL).length - 1));
-        
-        scramble = curZBLL[r];
+        let aufs = [""];
+        for (let k of Object.keys(currentAUFs)) {
+            if (currentAUFs[k]) {
+                aufs.push(k);
+            }
+        }
+        let rauf = aufs[Math.floor(Math.random() * (aufs.length - 1))].replace("U", "y");
+        if (rauf === "y'") {
+            rauf = "y";
+        }
+        else if (rauf === "y") {
+            rauf === "y'";
+        }
+        scramble = getMovesWithoutRotations(rauf + " " + curZBLL[r]);
         $("#scramble h1").html(scramble);
     
         drawScramble();
@@ -1120,6 +1133,15 @@ function getSettings() {
     else {
         $("input:radio[name=wait055]").filter("[value=0]").prop('checked', true);
     }
+
+    $("#aufu1").prop('checked', currentAUFs["U"]);
+    $("#aufu3").prop('checked', currentAUFs["U'"]);
+    $("#aufu2").prop('checked', currentAUFs["U2"]);
+}
+
+function updateAUF() {
+    currentAUFs = {"U" : $("#aufu1").is(':checked'), "U'" : $("#aufu3").is(':checked'), "U2" : $("#aufu2").is(':checked')};
+    localStorage.setItem("currentAUFs", JSON.stringify(currentAUFs));
 }
 
 function initActions() {

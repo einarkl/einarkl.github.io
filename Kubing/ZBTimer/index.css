@@ -13,7 +13,7 @@ body {
     overflow: hidden;
 }
 
-label {
+label, span {
     color: white;
 }
 
@@ -144,7 +144,7 @@ label {
     -webkit-animation: spin 2s linear infinite; /* Safari */
     animation: spin 2s linear infinite;
 }
-  
+
 /* Safari */
 @-webkit-keyframes spin {
     0% {

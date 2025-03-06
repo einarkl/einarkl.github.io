@@ -491,8 +491,4 @@ const oll7 = {
     "70": "R' U2 F' R U R' U' R' F R2 U R' U R U'",
     "71": "R' U' R U' R' U R' D' R U' R' D R U2 R U"
 };
-const custom = {
-    "name": "Custom",
-    "1": []
-};
 const algs = [oll1,oll2,oll3,oll4,oll5,oll6,oll7];

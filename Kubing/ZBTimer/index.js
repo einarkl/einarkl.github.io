@@ -312,7 +312,6 @@ function getScramble() {
         currentAUF = aufs[Math.floor(Math.random() * (aufs.length))];
         
         let rauf = currentAUF.replace("U", "y");
-        console.log(rauf);
         
         if (rauf === "-") {
             rauf = "";

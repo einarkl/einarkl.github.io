@@ -282,6 +282,10 @@ function stopTimer() {
 function resetTimer() {
     clearInterval(interval);
     clearInterval(waitingInterval);
+    currentAlgset = 0;
+    currentAUFs = {"-" : true, "U" : false, "U2" : false, "U'" : false};
+    localStorage.setItem("currentAlgset", JSON.stringify(currentAlgset));
+    localStorage.setItem("currentAUFs", JSON.stringify(currentAUFs));
     timing = false;
     ready = false;
     waiting = false;

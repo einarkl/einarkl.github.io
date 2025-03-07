@@ -146,6 +146,16 @@ $(window).resize(function(){
     adjustSize();
 });
 
+function resetDB() {
+    if (confirm("Are you sure you want do reset the database?")) {
+        openDB(refreshDatabase);
+        sessionList[curSession].solutions = [];
+        doNotScramble = true;
+        openDB(editDB, sessionList[curSession].id, sessionList[curSession]);
+        getScramble();
+    }
+}
+
 function listCases() {
 
     let out = "";

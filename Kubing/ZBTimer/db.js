@@ -54,6 +54,19 @@ function openDB(func, arg1 = false, arg2 = false, arg3 = false) {
     }
 }
 
+function refreshDatabase() {
+    const request = indexedDB.deleteDatabase("myDatabase");
+
+    request.onerror = function(event) {
+        console.log("Error deleting database.");
+    };
+
+    request.onsuccess = function(event) {
+        console.log("Database deleted successfully.");
+        openDB();
+    };
+}
+
 function editDB(key, val, dontGetAll = false) {
     const tx = db.transaction(storeName, readwrite);
     const store = tx.objectStore(storeName);

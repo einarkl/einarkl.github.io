@@ -1,6 +1,6 @@
 const dbName = "zb_timer";
 const storeName = "sessions";
-const version = 1.1;
+const version = 2;
 const readwrite = "readwrite";
 const readonly = "readonly";
 

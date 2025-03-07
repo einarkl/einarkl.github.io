@@ -1329,6 +1329,16 @@ function touchActions() {
     }});
 }
 
+function showStats() {
+    let puns = [
+        "u suk",
+        "get good",
+        "L",
+        "Yiheng is faster"
+    ];
+    alert(puns[Math.floor(Math.random() * (puns.length))]);
+}
+
 function adjustSize() {
     //Fix size for phone screen
     /*if ($("#content").width() >= $("#content").height()) {

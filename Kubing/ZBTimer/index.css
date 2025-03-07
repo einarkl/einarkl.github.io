@@ -81,15 +81,19 @@ label, span {
     right: 5vh;
 }
 
-#btnOptions {
+#btnOptions, #btnStats {
     margin-bottom: 1vh;
     width: auto;
     height: 5vh;
 }
 
-#btnOptions:hover {
+#btnOptions:hover, #btnStats:hover {
     opacity: 0.75;
     cursor: pointer;
+}
+
+#btnStats {
+    float: right;
 }
 
 .outer {

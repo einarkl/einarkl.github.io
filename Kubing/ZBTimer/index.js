@@ -151,7 +151,7 @@ function listCases() {
     const canvasSize = $("#selectAlgset").height() * 2;
     
     let i = 0;
-    for (let a of algs) {
+    for (let a of bnwAlgs) {
         out += "<option id='algOpt"+i+"' value='"+i+"'>"+a.name+"<canvas id='canvas"+i+"' width='"+canvasSize+"' height='"+canvasSize+"'></canvas></option>";
         i++;
     }
@@ -161,7 +161,7 @@ function listCases() {
 
 
     let j = 0;
-    for (let a of algs) {
+    for (let a of bnwAlgs) {
         dOut += "<span value='"+j+"' class='dropdown-item'' onclick='setAlgset("+j+"); this.blur()'><img id='algImg"+j+"' src='' alt=''>&nbsp;&nbsp;"+a.name+"</span>";
         j++;
     }
@@ -176,14 +176,8 @@ function listImages() {
     const canvasSize = $("#selectAlgset").height() * 2;
 
     let i = 0;
-    for (let a of algs) {
-        let algorithm = Object.values(a)[0];
-        if (a.name !== "Custom") {
-            algorithm = algorithm.split("/")[0].replaceAll("(", "").replaceAll(")", "");
-        }
-        else {
-            algorithm = "";
-        }
+    for (let a of bnwAlgs) {
+        let algorithm = a[0][0].split("/")[0].replaceAll("(", "").replaceAll(")", "");
 
         let c = $("#canvas"+i)[0];
         let ctx = c.getContext("2d");
@@ -210,7 +204,7 @@ function setAlgset(algset) {
         $("#btnDropdown").text("Custom");
     }
     else {
-        $("#btnDropdown").text(algs[parseInt(currentAlgset)].name);
+        $("#btnDropdown").text(bnwAlgs[parseInt(currentAlgset)].name);
     }
     adjustSize();
     getScramble();
@@ -302,7 +296,7 @@ function resetTimer() {
 
 function getScramble() {
     // if (!doNotScramble) {
-        let curZBLL = algs[parseInt(currentAlgset)];
+        let curZBLL = algs[Object.keys(algs)[parseInt(currentAlgset)]];
         let aufs = [];
         for (let k of Object.keys(currentAUFs)) {
             if (currentAUFs[k]) {
@@ -323,8 +317,9 @@ function getScramble() {
             rauf = "y'";
         }
 
-        let r = Math.floor(Math.random() * (Object.keys(curZBLL).length - 1));
-        currentAlg = curZBLL[r];
+        let r1 = Math.floor(Math.random() * (Object.keys(curZBLL).length - 1));
+        let r2 = Math.floor(Math.random() * (Object.keys(curZBLL[r1]).length - 1));
+        currentAlg = curZBLL[r1][r2];
         
         scramble = getMovesWithoutRotations(rauf + " " + currentAlg);
         $("#scramble h1").html(scramble);

@@ -1,4 +1,4 @@
-const dbName = "einarkl_timer";
+const dbName = "zb_timer";
 const storeName = "sessions";
 const version = 1;
 const readwrite = "readwrite";
@@ -28,7 +28,7 @@ function openDB(func, arg1 = false, arg2 = false, arg3 = false) {
         store2.createIndex("ao5000IDX", "ao5000", {unique: false});
         store2.createIndex("ao10000IDX", "ao10000", {unique: false});
 
-        localStorage.removeItem("einarkl_timer_settings");
+        localStorage.removeItem("zb_timer_settings");
     }
     
     request.onsuccess = e => {

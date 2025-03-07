@@ -4,6 +4,8 @@ let nextAlg = 0;
 let algList = [];
 let currentAlg = "";
 let currentAUF = "";
+let algs;
+let bnwAlgs = [];
 
 class Solution {
     constructor(
@@ -48,6 +50,7 @@ class Session {
 let timing, waiting, ready = false;
 let stopped = true;
 let scramble;
+let curScrType;
 let curSession;
 
 let interval;
@@ -58,7 +61,7 @@ let green = "#00FF00";
 let yellow = "#F5E801";
 let red = "#FF0000";
 
-const scrTypes = ["333", "222", "444", "555", "666", "777", "clock", "minx", "pyram", "skewb", "sq1"];
+const scrTypes = ["w", "nw"];
 
 let wait055;
 let showTime;
@@ -282,10 +285,7 @@ function stopTimer() {
 function resetTimer() {
     clearInterval(interval);
     clearInterval(waitingInterval);
-    currentAlgset = 0;
-    currentAUFs = {"-" : true, "U" : false, "U2" : false, "U'" : false};
-    localStorage.setItem("currentAlgset", JSON.stringify(currentAlgset));
-    localStorage.setItem("currentAUFs", JSON.stringify(currentAUFs));
+    localStorage.clear();
     timing = false;
     ready = false;
     waiting = false;
@@ -299,7 +299,7 @@ function resetTimer() {
 }
 
 function getScramble() {
-    // if (!doNotScramble) {
+    if (!doNotScramble) {
         let curZBLL = algs[Object.keys(algs)[parseInt(currentAlgset)]];
         let aufs = [];
         for (let k of Object.keys(currentAUFs)) {
@@ -329,7 +329,7 @@ function getScramble() {
         $("#scramble h1").html(scramble);
     
         drawScramble();
-    // }
+    }
 
     doNotScramble = false;
 }
@@ -404,6 +404,7 @@ function createSession() {
     }
     
     curSession = sessionList.length;
+    curScrType = sessionScrType;
 
     if (sessionList.some(e => e.name === sessionName)) {
         let sNum = 1;
@@ -462,6 +463,7 @@ function deleteSession() {
         
         for (let i = curSession; i < sessionList.length; i++) {
             doNotScramble = true;
+            
             openDB(editDB, sessionList[i].id, sessionList[i]);
         }
 
@@ -532,8 +534,39 @@ function changeSession() {
 }
 
 function updateSession() {
+    updateScrType();
     addSolutionsToDB(sessionList[curSession].solutions, updateFromIndex);
     updateFromIndex = 0;
+}
+
+function changeScrType() {
+    curScrType = $("#scrambleType").children(":selected").attr("id");
+    $("#scrambleType").blur();
+
+    if (curScrType === "minx") {
+        $("#scramble").css("text-align", "left");
+    }
+    else {
+        $("#scramble").css("text-align", "center");
+    }
+
+    sessionList[curSession].scrType = curScrType;
+
+    openDB(editDB, sessionList[curSession].id, sessionList[curSession]);
+}
+
+function updateScrType() {
+    curScrType = sessionList[curSession].scrType;
+    $("#scrambleType").val(curScrType);
+
+    if (curScrType === "minx") {
+        $("#scramble").css("text-align", "left");
+    }
+    else {
+        $("#scramble").css("text-align", "center");
+    }
+
+    getScramble();
 }
 
 function updateStats() {
@@ -1106,12 +1139,12 @@ function changeSettings() {
         "customPlaceholder": customPlaceholder
     };
 
-    localStorage.setItem("einarkl_timer_settings", JSON.stringify(settings));
+    localStorage.setItem("zb_timer_settings", JSON.stringify(settings));
 }
 
 function getSettings() {
-    if (localStorage.getItem("einarkl_timer_settings")) {
-        settings = $.parseJSON(localStorage.getItem("einarkl_timer_settings"));
+    if (localStorage.getItem("zb_timer_settings")) {
+        settings = $.parseJSON(localStorage.getItem("zb_timer_settings"));
     }
     else {
         settings = {
@@ -1166,28 +1199,38 @@ function updateAUF() {
 }
 
 function initActions() {
-    calcStats = false;
-    getSettings();
-    updateAUF();
+    $.getJSON("zbll_scrambles.json", data => {
+        algs = data;
+        for (let k of Object.keys(algs)) {
+            bnwAlgs.push({"name" : k, "0" : algs[k][0]});
+        }
+        calcStats = false;
 
-    connectAndGetDataFromDB();
-    keyActions();
-    touchActions();
+        getSettings();
+        updateAUF();
+
+        connectAndGetDataFromDB();
+        keyActions();
+        touchActions();
+        
+        curScrType = $("#scrambleType").val();
+
+        listCases();
+        setAlgset(currentAlgset);
+
+        getScramble();
+
+        $("#timeList").parent().css("overflow-y", "scroll");
+
+        $(".inner").on("mousedown", function (e) {
+            e.stopPropagation();
+        });
+
+        $("#display").bind("contextmenu", function(e){
+            return false;
+        });
+    });
     
-    listCases();
-    setAlgset(currentAlgset);
-
-    getScramble();
-
-    $("#timeList").parent().css("overflow-y", "scroll");
-
-    $(".inner").on("mousedown", function (e) {
-        e.stopPropagation();
-    });
-
-    $("#display").bind("contextmenu", function(e){
-        return false;
-    });
 }
 
 function keyActions() {

@@ -10,7 +10,6 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
     <script src="../Tools/tools.js"></script>
-    <script src="algs.js"></script>
     <script src="drawCube.js"></script>
     <link rel="stylesheet" href="index.css">
     <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
@@ -67,6 +66,10 @@
         </div>
         <div id="middle">
             <div id="scramble">
+                <select id="scrambleType" onchange="changeScrType()">
+                    <option id="w" value="w">Weighted</option>
+                    <option id="nw" value="nw">Non weighted</option>
+                </select>
                 <div id="selectDiv">
                     <div style="display: grid; grid-template-columns: 1fr 2fr;">
                         <div>

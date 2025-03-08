@@ -331,6 +331,8 @@ function getScramble() {
             rauf = "y'";
         }
 
+        let pauf = ["", "U", "U2", "U'"][Math.floor(Math.random() * (4))];
+        rauf = [pauf, rauf].join(" ");
         let r1 = Math.floor(Math.random() * (Object.keys(curZBLL).length - 1));
         let r2 = Math.floor(Math.random() * (Object.keys(curZBLL[r1]).length - 1));
         currentAlg = curZBLL[r1][r2];

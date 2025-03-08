@@ -337,7 +337,7 @@ function getScramble() {
         let r2 = Math.floor(Math.random() * (Object.keys(curZBLL[r1]).length - 1));
         currentAlg = curZBLL[r1][r2];
         
-        scramble = getMovesWithoutRotations(rauf + " " + currentAlg);
+        scramble = cleanAlg(getMovesWithoutRotations(rauf + " " + currentAlg));
         $("#scramble h1").html(scramble);
     
         drawScramble();

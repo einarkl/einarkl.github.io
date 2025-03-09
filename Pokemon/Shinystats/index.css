@@ -1,0 +1,37 @@
+/* Dark theme */
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* Input Fields */
+.form-control {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #333;
+}
+.form-control::placeholder {
+    color: #888;
+}
+.form-control:focus {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border-color: #00bfa5; /* Teal */
+    box-shadow: 0 0 5px rgba(0, 191, 165, 0.5);
+}
+
+/* Headings */
+h1, h2 {
+    background: linear-gradient(90deg, #00b4d8, #00bfa5); /* Blue to Teal */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Centered Container */
+.container {
+    max-width: 400px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 10px;
+    box-shadow: 0px 0px 15px rgba(0, 191, 165, 0.2);
+}

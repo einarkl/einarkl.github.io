@@ -219,6 +219,17 @@ function setAlgset(algset) {
     else {
         $("#btnDropdown").text(bnwAlgs[parseInt(currentAlgset)].name);
     }
+
+    let curAlg = Object.keys(algs)[parseInt(currentAlgset)];
+    let cbCount = curAlg === "H" ? 4 : 6;
+    let out = "";
+    
+    for (let i = 0; i < cbCount; i++) {
+        out += "<label>&nbsp&nbsp"+(i + 1)+"&nbsp<input type='checkbox' value='"+i+"' onchange='getScramble(); this.blur()'></label>";
+    }
+
+    $("#cbSubsetDiv").html(out);
+
     adjustSize();
     getScramble();
 }
@@ -310,7 +321,47 @@ function resetTimer() {
 
 function getScramble() {
     if (!doNotScramble) {
-        let curZBLL = algs[Object.keys(algs)[parseInt(currentAlgset)]];
+        let zbllName = Object.keys(algs)[parseInt(currentAlgset)];
+        let curZBLL = algs[zbllName];
+        let activeAlgs = [];
+        //Subsets//
+        let checkedCBs = [];
+    
+        for (let c of $("#cbSubsetDiv input:checked")) {
+            checkedCBs.push(c.value);
+        }
+        
+        if (checkedCBs.length === 0) {
+            activeAlgs = curZBLL;
+        }
+        else {
+            for (let c of checkedCBs) {
+                let startIndex = c * 12;
+                let stopIndex = startIndex + 12;
+                if (zbllName === "H") {
+                    if (parseInt(c) === 0) {
+                        startIndex = 0;
+                        stopIndex = 8;
+                    }
+                    else if (parseInt(c) === 1) {
+                        startIndex = 8;
+                        stopIndex = 16;
+                    }
+                    else if (parseInt(c) === 2) {
+                        startIndex = 16;
+                        stopIndex = 28;
+                    }
+                    else {
+                        startIndex = 28;
+                        stopIndex = 40;
+                    }
+                }
+                for (let i = startIndex; i < stopIndex; i++) {
+                    activeAlgs.push(curZBLL[i]);
+                }
+            }
+        }
+        ////
         let aufs = [];
         for (let k of Object.keys(currentAUFs)) {
             if (currentAUFs[k]) {
@@ -333,9 +384,9 @@ function getScramble() {
 
         let pauf = ["", "U", "U2", "U'"][Math.floor(Math.random() * (4))];
         rauf = [pauf, rauf].join(" ");
-        let r1 = Math.floor(Math.random() * (Object.keys(curZBLL).length - 1));
-        let r2 = Math.floor(Math.random() * (Object.keys(curZBLL[r1]).length - 1));
-        currentAlg = curZBLL[r1][r2];
+        let r1 = Math.floor(Math.random() * (Object.keys(activeAlgs).length - 1));
+        let r2 = Math.floor(Math.random() * (Object.keys(activeAlgs[r1]).length - 1));
+        currentAlg = activeAlgs[r1][r2];
         
         scramble = cleanAlg(getMovesWithoutRotations(rauf + " " + currentAlg));
         $("#scramble h1").html(scramble);
@@ -455,7 +506,7 @@ function resetSession() {
         sessionList[curSession].solutions = [];
         doNotScramble = true;
         openDB(editDB, sessionList[curSession].id, sessionList[curSession]);
-        getScramble();
+        // getScramble();
     }
 }
 
@@ -1229,8 +1280,6 @@ function initActions() {
 
         listCases();
         setAlgset(currentAlgset);
-
-        getScramble();
 
         $("#timeList").parent().css("overflow-y", "scroll");
 

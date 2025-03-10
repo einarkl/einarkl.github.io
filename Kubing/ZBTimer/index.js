@@ -333,7 +333,10 @@ function getScramble() {
         }
         
         if (checkedCBs.length === 0) {
-            activeAlgs = curZBLL;
+            // activeAlgs = curZBLL;
+            for (let i = 0; i < curZBLL[i].length; i++) {
+                activeAlgs[zbllName + i] = curZBLL[i];
+            }
         }
         else {
             for (let c of checkedCBs) {
@@ -358,7 +361,7 @@ function getScramble() {
                     }
                 }
                 for (let i = startIndex; i < stopIndex; i++) {
-                    activeAlgs.push(curZBLL[i]);
+                    activeAlgs[zbllName + i] = curZBLL[i];
                 }
             }
         }
@@ -385,11 +388,10 @@ function getScramble() {
 
         let pauf = ["", "U", "U2", "U'"][Math.floor(Math.random() * (4))];
         rauf = [pauf, rauf].join(" ");
-        let r1 = Math.floor(Math.random() * (Object.keys(activeAlgs).length - 1));
-        let r2 = Math.floor(Math.random() * (Object.keys(activeAlgs[r1]).length - 1));
-        currentAlg = activeAlgs[r1][r2];
-        algCase = zbllName + r1;
-        
+        let r1 = Math.floor(Math.random() * Object.keys(activeAlgs).length);
+        let r2 = Math.floor(Math.random() * activeAlgs[Object.keys(activeAlgs)[r1]].length);
+        currentAlg = activeAlgs[Object.keys(activeAlgs)[r1]][r2];
+        algCase = Object.keys(activeAlgs)[r1];
         scramble = cleanAlg(getMovesWithoutRotations(rauf + " " + currentAlg));
         $("#scramble h1").html(scramble);
     

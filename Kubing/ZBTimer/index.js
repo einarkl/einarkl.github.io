@@ -5,6 +5,7 @@ let algList = [];
 let currentAlg = "";
 let currentAUF = "";
 let algs;
+let algCase;
 let bnwAlgs = [];
 
 class Solution {
@@ -387,6 +388,7 @@ function getScramble() {
         let r1 = Math.floor(Math.random() * (Object.keys(activeAlgs).length - 1));
         let r2 = Math.floor(Math.random() * (Object.keys(activeAlgs[r1]).length - 1));
         currentAlg = activeAlgs[r1][r2];
+        algCase = zbllName + r1;
         
         scramble = cleanAlg(getMovesWithoutRotations(rauf + " " + currentAlg));
         $("#scramble h1").html(scramble);
@@ -406,7 +408,7 @@ function saveSolution() {
     //Add solution to solutions
     calcStats = true;
     const date = Date.now().toString().split("").slice(0, 10).join("");
-    const newSolution = new Solution(rawTime, 0, scramble, "", date, rawTime, sessionList[curSession].solutions.length, currentAlg, currentAUF);
+    const newSolution = new Solution(rawTime, 0, scramble, "", date, rawTime, sessionList[curSession].solutions.length, algCase, currentAUF);
     sessionList[curSession].solutions.push(newSolution);
     
     updateFromIndex = sessionList[curSession].solutions.length - 1;

@@ -1,5 +1,6 @@
 let currentAlgset = localStorage.getItem("currentAlgset") || 0;
 let currentAUFs = $.parseJSON(localStorage.getItem("currentAUFs")) || {"-" : true, "U" : false, "U2" : false, "U'" : false};
+let displayPB = localStorage.getItem("displayPB") || true;
 let nextAlg = 0;
 let algList = [];
 let currentAlg = "";
@@ -1320,6 +1321,8 @@ function initActions() {
         }
         calcStats = false;
 
+        showStats(false);
+
         getSettings();
         updateAUF();
 
@@ -1481,14 +1484,25 @@ function applyRestartDelay() {
     }, 200);
 }
 
-function showStats() {
-    let puns = [
+function showStats(toggle = true) {
+    /* let puns = [
         "u suk",
         "get good",
         "L",
         "Yiheng is faster"
     ];
-    alert(puns[Math.floor(Math.random() * (puns.length))]);
+    alert(puns[Math.floor(Math.random() * (puns.length))]); */
+    if (displayPB === true || displayPB === "true") {
+        displayPB = true;
+    }
+    else {
+        displayPB = false;
+    }
+    if (toggle) {
+        displayPB = !displayPB;
+        localStorage.setItem("displayPB", displayPB);
+    }
+    $("#pbListDiv").css("display", (displayPB ? "block" : "none"));
 }
 
 function adjustSize() {

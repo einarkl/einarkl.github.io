@@ -40,6 +40,7 @@
         <div id="left">
             <div id="notTimeList">
                 <img id="btnOptions" src="./resources/settings.png" onclick="showOptions()">
+                <img id="btnStats" src="./resources/stats.png" onclick="showStats()">
                 <div id="sessionOptions">
                     <select id="sessionList" onchange="changeSession()"></select>
                     <button id="btnNew" onclick="createSession()">New</button>
@@ -47,7 +48,7 @@
                     <button id="btnReset" onclick="resetSession()">Reset</button>
                     <button id="btnDelete" onclick="deleteSession()">Delete</button>
                 </div><br/>
-                <div>
+                <div id="pbListDiv">
                     <table id="pbListHeading">
                         <tr><th></th><th>Current</th><th>Best</th></tr>
                     </table>
@@ -101,7 +102,6 @@
             </div>
         </div>
         <div id="right">
-            <img id="btnStats" src="./resources/stats.png" onclick="showStats()">
         </div>
     </div>
     <div id="hiddenDiv" hidden></div>

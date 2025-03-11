@@ -62,10 +62,13 @@ label, span {
         height: auto;
     }
 
+    #right {
+        height: 20vh !important;
+    }
+
     #middle {
         order: -1;
-        
-        height: 50vh;
+        height: 50vh !important;
     }
 
     #display {
@@ -75,16 +78,38 @@ label, span {
         align-items: center;
     }
 
-    /* Ensure the table remains visible */
-    #timeList {
-        display: table !important;
-        max-height: 30vh;
-        overflow-y: auto;
+    #display h1 {
+        color: #FFFFFF;
+        font-size: 10vh !important;
+        font-family: Verdana;
+    }
+
+    #left {
+        height: 20vh !important;
+    }
+
+    #timeListHeading {
         width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
     }
     
-    #timeListHeading {
-        display: table-header-group !important;
+    #timeListHeading th {
+        width: 33.3%; /* Adjust based on number of columns */
+        text-align: center;
+        padding: 0.5vh;
+    }
+    
+    #timeList {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+    
+    #timeList td {
+        width: 33.3%; /* Same as headers */
+        text-align: center;
+        padding: 0.5vh;
     }
 }
 
@@ -131,6 +156,8 @@ label, span {
 }
 
 #btnStats {
+    position: absolute;
+    right: 1vh;
     float: right;
 }
 

@@ -8,6 +8,16 @@ let algs;
 let algCase;
 let bnwAlgs = [];
 
+let lastTap = 0;
+
+document.addEventListener('touchstart', function(event) {
+    let currentTap = new Date().getTime();
+    if (currentTap - lastTap < 300) {  // 300ms threshold for double-tap
+        event.preventDefault(); // Prevent zooming
+    }
+    lastTap = currentTap;
+}, { passive: false });
+
 class Solution {
     constructor(
         time, penalty, scramble, comment, date, totalTime, index, alg, auf,
@@ -48,7 +58,9 @@ class Session {
     }
 }
 
-let timing, waiting, ready = false;
+let timing = false;
+let waiting = false;
+let ready = false;
 let stopped = true;
 let scramble;
 let curScrType;
@@ -308,6 +320,7 @@ function stopTimer() {
         $("#display h1").text(getHHmmsshh(rawTime));
         clearInterval(interval);
         stopped = true;
+        timing = false;
 
         // Save time and scramble
         saveSolution();
@@ -1382,7 +1395,7 @@ function keyActions() {
     });
 }
 
-function touchActions() {
+/* function touchActions() {
     $("html").on({'touchstart' : function() {
         if (!showingOuterInner && timing) {
             stopTimer();
@@ -1412,10 +1425,60 @@ function touchActions() {
                 setTimeout(
                     function() {
                         timing = false;
-                    }, 100);
+                    }, 1000);
             }
         }
     }});
+} */
+let restartDelay = false; 
+let timerStopped = false;
+
+function touchActions() {
+    $("html").on({
+        'touchstart': function () {
+            if (!showingOuterInner && timing && !restartDelay && !timerStopped) {
+                stopTimer();
+                timerStopped = true;
+                applyRestartDelay();
+            }
+        }
+    });
+
+    $("#display").on({
+        'touchstart': function (e) {
+            e.stopPropagation(); // Prevent bubbling
+
+            if (!showingOuterInner && !ready && !timing) {
+                waitForTimer();
+            } else if (!showingOuterInner && timing && !restartDelay && !timerStopped) {
+                stopTimer();
+                timerStopped = true;
+                applyRestartDelay();
+            }
+        },
+        'touchend': function () {
+            if (!showingOuterInner && !restartDelay && !timing) {
+                timerStopped = false;
+                
+                timing = true;  // Ensure `timing` is correctly set
+                startTimer();
+
+                // Add cooldown to prevent immediate stop, but make sure restartDelay doesn't block indefinitely
+                setTimeout(() => {
+                    if (!timing) { // Only reset if the timer is still stopped
+                        timerStopped = false;
+                    }
+                }, 100); 
+            }
+        }
+    });
+}
+
+function applyRestartDelay() {
+    restartDelay = true;
+    setTimeout(() => { 
+        restartDelay = false; 
+    }, 200);
 }
 
 function showStats() {

@@ -50,6 +50,44 @@ label, span {
     grid-template-columns: 1fr 2fr 1fr;
 }
 
+@media screen and (max-aspect-ratio: 1/1) {
+    #content {
+        display: flex;
+        flex-direction: column; /* Stacks divs */
+        height: 100vh;
+    }
+
+    #left, #middle, #right {
+        width: 100%;
+        height: auto;
+    }
+
+    #middle {
+        order: -1;
+        
+        height: 50vh;
+    }
+
+    #display {
+        height: 50vh !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Ensure the table remains visible */
+    #timeList {
+        display: table !important;
+        max-height: 30vh;
+        overflow-y: auto;
+        width: 100%;
+    }
+    
+    #timeListHeading {
+        display: table-header-group !important;
+    }
+}
+
 #scramble {
     height: 10vh;
     margin: 0;

@@ -170,6 +170,8 @@ function listCases() {
         i++;
     }
     out += "<option id='algOpt"+i+"' value='"+i+"'>All<canvas id='canvas"+i+"' width='"+canvasSize+"' height='"+canvasSize+"'></canvas></option>";
+    i++;
+    out += "<option id='algOpt"+i+"' value='"+i+"'>2gll<canvas id='canvas"+i+"' width='"+canvasSize+"' height='"+canvasSize+"'></canvas></option>";
 
     $("#selectAlgset").append(out);
     $("#selectAlgset").val(currentAlgset);
@@ -181,6 +183,8 @@ function listCases() {
         j++;
     }
     dOut += "<span value='"+j+"' class='dropdown-item'' onclick='setAlgset("+j+"); this.blur()'><img id='algImg"+j+"' src='' alt=''>&nbsp;&nbsp;All</span>";
+    j++;
+    dOut += "<span value='"+j+"' class='dropdown-item'' onclick='setAlgset("+j+"); this.blur()'><img id='algImg"+j+"' src='' alt=''>&nbsp;&nbsp;2gll</span>";
     
     $("#dropdownAlgset").append(dOut);
     $("#dropdownAlgset").val(currentAlgset);
@@ -216,14 +220,14 @@ function setAlgset(algset) {
         $("#btnDropdown").text("All");
     }
     else if (parseInt(currentAlgset) === 8) {
-        $("#btnDropdown").text("2GLL");
+        $("#btnDropdown").text("2gll");
     }
     else {
         $("#btnDropdown").text(bnwAlgs[parseInt(currentAlgset)].name);
     }
 
     let curAlg = Object.keys(algs)[parseInt(currentAlgset)];
-    let cbCount = parseInt(currentAlgset) === 7 ? 0 : curAlg === "H" ? 4 : 6;
+    let cbCount = parseInt(currentAlgset) > 6 ? 0 : curAlg === "H" ? 4 : 6;
     let out = "";
     
     for (let i = 0; i < cbCount; i++) {
@@ -335,6 +339,14 @@ function getScramble() {
             for (let k of Object.keys(algs)) {
                 for (let a of Object.keys(algs[k])) {
                     activeAlgs[k + a] = algs[k][a];
+                }
+            }
+        }
+        else if (parseInt(currentAlgset) === 8) {
+            for (let k of Object.keys(algs)) {
+                let endIndex = k === "H" ? 8 : 12;
+                for (let i = 0; i < endIndex; i++) {
+                    activeAlgs[k + i] = algs[k][i];
                 }
             }
         }

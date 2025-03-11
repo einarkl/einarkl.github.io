@@ -102,8 +102,10 @@ label, span {
     
     #timeList {
         width: 100%;
+        max-height: 20vh;
         table-layout: fixed;
         border-collapse: collapse;
+        overflow-y: scroll;
     }
     
     #timeList td {

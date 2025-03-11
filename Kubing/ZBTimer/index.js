@@ -335,7 +335,7 @@ function resetTimer() {
 function getScramble() {
     if (!doNotScramble) {
         let zbllName = Object.keys(algs)[parseInt(currentAlgset)];
-        let curZBLL = zbllName ? algs[zbllName] : algs;
+        let curZBLL = algs[zbllName];
         let activeAlgs = [];
         //Subsets//
         let checkedCBs = [];
@@ -365,7 +365,7 @@ function getScramble() {
             }
         }
         else if (checkedCBs.length === 0) {
-            for (let i = 0; i < curZBLL[i].length; i++) {
+            for (let i = 0; i < Object.keys(curZBLL).length; i++) {
                 activeAlgs[zbllName + i] = curZBLL[i];
             }
         }

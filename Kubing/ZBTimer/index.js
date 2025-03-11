@@ -172,6 +172,8 @@ function listCases() {
     out += "<option id='algOpt"+i+"' value='"+i+"'>All<canvas id='canvas"+i+"' width='"+canvasSize+"' height='"+canvasSize+"'></canvas></option>";
     i++;
     out += "<option id='algOpt"+i+"' value='"+i+"'>2gll<canvas id='canvas"+i+"' width='"+canvasSize+"' height='"+canvasSize+"'></canvas></option>";
+    i++;
+    out += "<option id='algOpt"+i+"' value='"+i+"'>TUL<canvas id='canvas"+i+"' width='"+canvasSize+"' height='"+canvasSize+"'></canvas></option>";
 
     $("#selectAlgset").append(out);
     $("#selectAlgset").val(currentAlgset);
@@ -185,6 +187,8 @@ function listCases() {
     dOut += "<span value='"+j+"' class='dropdown-item'' onclick='setAlgset("+j+"); this.blur()'><img id='algImg"+j+"' src='' alt=''>&nbsp;&nbsp;All</span>";
     j++;
     dOut += "<span value='"+j+"' class='dropdown-item'' onclick='setAlgset("+j+"); this.blur()'><img id='algImg"+j+"' src='' alt=''>&nbsp;&nbsp;2gll</span>";
+    j++;
+    dOut += "<span value='"+j+"' class='dropdown-item'' onclick='setAlgset("+j+"); this.blur()'><img id='algImg"+j+"' src='' alt=''>&nbsp;&nbsp;TUL</span>";
     
     $("#dropdownAlgset").append(dOut);
     $("#dropdownAlgset").val(currentAlgset);
@@ -221,6 +225,9 @@ function setAlgset(algset) {
     }
     else if (parseInt(currentAlgset) === 8) {
         $("#btnDropdown").text("2gll");
+    }
+    else if (parseInt(currentAlgset) === 9) {
+        $("#btnDropdown").text("TUL");
     }
     else {
         $("#btnDropdown").text(bnwAlgs[parseInt(currentAlgset)].name);
@@ -347,6 +354,13 @@ function getScramble() {
                 let endIndex = k === "H" ? 8 : 12;
                 for (let i = 0; i < endIndex; i++) {
                     activeAlgs[k + i] = algs[k][i];
+                }
+            }
+        }
+        else if (parseInt(currentAlgset) === 9) {
+            for (let k of ["T", "U", "L"]) {
+                for (let a of Object.keys(algs[k])) {
+                    activeAlgs[k + a] = algs[k][a];
                 }
             }
         }

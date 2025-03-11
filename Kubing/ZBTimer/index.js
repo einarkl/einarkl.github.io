@@ -149,16 +149,16 @@ $(window).resize(function(){
 
 function resetDB() {
     if (confirm("Are you sure you want do reset the database?")) {
+        localStorage.clear();
         openDB(refreshDatabase);
         sessionList[curSession].solutions = [];
         doNotScramble = true;
         openDB(editDB, sessionList[curSession].id, sessionList[curSession]);
-        getScramble();
+        window.location = window.location;
     }
 }
 
 function listCases() {
-
     let out = "";
     let dOut = "";
 
@@ -169,6 +169,7 @@ function listCases() {
         out += "<option id='algOpt"+i+"' value='"+i+"'>"+a.name+"<canvas id='canvas"+i+"' width='"+canvasSize+"' height='"+canvasSize+"'></canvas></option>";
         i++;
     }
+    out += "<option id='algOpt"+i+"' value='"+i+"'>All<canvas id='canvas"+i+"' width='"+canvasSize+"' height='"+canvasSize+"'></canvas></option>";
 
     $("#selectAlgset").append(out);
     $("#selectAlgset").val(currentAlgset);
@@ -179,6 +180,7 @@ function listCases() {
         dOut += "<span value='"+j+"' class='dropdown-item'' onclick='setAlgset("+j+"); this.blur()'><img id='algImg"+j+"' src='' alt=''>&nbsp;&nbsp;"+a.name+"</span>";
         j++;
     }
+    dOut += "<span value='"+j+"' class='dropdown-item'' onclick='setAlgset("+j+"); this.blur()'><img id='algImg"+j+"' src='' alt=''>&nbsp;&nbsp;All</span>";
     
     $("#dropdownAlgset").append(dOut);
     $("#dropdownAlgset").val(currentAlgset);
@@ -210,19 +212,18 @@ function listImages() {
 function setAlgset(algset) {
     localStorage.setItem("currentAlgset", algset);
     currentAlgset = algset;
-
-    if (currentAlgset === 57) {
-        $("#btnDropdown").text("Pll");
+    if (parseInt(currentAlgset) === 7) {
+        $("#btnDropdown").text("All");
     }
-    else if (currentAlgset === 58) {
-        $("#btnDropdown").text("Custom");
+    else if (parseInt(currentAlgset) === 8) {
+        $("#btnDropdown").text("2GLL");
     }
     else {
         $("#btnDropdown").text(bnwAlgs[parseInt(currentAlgset)].name);
     }
 
     let curAlg = Object.keys(algs)[parseInt(currentAlgset)];
-    let cbCount = curAlg === "H" ? 4 : 6;
+    let cbCount = parseInt(currentAlgset) === 7 ? 0 : curAlg === "H" ? 4 : 6;
     let out = "";
     
     for (let i = 0; i < cbCount; i++) {
@@ -323,17 +324,21 @@ function resetTimer() {
 function getScramble() {
     if (!doNotScramble) {
         let zbllName = Object.keys(algs)[parseInt(currentAlgset)];
-        let curZBLL = algs[zbllName];
+        let curZBLL = zbllName ? algs[zbllName] : algs;
         let activeAlgs = [];
         //Subsets//
         let checkedCBs = [];
-    
         for (let c of $("#cbSubsetDiv input:checked")) {
             checkedCBs.push(c.value);
         }
-        
-        if (checkedCBs.length === 0) {
-            // activeAlgs = curZBLL;
+        if (parseInt(currentAlgset) === 7) {
+            for (let k of Object.keys(algs)) {
+                for (let a of Object.keys(algs[k])) {
+                    activeAlgs[k + a] = algs[k][a];
+                }
+            }
+        }
+        else if (checkedCBs.length === 0) {
             for (let i = 0; i < curZBLL[i].length; i++) {
                 activeAlgs[zbllName + i] = curZBLL[i];
             }
@@ -386,16 +391,18 @@ function getScramble() {
             rauf = "y'";
         }
 
-        let pauf = ["", "U", "U2", "U'"][Math.floor(Math.random() * (4))];
-        rauf = [pauf, rauf].join(" ");
-        let r1 = Math.floor(Math.random() * Object.keys(activeAlgs).length);
-        let r2 = Math.floor(Math.random() * activeAlgs[Object.keys(activeAlgs)[r1]].length);
-        currentAlg = activeAlgs[Object.keys(activeAlgs)[r1]][r2];
-        algCase = Object.keys(activeAlgs)[r1];
-        scramble = cleanAlg(getMovesWithoutRotations(rauf + " " + currentAlg));
-        $("#scramble h1").html(scramble);
+        if (Object.keys(activeAlgs).length > 0) {
+            let pauf = ["", "U", "U2", "U'"][Math.floor(Math.random() * (4))];
+            rauf = [pauf, rauf].join(" ");
+            let r1 = Math.floor(Math.random() * Object.keys(activeAlgs).length);
+            let r2 = Math.floor(Math.random() * activeAlgs[Object.keys(activeAlgs)[r1]].length);
+            currentAlg = activeAlgs[Object.keys(activeAlgs)[r1]][r2];
+            algCase = Object.keys(activeAlgs)[r1];
+            scramble = cleanAlg(getMovesWithoutRotations(rauf + " " + currentAlg));
+            $("#scramble h1").html(scramble);
     
-        drawScramble();
+            drawScramble();
+        }
     }
 
     doNotScramble = false;
@@ -1267,6 +1274,7 @@ function updateAUF() {
 
 function initActions() {
     $.getJSON("zbll_scrambles.json", data => {
+        doNotScramble = true;
         algs = data;
         for (let k of Object.keys(algs)) {
             bnwAlgs.push({"name" : k, "0" : algs[k][0]});

@@ -9,6 +9,8 @@ let algs;
 let algCase;
 let bnwAlgs = [];
 
+let weights = {};
+
 let lastTap = 0;
 
 document.addEventListener('touchstart', function(event) {
@@ -504,12 +506,15 @@ function getData(data) {
 }
 
 function createSession() {
+    let sessionScrType = "nw";
+    if (confirm("Do you want to use weighted cases for this session?")) {
+        sessionScrType = "w";
+    }
     $("#btnNew").blur();
     let num = sessionList.length + 1;
     let sessionId = "session"+num;
     let sessionName = "Session "+num;
     let sessionRank = sessionList.length + 1;
-    let sessionScrType = scrTypes[0];
     let sessionSolutions = [];
 
     if (sessionList[curSession] && sessionScrType === sessionList[curSession].scrType) {
@@ -652,16 +657,8 @@ function updateSession() {
     updateFromIndex = 0;
 }
 
-function changeScrType() {
-    curScrType = $("#scrambleType").children(":selected").attr("id");
-    $("#scrambleType").blur();
-
-    if (curScrType === "minx") {
-        $("#scramble").css("text-align", "left");
-    }
-    else {
-        $("#scramble").css("text-align", "center");
-    }
+function changeScrType(type) {
+    curScrType = type;
 
     sessionList[curSession].scrType = curScrType;
 
@@ -1502,6 +1499,15 @@ function showStats(toggle = true) {
         localStorage.setItem("displayPB", displayPB);
     }
     $("#pbListDiv").css("display", (displayPB ? "block" : "none"));
+}
+
+function updateWeight(id, time, undo = false) {
+	if (undo) {
+		weights[id] = weights[id] * 2 - time;
+	}
+	else {
+		weights[id] = (weights[id] + time) / 2;
+	}
 }
 
 function adjustSize() {

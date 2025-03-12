@@ -507,7 +507,7 @@ function getData(data) {
 
 function createSession() {
     let sessionScrType = "nw";
-    if (confirm("Do you want to use weighted cases for this session?")) {
+    if (confirm("Do you want to use weighted cases for this session? (OK = Yes, Cancel = No)")) {
         sessionScrType = "w";
     }
     $("#btnNew").blur();

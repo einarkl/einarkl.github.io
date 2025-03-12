@@ -21,7 +21,7 @@ document.addEventListener('touchstart', function(event) {
 
 class Solution {
     constructor(
-        time, penalty, scramble, comment, date, totalTime, index, alg, auf,
+        time, penalty, scramble, comment, date, totalTime, index, caseID,
         ao3 = "-", ao5 = "-", ao12 = "-", ao25 = "-", ao50 = "-", ao100 = "-",
         ao200 = "-", ao500 = "-", ao1000 = "-", ao2000 = "-", ao5000 = "-", ao10000 = "-"
     ) {
@@ -32,8 +32,7 @@ class Solution {
         this.date = date;
         this.totalTime = totalTime;
         this.index = index;
-        this.alg = alg;
-        this.auf = auf;
+        this.caseID = caseID;
         this.ao3 = ao3;
         this.ao5 = ao5;
         this.ao12 = ao12;
@@ -457,7 +456,7 @@ function saveSolution() {
     //Add solution to solutions
     calcStats = true;
     const date = Date.now().toString().split("").slice(0, 10).join("");
-    const newSolution = new Solution(rawTime, 0, scramble, "", date, rawTime, sessionList[curSession].solutions.length, algCase, currentAUF);
+    const newSolution = new Solution(rawTime, 0, scramble, "", date, rawTime, sessionList[curSession].solutions.length, algCase+currentAUF);
     sessionList[curSession].solutions.push(newSolution);
     
     updateFromIndex = sessionList[curSession].solutions.length - 1;

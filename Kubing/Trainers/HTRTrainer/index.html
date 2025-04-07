@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTR Trainer | Einar KL</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script src="../../Tools/tools.js"></script>
+    <script src='https://einarkl.github.io/Kubing/EinarDrawScramble/EinarDrawScramble.js' type='module'></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1 id="scramble"></h1>
+    <div id="scrDiv">
+        <einar-drawscramble id="drwscr" puzzle="3x3" scramble=""></einar-drawscramble>
+    </div>
+    <div>
+        <button id="btnNext" onclick="nextScramble()">Next</button>
+    </div>
+</body>
+</html>

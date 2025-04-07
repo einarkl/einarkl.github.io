@@ -9,6 +9,7 @@ function nextScramble() {
     let optimal = "?"; // Implement later
     $("#scramble").text(scr);
     $("#optimal").text("(Optimal: " + optimal + ")");
+    $("#drwscr").attr("scramble", scr);
 }
 
 function keyActions() {

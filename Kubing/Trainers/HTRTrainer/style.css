@@ -13,7 +13,7 @@ body {
     padding: 0;
     overflow: hidden;
     display: grid;
-    grid-template-rows: 1fr 1fr 2fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 2fr 1fr;
 }
 
 h1 {
@@ -37,4 +37,13 @@ div {
 #btnNext {
     width: 10vw;
     height: 5vw;
+}
+
+.blur {
+    transition: filter 0.2s ease;
+    filter: blur(25px);
+}
+  
+.blur:hover {
+    filter: none;
 }

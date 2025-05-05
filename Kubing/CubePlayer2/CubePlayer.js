@@ -316,10 +316,12 @@ export class CubePlayer extends HTMLElement {
 
             resetState();
 
-            if (scramble.includes("[") || scramble.includes("]") || scramble.includes("(") || scramble.includes(")")) {
+            scramble.replaceAll("(", "").replaceAll(")", "");
+            solution.replaceAll("(", "").replaceAll(")", "");
+            if (scramble.includes("[") || scramble.includes("]")) {
                 scramble = commToAlg(scramble);
             }
-            if (solution.includes("[") || solution.includes("]") || solution.includes("(") || solution.includes(")")) {
+            if (solution.includes("[") || solution.includes("]")) {
                 solution = commToAlg(solution);
             }
             

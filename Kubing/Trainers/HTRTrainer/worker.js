@@ -24,12 +24,12 @@ function createMap(n) {
                 newSequences.push(newSeq);
                 let state = getNumberState(3, newSeq);
 
-                let htr = [...state.slice(0, 9)].filter(c => c !== '1' && c !== '2').length === 0 &&
-                    [...state.slice(9, 18)].filter(c => c !== '5' && c !== '6').length === 0 &&
-                    [...state.slice(18, 27)].filter(c => c !== '3' && c !== '4').length === 0 &&
-                    [...state.slice(27, 36)].filter(c => c !== '5' && c !== '6').length === 0 &&
-                    [...state.slice(36, 45)].filter(c => c !== '3' && c !== '4').length === 0 &&
-                    [...state.slice(45, 54)].filter(c => c !== '1' && c !== '2').length === 0;
+                let htr = [...state.slice(0, 9)].filter(c => c !== "1" && c !== "2").length === 0 &&
+                    [...state.slice(9, 18)].filter(c => c !== "5" && c !== "6").length === 0 &&
+                    [...state.slice(18, 27)].filter(c => c !== "3" && c !== "4").length === 0 &&
+                    [...state.slice(27, 36)].filter(c => c !== "5" && c !== "6").length === 0 &&
+                    [...state.slice(36, 45)].filter(c => c !== "3" && c !== "4").length === 0 &&
+                    [...state.slice(45, 54)].filter(c => c !== "1" && c !== "2").length === 0;
 
                 if (htr && !algs[state]) {
                     algs[state] = newSeq;

@@ -57,10 +57,14 @@ export class CubePlayer extends HTMLElement {
             scramble = this.getAttribute("scramble") || "";
             solution = this.getAttribute("solution") || "";
 
-            if (scramble.includes("[") || scramble.includes("]") || scramble.includes("(") || scramble.includes(")")) {
+            
+            scramble = scramble.replaceAll("(", "").replaceAll(")", "");
+            solution = solution.replaceAll("(", "").replaceAll(")", "");
+
+            if (scramble.includes("[") || scramble.includes("]")) {
                 scramble = commToAlg(scramble);
             }
-            if (solution.includes("[") || solution.includes("]") || solution.includes("(") || solution.includes(")")) {
+            if (solution.includes("[") || solution.includes("]")) {
                 solution = commToAlg(solution);
             }
 
@@ -266,10 +270,13 @@ export class CubePlayer extends HTMLElement {
 
             resetState();
 
-            if (scramble.includes("[") || scramble.includes("]") || scramble.includes("(") || scramble.includes(")")) {
+            scramble = scramble.replaceAll("(", "").replaceAll(")", "");
+            solution = solution.replaceAll("(", "").replaceAll(")", "");
+
+            if (scramble.includes("[") || scramble.includes("]")) {
                 scramble = commToAlg(scramble);
             }
-            if (solution.includes("[") || solution.includes("]") || solution.includes("(") || solution.includes(")")) {
+            if (solution.includes("[") || solution.includes("]")) {
                 solution = commToAlg(solution);
             }
             
@@ -678,75 +685,99 @@ function mv(turn) {
             doE2i();
             break;
         case "Rw":
+        case "r":
             doRw();
             break;
         case "Rw'":
+        case "r'":
             doRwi();
             break;
         case "Rw2":
+        case "r2":
             doRw2();
             break;
         case "Rw2'":
+        case "r2'":
             doRw2i();
             break;
         case "Lw":
+        case "l":
             doLw();
             break;
         case "Lw'":
+        case "l'":
             doLwi();
             break;
         case "Lw2":
+        case "l2":
             doLw2();
             break;
         case "Lw2'":
+        case "l2'":
             doLw2i();
             break;
         case "Fw":
+        case "f":
             doFw();
             break;
         case "Fw'":
+        case "f'":
             doFwi();
             break;
         case "Fw2":
+        case "f2":
             doFw2();
             break;
         case "Fw2'":
+        case "f2'":
             doFw2i();
             break;
         case "Bw":
+        case "b":
             doBw();
             break;
         case "Bw'":
+        case "b'":
             doBwi();
             break;
         case "Bw2":
+        case "b2":
             doBw2();
             break;
         case "Bw2'":
+        case "b2'":
             doBw2i();
             break;
         case "Uw":
+        case "u":
             doUw();
             break;
         case "Uw'":
+        case "u'":
             doUwi();
             break;
         case "Uw2":
+        case "u2":
             doUw2();
             break;
         case "Uw2'":
+        case "u2'":
             doUw2i();
             break;
         case "Dw":
+        case "d":
             doDw();
             break;
         case "Dw'":
+        case "d'":
             doDwi();
             break;
         case "Dw2":
+        case "d2":
             doDw2();
             break;
         case "Dw2'":
+        case "d2'":
             doDw2i();
             break;
     }

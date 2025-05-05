@@ -56,11 +56,14 @@ export class CubePlayer extends HTMLElement {
             this.id = this.getAttribute("id") || this.id;
             scramble = this.getAttribute("scramble") || "";
             solution = this.getAttribute("solution") || "";
+            
+            scramble = scramble.replaceAll("(", "").replaceAll(")", "");
+            solution = solution.replaceAll("(", "").replaceAll(")", "");
 
-            if (scramble.includes("[") || scramble.includes("]") || scramble.includes("(") || scramble.includes(")")) {
+            if (scramble.includes("[") || scramble.includes("]")) {
                 scramble = commToAlg(scramble);
             }
-            if (solution.includes("[") || solution.includes("]") || solution.includes("(") || solution.includes(")")) {
+            if (solution.includes("[") || solution.includes("]")) {
                 solution = commToAlg(solution);
             }
 
@@ -316,8 +319,9 @@ export class CubePlayer extends HTMLElement {
 
             resetState();
 
-            scramble.replaceAll("(", "").replaceAll(")", "");
-            solution.replaceAll("(", "").replaceAll(")", "");
+            scramble = scramble.replaceAll("(", "").replaceAll(")", "");
+            solution = solution.replaceAll("(", "").replaceAll(")", "");
+
             if (scramble.includes("[") || scramble.includes("]")) {
                 scramble = commToAlg(scramble);
             }

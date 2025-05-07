@@ -30,7 +30,7 @@ let movesApplied = [];
 let initialized = false;
 let cubePlayerHeight, cubePlayerWidth;
 
-let scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, rotx, roty;
+let scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, fov, rotx, roty;
 let planes = [];
 let scene, camera, renderer, controls;
 let anim = false;
@@ -86,6 +86,7 @@ export class CubePlayer extends HTMLElement {
             smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "";
             solvedFunc = window[this.getAttribute("solvedfunc")] ? this.getAttribute("solvedfunc") : "";
             useControls = this.getAttribute("usecontrols") ? this.getAttribute("usecontrols").toLowerCase().trim() === "true" : false;
+            fov = parseInt(this.getAttribute("fov")) || 40;
             rotx = parseFloat(this.getAttribute("rotx")) || 0;
             roty = parseFloat(this.getAttribute("roty")) || 0;
 
@@ -224,7 +225,7 @@ export class CubePlayer extends HTMLElement {
     }
     
     static get observedAttributes() {
-        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "rotx", "roty"];
+        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -289,6 +290,10 @@ export class CubePlayer extends HTMLElement {
                     useControls =  newValue ? newValue.toLowerCase().trim() === "true" : false;
                     shouldInit = true;
                     break;
+                case "fov":
+                    fov = newValue || 40;
+                    shouldInit = true;
+                    break;
                 case "rotx":
                     rotx = newValue || 0;
                     shouldInit = true;
@@ -351,7 +356,7 @@ export class CubePlayer extends HTMLElement {
 
 function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera( 40, 1, 0.1, 10 );
+    camera = new THREE.PerspectiveCamera( (fov), 1, 0.1, 10 );
 
     cube = new THREE.Object3D();
     planeCube = new THREE.Object3D();
@@ -545,39 +550,48 @@ function rotateCamera(axis, angle, target = new THREE.Vector3(0, 0, 0)) {
     const offset = camera.position.clone().sub(target); // vector from target to camera
     let radius, currentAngle, newAngle;
 
+    // Ensure angle is in radians; if it's in degrees, convert to radians
+    if (Math.abs(angle) > Math.PI) {
+        angle = THREE.MathUtils.degToRad(angle);  // Convert degrees to radians if necessary
+    }
+
     switch (axis.toLowerCase()) {
-        case 'y':
+        case 'y': {
             radius = Math.sqrt(offset.x ** 2 + offset.z ** 2);
-            currentAngle = Math.atan2(offset.x, offset.z);
-            newAngle = currentAngle + angle;
+            currentAngle = Math.atan2(offset.x, offset.z); // Get the current angle in the X-Z plane
+            newAngle = currentAngle + angle;  // Adjust the angle based on input
 
-            offset.x = radius * Math.sin(newAngle);
+            offset.x = radius * Math.sin(newAngle);  // Recompute the x and z positions
             offset.z = radius * Math.cos(newAngle);
             break;
+        }
 
-        case 'x':
+        case 'x': {
             radius = Math.sqrt(offset.y ** 2 + offset.z ** 2);
-            currentAngle = Math.atan2(offset.y, offset.z);
-            newAngle = currentAngle + angle;
+            currentAngle = Math.atan2(offset.y, offset.z);  // Get the current angle in the Y-Z plane
+            newAngle = currentAngle + angle;  // Adjust the angle based on input
 
-            offset.y = radius * Math.sin(newAngle);
+            offset.y = radius * Math.sin(newAngle);  // Recompute the y and z positions
             offset.z = radius * Math.cos(newAngle);
             break;
+        }
 
-        case 'z':
+        case 'z': {
             radius = Math.sqrt(offset.x ** 2 + offset.y ** 2);
-            currentAngle = Math.atan2(offset.y, offset.x);
-            newAngle = currentAngle + angle;
+            currentAngle = Math.atan2(offset.y, offset.x);  // Get the current angle in the X-Y plane
+            newAngle = currentAngle + angle;  // Adjust the angle based on input
 
-            offset.x = radius * Math.cos(newAngle);
+            offset.x = radius * Math.cos(newAngle);  // Recompute the x and y positions
             offset.y = radius * Math.sin(newAngle);
             break;
+        }
 
         default:
             console.warn(`Unknown axis '${axis}' passed to rotateCamera`);
             return;
     }
 
+    // Update camera position based on the computed offset and look at the target
     camera.position.copy(offset.add(target));
     camera.lookAt(target);
 }

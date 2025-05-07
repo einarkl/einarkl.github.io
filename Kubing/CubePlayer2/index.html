@@ -29,10 +29,11 @@
                 let smartcube = $("#selSmartcube").find(":selected").val();
                 let solvedfunc = $("#selSolvedfunc").find(":selected").val();
                 let useControls = $("#selControls").find(":selected").val();
+                let fov = $("#inpfov").val();
                 let rotx = $("#inprotx").val();
                 let roty = $("#inproty").val();
-                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, smartcube, solvedfunc, useControls, rotx, roty];
-                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "rotx", "roty"].indexOf(attr)]);
+                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, smartcube, solvedfunc, useControls, fov, rotx, roty];
+                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "fov", "rotx", "roty"].indexOf(attr)]);
             }
 
             function customSolvedFunction() {
@@ -132,8 +133,13 @@
                     <td>true | false</td>
                 </tr>
                 <tr>
+                    <td>fov</td>
+                    <td><input id="inpfov" type="number" value="40" min="0" max="100" step="1" onchange="updateAttr('fov')"></input></td>
+                    <td>camera fov</td>
+                </tr>
+                <tr>
                     <td>rotx</td>
-                    <td><input id="inprotx" type="number" value="0" min="0" max="1" step="0.1" onchange="updateAttr('rotx')"></input></td>
+                    <td><input id="inprotx" type="number" value="0" min="-1" max="1" step="0.1" onchange="updateAttr('rotx')"></input></td>
                     <td>camera rotation x</td>
                 </tr>
                 <tr>
@@ -163,6 +169,7 @@
             smartcube="none"
             solvedfunc="none"
             usecontrols="true"
+            fov="40"
             rotx="0"
             roty="0">
             </cube-player>

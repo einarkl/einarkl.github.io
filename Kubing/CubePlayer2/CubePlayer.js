@@ -376,6 +376,9 @@ function init() {
     let colRed = isColor(colors[3]) ? colors[3] : "#ff0000";
     let colBlue = isColor(colors[4]) ? colors[4] : "#0000ff";
     let colYellow = isColor(colors[5]) ? colors[5] : "#ffff00";
+    let colCustom0 = isColor(colors[6]) ? colors[6] : "#000";
+    let colCustom1 = isColor(colors[7]) ? colors[7] : "#333";
+    let colCustom2 = isColor(colors[8]) ? colors[8] : "#666";
     let colGray = "#444";
     
     white = new THREE.MeshBasicMaterial( { color: colWhite });
@@ -384,7 +387,6 @@ function init() {
     blue = new THREE.MeshBasicMaterial( { color: colBlue } );
     red = new THREE.MeshBasicMaterial( { color: colRed } );
     orange = new THREE.MeshBasicMaterial( { color: colOrange } );
-    let gray = new THREE.MeshBasicMaterial( { color: colGray } );
 
     let cc = customcolors.split("").map(c => 
         c === "w" ? colWhite :
@@ -393,6 +395,9 @@ function init() {
         c === "r" ? colRed :
         c === "b" ? colBlue :
         c === "y" ? colYellow :
+        c === "0" ? colCustom0 :
+        c === "1" ? colCustom1 :
+        c === "2" ? colCustom2 :
         colGray
     );
     let cCols = [

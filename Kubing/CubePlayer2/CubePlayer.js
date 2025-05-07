@@ -30,7 +30,7 @@ let movesApplied = [];
 let initialized = false;
 let cubePlayerHeight, cubePlayerWidth;
 
-let scramble, solution, time, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator;
+let scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator;
 
 let planes = [];
 let scene, camera, renderer, controls;
@@ -68,6 +68,7 @@ export class CubePlayer extends HTMLElement {
             }
 
             time = parseInt(this.getAttribute("time")) || "";
+            tps = time === "" ? (parseFloat(this.getAttribute("tps")) || "") : "";
             cubestyle = this.getAttribute("cubestyle") || "solid";
             logo = this.getAttribute("logo") || "";
             colors = this.getAttribute("colors") && this.getAttribute("colors").split(",").length === 6 ? this.getAttribute("colors").split(",").map(c => c.trim()) : 
@@ -153,7 +154,7 @@ export class CubePlayer extends HTMLElement {
             
                 anim = true;
                 let mvs = (moves).split(" ");
-                playMoveTime = time === "" ? stdTime * 1000 : time / mvs.length;
+                playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
                 
                 let i = 0;
                 let interval = setInterval(() => {
@@ -223,7 +224,7 @@ export class CubePlayer extends HTMLElement {
     }
     
     static get observedAttributes() {
-        return ["id", "scramble", "solution", "time", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols"];
+        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -241,6 +242,9 @@ export class CubePlayer extends HTMLElement {
                     break;
                 case "time":
                     time = newValue || "";
+                    break;
+                case "tps":
+                    tps = newValue || "";
                     break;
                 case "cubestyle":
                     cubestyle = newValue || "solid";

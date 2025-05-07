@@ -20,6 +20,7 @@
                 let scramble = $("#inpScramble").val();
                 let solution = $("#inpSolution").val();
                 let time = $("#inpTime").val();
+                let tps = $("#inpTPS").val();
                 let cubestyle = $("#selCubestyle").find(":selected").val();
                 let logo = $("#inpLogo").val();
                 let colors = $("#inpColors").val();
@@ -28,8 +29,8 @@
                 let smartcube = $("#selSmartcube").find(":selected").val();
                 let solvedfunc = $("#selSolvedfunc").find(":selected").val();
                 let useControls = $("#selControls").find(":selected").val();
-                let attributes = [scramble, solution, time, cubestyle, logo, colors, plastic, playbutton, smartcube, solvedfunc, useControls];
-                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols"].indexOf(attr)]);
+                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, smartcube, solvedfunc, useControls];
+                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols"].indexOf(attr)]);
             }
 
             function customSolvedFunction() {
@@ -66,6 +67,11 @@
                     <td>time</td>
                     <td><input id="inpTime" type="number" value="3000" onchange="updateAttr('time')"></input></td>
                     <td>time in ms</td>
+                </tr>
+                <tr>
+                    <td>tps</td>
+                    <td><input id="inpTPS" type="number" value="" onchange="updateAttr('tps')"></input></td>
+                    <td>turns per second, will be overwritten by time if it is not set to empty</td>
                 </tr>
                 <tr>
                     <td>cubestyle</td>
@@ -130,6 +136,7 @@
             scramble="L2 R2 F2 L' R' D2 R L F2 U' D F2 U2 D2 L2 R2 F2 D' R L D'" 
             solution="D' L' R' U B2 D2 F2 L2 F2 U2 L2 U2 L2" 
             time="3000" 
+            tps="" 
             cubestyle="solid" 
             logo="./dayan-logo.jpg"
             colors="

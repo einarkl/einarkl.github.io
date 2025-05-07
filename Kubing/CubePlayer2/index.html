@@ -24,6 +24,7 @@
                 let cubestyle = $("#selCubestyle").find(":selected").val();
                 let logo = $("#inpLogo").val();
                 let colors = $("#inpColors").val();
+                let customcolors = $("#inpCustomcolors").val();
                 let plastic = $("#inpPlastic").val();
                 let playbutton = $("#selPlaybutton").find(":selected").val();
                 let smartcube = $("#selSmartcube").find(":selected").val();
@@ -32,8 +33,8 @@
                 let fov = $("#inpfov").val();
                 let rotx = $("#inprotx").val();
                 let roty = $("#inproty").val();
-                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, smartcube, solvedfunc, useControls, fov, rotx, roty];
-                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "fov", "rotx", "roty"].indexOf(attr)]);
+                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, smartcube, solvedfunc, useControls, fov, rotx, roty];
+                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "fov", "rotx", "roty"].indexOf(attr)]);
             }
 
             function customSolvedFunction() {
@@ -94,6 +95,11 @@
                     <td>colors</td>
                     <td><input id="inpColors" type="text" value="#ffffff,#ffaa00,#00ff00,#ff0000,#0000ff,#ffff00" onchange="updateAttr('colors')"></input></td>
                     <td>6 hex colors separated by , in order U L F R B D</td>
+                </tr>
+                <tr>
+                    <td>customcolors</td>
+                    <td><input id="inpCustomcolors" type="text" value="wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy" onchange="updateAttr('customcolors')"></input></td>
+                    <td>stickerbased colors, in order U L F R B D, then left to right on upper row, second row, bottom row for each face. WOGRBY for regular colors, gray for anything else.</td>
                 </tr>
                 <tr>
                     <td>plastic</td>
@@ -163,7 +169,8 @@
                 #00ff00,
                 #ff0000,
                 #0000ff,
-                #ffff00" 
+                #ffff00"
+            customcolors="wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy"
             plastic="#000000"
             playbutton="button"
             smartcube="none"

@@ -30,7 +30,7 @@ let movesApplied = [];
 let initialized = false;
 let cubePlayerHeight, cubePlayerWidth;
 
-let scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, fov, rotx, roty;
+let scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, fov, rotx, roty;
 let planes = [];
 let scene, camera, renderer, controls;
 let anim = false;
@@ -79,6 +79,7 @@ export class CubePlayer extends HTMLElement {
                 "#0000ff",
                 "#ffff00"
             ];
+            customcolors = this.getAttribute("customcolors") || "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
             plastic = isColor(this.getAttribute("plastic")) ? this.getAttribute("plastic") : "#000000";
             playbutton = this.getAttribute("playbutton") || "";
             nextbutton = this.getAttribute("nextbutton") || "";
@@ -225,7 +226,7 @@ export class CubePlayer extends HTMLElement {
     }
     
     static get observedAttributes() {
-        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
+        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -265,6 +266,10 @@ export class CubePlayer extends HTMLElement {
                         "#0000ff",
                         "#ffff00"
                     ];
+                    shouldInit = true;
+                    break;
+                case "customcolors":
+                    customcolors = newValue.split("").length === 54 ? newValue : "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy" || "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
                     shouldInit = true;
                     break;
                 case "plastic":
@@ -371,6 +376,7 @@ function init() {
     let colRed = isColor(colors[3]) ? colors[3] : "#ff0000";
     let colBlue = isColor(colors[4]) ? colors[4] : "#0000ff";
     let colYellow = isColor(colors[5]) ? colors[5] : "#ffff00";
+    let colGray = "#444";
     
     white = new THREE.MeshBasicMaterial( { color: colWhite });
     yellow = new THREE.MeshBasicMaterial( { color: colYellow } );
@@ -378,7 +384,49 @@ function init() {
     blue = new THREE.MeshBasicMaterial( { color: colBlue } );
     red = new THREE.MeshBasicMaterial( { color: colRed } );
     orange = new THREE.MeshBasicMaterial( { color: colOrange } );
-    
+    let gray = new THREE.MeshBasicMaterial( { color: colGray } );
+
+    let cc = customcolors.split("").map(c => 
+        c === "w" ? colWhite :
+        c === "o" ? colOrange :
+        c === "g" ? colGreen :
+        c === "r" ? colRed :
+        c === "b" ? colBlue :
+        c === "y" ? colYellow :
+        colGray
+    );
+    let cCols = [
+        [ // Up
+            [cc[0], cc[1], cc[2]],
+            [cc[3], cc[4], cc[5]],
+            [cc[6], cc[7], cc[8]]
+        ],
+        [ // Left
+            [cc[15], cc[16], cc[17]],
+            [cc[12], cc[13], cc[14]],
+            [cc[9], cc[10], cc[11]]
+        ],
+        [ // Front
+            [cc[24], cc[25], cc[26]],
+            [cc[21], cc[22], cc[23]],
+            [cc[18], cc[19], cc[20]]
+        ],
+        [ // Right
+            [cc[35], cc[34], cc[33]],
+            [cc[32], cc[31], cc[30]],
+            [cc[29], cc[28], cc[27]]
+        ],
+        [ // Back
+            [cc[44], cc[43], cc[42]],
+            [cc[41], cc[40], cc[39]],
+            [cc[38], cc[37], cc[36]]
+        ],
+        [ // Down
+            [cc[51], cc[52], cc[53]],
+            [cc[48], cc[49], cc[50]],
+            [cc[45], cc[46], cc[47]]
+        ]
+    ];
     let materials = [
         red,
         orange,
@@ -418,10 +466,10 @@ function init() {
     }
     let m1 = 1.01;
     let m2 = 1.5// + planeSize / 2;
-    // White
+    // Up
     for (let z = -1; z < 2; z++) {
         for (let x = -1; x < 2; x++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colWhite, side: THREE.DoubleSide} );
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[0][z+1][x+1], side: THREE.DoubleSide} );
             let plane = new THREE.Mesh( planeGeometry, planeMaterial );
             plane.renderOrder = 1;
             plane.position.set(x * m1, 1*m2 * m1, z * m1);
@@ -431,47 +479,10 @@ function init() {
             planes.push(plane);
         }
     }
-    // Yellow
-    for (let z = -1; z < 2; z++) {
-        for (let x = -1; x < 2; x++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colYellow, side: THREE.DoubleSide} );
-            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
-            plane.renderOrder = 1;
-            plane.position.set(x * m1, -1*m2 * m1, z * m1);
-            plane.rotateX(Math.PI / 2);
-            plane.name = "stickerD";
-            planeCube.add(plane);
-            planes.push(plane);
-        }
-    }
-    // Green
-    for (let y = -1; y < 2; y++) {
-        for (let x = -1; x < 2; x++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colGreen, side: THREE.DoubleSide} );
-            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
-            plane.renderOrder = 1;
-            plane.position.set(x * m1, y * m1, 1*m2 * m1);
-            plane.name = "stickerF";
-            planeCube.add(plane);
-            planes.push(plane);
-        }
-    }
-    // Blue
-    for (let y = -1; y < 2; y++) {
-        for (let x = -1; x < 2; x++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colBlue, side: THREE.DoubleSide} );
-            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
-            plane.renderOrder = 1;
-            plane.position.set(x * m1, y * m1, -1*m2 * m1);
-            plane.name = "stickerB";
-            planeCube.add(plane);
-            planes.push(plane);
-        }
-    }
-    // Orange
-    for (let y = -1; y < 2; y++) {
+    // Left
+    for (let y = 1; y > -2; y--) {
         for (let z = -1; z < 2; z++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colOrange, side: THREE.DoubleSide} );
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[1][y+1][z+1], side: THREE.DoubleSide} );
             let plane = new THREE.Mesh( planeGeometry, planeMaterial );
             plane.renderOrder = 1;
             plane.position.set(-1*m2 * m1, y * m1, z * m1);
@@ -481,15 +492,52 @@ function init() {
             planes.push(plane);
         }
     }
-    // Red
-    for (let y = -1; y < 2; y++) {
+    // Front
+    for (let y = 1; y > -2; y--) {
+        for (let x = -1; x < 2; x++) {
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[2][y+1][x+1], side: THREE.DoubleSide} );
+            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
+            plane.renderOrder = 1;
+            plane.position.set(x * m1, y * m1, 1*m2 * m1);
+            plane.name = "stickerF";
+            planeCube.add(plane);
+            planes.push(plane);
+        }
+    }
+    // Right
+    for (let y = 1; y > -2; y--) {
         for (let z = -1; z < 2; z++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colRed, side: THREE.DoubleSide} );
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[3][y+1][z+1], side: THREE.DoubleSide} );
             let plane = new THREE.Mesh( planeGeometry, planeMaterial );
             plane.renderOrder = 1;
             plane.position.set(1*m2 * m1, y * m1, z * m1);
             plane.rotateY(-Math.PI / 2);
             plane.name = "stickerR";
+            planeCube.add(plane);
+            planes.push(plane);
+        }
+    }
+    // Back
+    for (let y = 1; y > -2; y--) {
+        for (let x = -1; x < 2; x++) {
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[4][y+1][x+1], side: THREE.DoubleSide} );
+            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
+            plane.renderOrder = 1;
+            plane.position.set(x * m1, y * m1, -1*m2 * m1);
+            plane.name = "stickerB";
+            planeCube.add(plane);
+            planes.push(plane);
+        }
+    }
+    // Down
+    for (let z = 1; z > -2; z--) {
+        for (let x = -1; x < 2; x++) {
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[5][z+1][x+1], side: THREE.DoubleSide} );
+            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
+            plane.renderOrder = 1;
+            plane.position.set(x * m1, -1*m2 * m1, z * m1);
+            plane.rotateX(Math.PI / 2);
+            plane.name = "stickerD";
             planeCube.add(plane);
             planes.push(plane);
         }

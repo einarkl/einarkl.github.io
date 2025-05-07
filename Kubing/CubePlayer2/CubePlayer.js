@@ -30,7 +30,7 @@ let movesApplied = [];
 let initialized = false;
 let cubePlayerHeight, cubePlayerWidth;
 
-let scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, roty;
+let scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, rotx, roty;
 let planes = [];
 let scene, camera, renderer, controls;
 let anim = false;
@@ -86,6 +86,7 @@ export class CubePlayer extends HTMLElement {
             smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "";
             solvedFunc = window[this.getAttribute("solvedfunc")] ? this.getAttribute("solvedfunc") : "";
             useControls = this.getAttribute("usecontrols") ? this.getAttribute("usecontrols").toLowerCase().trim() === "true" : false;
+            rotx = parseFloat(this.getAttribute("rotx")) || 0;
             roty = parseFloat(this.getAttribute("roty")) || 0;
 
             cubePlayerDiv = document.createElement("div");
@@ -223,7 +224,7 @@ export class CubePlayer extends HTMLElement {
     }
     
     static get observedAttributes() {
-        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "roty"];
+        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "rotx", "roty"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -286,6 +287,10 @@ export class CubePlayer extends HTMLElement {
                     break;
                 case "usecontrols":
                     useControls =  newValue ? newValue.toLowerCase().trim() === "true" : false;
+                    shouldInit = true;
+                    break;
+                case "rotx":
+                    rotx = newValue || 0;
                     shouldInit = true;
                     break;
                 case "roty":
@@ -525,7 +530,8 @@ function init() {
     controls.rotateSpeed = 0.5;
     controls.enableRotate = useControls;
     
-    rotateCameraY(roty);
+    rotateCamera('y', roty);
+    rotateCamera('x', rotx, new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z - 1));
     
     $(cubePlayerDiv).empty();
     $(cubePlayerDiv).append( renderer.domElement );
@@ -535,16 +541,45 @@ function init() {
     animate();
 }
 
-function rotateCameraY(angle) {
-    const radius = Math.sqrt(
-        camera.position.x ** 2 + camera.position.z ** 2
-    );
-    const currentAngle = Math.atan2(camera.position.x, camera.position.z);
-    const newAngle = currentAngle + angle;
+function rotateCamera(axis, angle, target = new THREE.Vector3(0, 0, 0)) {
+    const offset = camera.position.clone().sub(target); // vector from target to camera
+    let radius, currentAngle, newAngle;
 
-    camera.position.x = radius * Math.sin(newAngle);
-    camera.position.z = radius * Math.cos(newAngle);
-    camera.lookAt(0, 0, 0); // or scene.position if it's centered
+    switch (axis.toLowerCase()) {
+        case 'y':
+            radius = Math.sqrt(offset.x ** 2 + offset.z ** 2);
+            currentAngle = Math.atan2(offset.x, offset.z);
+            newAngle = currentAngle + angle;
+
+            offset.x = radius * Math.sin(newAngle);
+            offset.z = radius * Math.cos(newAngle);
+            break;
+
+        case 'x':
+            radius = Math.sqrt(offset.y ** 2 + offset.z ** 2);
+            currentAngle = Math.atan2(offset.y, offset.z);
+            newAngle = currentAngle + angle;
+
+            offset.y = radius * Math.sin(newAngle);
+            offset.z = radius * Math.cos(newAngle);
+            break;
+
+        case 'z':
+            radius = Math.sqrt(offset.x ** 2 + offset.y ** 2);
+            currentAngle = Math.atan2(offset.y, offset.x);
+            newAngle = currentAngle + angle;
+
+            offset.x = radius * Math.cos(newAngle);
+            offset.y = radius * Math.sin(newAngle);
+            break;
+
+        default:
+            console.warn(`Unknown axis '${axis}' passed to rotateCamera`);
+            return;
+    }
+
+    camera.position.copy(offset.add(target));
+    camera.lookAt(target);
 }
 
 function animate() {

@@ -180,7 +180,6 @@ export class CubePlayer extends HTMLElement {
                 let nextSol = sol[iterator];
                 const setup = scramble + " " + prevSol;
                 const moves = nextSol;
-                console.log("nextSol:" + nextSol);
             
                 for (let m of (setup).split(" ")) {
                     mv(m);
@@ -295,8 +294,6 @@ export class CubePlayer extends HTMLElement {
                     break;
             }
 
-            // console.log(attr, oldValue, newValue);
-            // console.log(playbutton, smartcube);
             if (smartcube !== "") {
                 $(button).css("display", "none");
                 $(smartcubeButton).css("display", "block");
@@ -322,7 +319,6 @@ export class CubePlayer extends HTMLElement {
             }
 
             if (shouldInit && oldValue !== newValue) {
-                console.log("HEI")
                 init();
             }
 
@@ -876,7 +872,6 @@ function checkIfSolved() {
         planesB.filter(c => c === planesB[4]).length === 9 &&
         planesD.filter(c => c === planesD[4]).length === 9
     ) {
-        // console.log("SOLVED");
         if (solvedFunc !== "" && window[solvedFunc]) {
             window[solvedFunc]();
         }

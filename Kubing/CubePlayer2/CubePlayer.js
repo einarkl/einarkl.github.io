@@ -30,8 +30,7 @@ let movesApplied = [];
 let initialized = false;
 let cubePlayerHeight, cubePlayerWidth;
 
-let scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator;
-
+let scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, roty;
 let planes = [];
 let scene, camera, renderer, controls;
 let anim = false;
@@ -87,6 +86,7 @@ export class CubePlayer extends HTMLElement {
             smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "";
             solvedFunc = window[this.getAttribute("solvedfunc")] ? this.getAttribute("solvedfunc") : "";
             useControls = this.getAttribute("usecontrols") ? this.getAttribute("usecontrols").toLowerCase().trim() === "true" : false;
+            roty = parseFloat(this.getAttribute("roty")) || 0;
 
             cubePlayerDiv = document.createElement("div");
             buttonDiv = document.createElement("div");
@@ -224,7 +224,7 @@ export class CubePlayer extends HTMLElement {
     }
     
     static get observedAttributes() {
-        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols"];
+        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "roty"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -289,6 +289,10 @@ export class CubePlayer extends HTMLElement {
                     useControls =  newValue ? newValue.toLowerCase().trim() === "true" : false;
                     shouldInit = true;
                     break;
+                case "roty":
+                    roty = newValue || 0;
+                    shouldInit = true;
+                    break;
             }
 
             // console.log(attr, oldValue, newValue);
@@ -318,6 +322,7 @@ export class CubePlayer extends HTMLElement {
             }
 
             if (shouldInit && oldValue !== newValue) {
+                console.log("HEI")
                 init();
             }
 
@@ -514,8 +519,6 @@ function init() {
     camera.position.y = 5;
     camera.position.z = 5;
     
-    camera.rotateX(-Math.PI / 4);
-    
     renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setClearColor( 0x000000, 0 );
     renderer.setSize($(cubePlayerDiv).parent().width(), $(cubePlayerDiv).parent().width());
@@ -526,13 +529,26 @@ function init() {
     controls.rotateSpeed = 0.5;
     controls.enableRotate = useControls;
     
+    rotateCameraY(roty);
+    
     $(cubePlayerDiv).empty();
     $(cubePlayerDiv).append( renderer.domElement );
-    
     adjustSize();
 
     anim = false;
     animate();
+}
+
+function rotateCameraY(angle) {
+    const radius = Math.sqrt(
+        camera.position.x ** 2 + camera.position.z ** 2
+    );
+    const currentAngle = Math.atan2(camera.position.x, camera.position.z);
+    const newAngle = currentAngle + angle;
+
+    camera.position.x = radius * Math.sin(newAngle);
+    camera.position.z = radius * Math.cos(newAngle);
+    camera.lookAt(0, 0, 0); // or scene.position if it's centered
 }
 
 function animate() {

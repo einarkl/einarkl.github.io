@@ -29,8 +29,9 @@
                 let smartcube = $("#selSmartcube").find(":selected").val();
                 let solvedfunc = $("#selSolvedfunc").find(":selected").val();
                 let useControls = $("#selControls").find(":selected").val();
-                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, smartcube, solvedfunc, useControls];
-                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols"].indexOf(attr)]);
+                let roty = $("#inproty").val();
+                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, plastic, playbutton, smartcube, solvedfunc, useControls, roty];
+                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "roty"].indexOf(attr)]);
             }
 
             function customSolvedFunction() {
@@ -129,6 +130,11 @@
                     </select></td>
                     <td>true | false</td>
                 </tr>
+                <tr>
+                    <td>roty</td>
+                    <td><input id="inproty" type="number" value="0" min="-1" max="1" step="0.1" onchange="updateAttr('roty')"></input></td>
+                    <td>camera rotation y</td>
+                </tr>
             </table>
         </div>
         <div id="content">
@@ -150,7 +156,8 @@
             playbutton="button"
             smartcube="none"
             solvedfunc="none"
-            usecontrols="true">
+            usecontrols="true"
+            roty="0">
             </cube-player>
         </div>
     </body>

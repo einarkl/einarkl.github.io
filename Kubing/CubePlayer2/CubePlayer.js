@@ -102,6 +102,11 @@ export class CubePlayer extends HTMLElement {
             button.innerText = "Play";
             buttonnxt.innerText = "Next";
             smartcubeButton.innerText = "Giiker";
+
+            $(button).addClass("cube-player-button");
+            $(buttonnxt).addClass("cube-player-button");
+            $(smartcubeButton).addClass("cube-player-button");
+
             buttonDiv.appendChild(button);
             buttonDiv.appendChild(buttonnxt);
             buttonDiv.appendChild(smartcubeButton);

@@ -108,23 +108,23 @@ export class CubePlayer extends HTMLElement {
             this.appendChild(buttonDiv);
 
             if (smartcube !== "") {
-                $(button).css("display", "none");
+                $(buttonDiv).css("display", "none");
                 $(smartcubeButton).css("display", "block");
             }
             else if (playbutton !== "none") {
-                $(button).css("display", "block");
+                $(buttonDiv).css("display", "block");
                 $(smartcubeButton).css("display", "none");
             }
             else {
-                $(button).css("display", "none");
+                $(buttonDiv).css("display", "none");
                 $(smartcubeButton).css("display", "none");
             }
 
             if (solution === "") {
-                $(button).attr("disabled", true);
+                $(buttonDiv).attr("disabled", true);
             }
             else {
-                $(button).attr("disabled", false);
+                $(buttonDiv).attr("disabled", false);
             }
 
             planes = [];
@@ -311,26 +311,26 @@ export class CubePlayer extends HTMLElement {
 
             if (smartcube !== "") {
                 $(button).css("display", "none");
+                $(buttonnxt).css("display", "none");
                 $(smartcubeButton).css("display", "block");
             }
             else if (playbutton !== "none") {
                 $(button).css("display", "block");
-                $(smartcubeButton).css("display", "none");
-            }
-            else if (nextbutton !== "none") {
-                $(button).css("display", "block");
-                $(smartcubeButton).css("display", "none");
+                $(buttonnxt).css("display", "block");
             }
             else {
                 $(button).css("display", "none");
+                $(buttonnxt).css("display", "none");
                 $(smartcubeButton).css("display", "none");
             }
 
             if (solution === "") {
                 $(button).attr("disabled", true);
+                $(buttonnxt).attr("disabled", true);
             }
             else {
                 $(button).attr("disabled", false);
+                $(buttonnxt).attr("disabled", false);
             }
 
             if (shouldInit && oldValue !== newValue) {
@@ -1386,19 +1386,15 @@ function adjustSize() {
     $(buttonDiv).css("text-align", "center");
     $(button).css("position", "relative");
     $(button).css("z-index", "1");
-    $(button).css("min-width", $(cubePlayerDiv).width() * 0.2);
-    $(button).css("margin", "auto");
     $(nextbutton).css("position", "relative");
     $(nextbutton).css("z-index", "1");
-    $(nextbutton).css("min-width", $(cubePlayerDiv).width() * 0.2);
-    $(nextbutton).css("margin", "auto");
     $(smartcubeButton).css("position", "relative");
     $(smartcubeButton).css("z-index", "1");
-    $(smartcubeButton).css("min-width", $(cubePlayerDiv).width() * 0.2);
+    $(smartcubeButton).css("min-width", $(cubePlayerDiv).width() * 0.4);
     $(smartcubeButton).css("margin", "auto");
 
     $(buttonDiv).css("display", "grid");
-    $(buttonDiv).css("grid-template-columns", ("1fr ").repeat($(buttonDiv.children.length)));
+    $(buttonDiv).css("grid-template-columns", ("1fr ").repeat($(buttonDiv).children.length));
 
     $("cube-player canvas").css("outline", "none");
 }

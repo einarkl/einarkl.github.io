@@ -277,15 +277,15 @@ export class CubePlayer extends HTMLElement {
                     shouldInit = true;
                     break;
                 case "playbutton":
-                    playbutton = newValue || "";
+                    playbutton = newValue || "none";
                     shouldInit = true;
                     break;
                 case "nextbutton":
-                    nextbutton = newValue || "";
+                    nextbutton = newValue || "none";
                     shouldInit = true;
                     break;
                 case "smartcube":
-                    smartcube = newValue === "giiker" ? newValue : "";
+                    smartcube = newValue === "giiker" ? newValue : "none";
                     shouldInit = true;
                     break;
                 case "solvedfunc":
@@ -309,7 +309,7 @@ export class CubePlayer extends HTMLElement {
                     break;
             }
 
-            if (smartcube !== "") {
+            if (smartcube !== "none") {
                 $(button).css("display", "none");
                 $(buttonnxt).css("display", "none");
                 $(smartcubeButton).css("display", "block");
@@ -317,6 +317,7 @@ export class CubePlayer extends HTMLElement {
             else if (playbutton !== "none") {
                 $(button).css("display", "block");
                 $(buttonnxt).css("display", "block");
+                $(smartcubeButton).css("display", "none");
             }
             else {
                 $(button).css("display", "none");

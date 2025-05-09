@@ -218,8 +218,8 @@ export class CubePlayer extends HTMLElement {
                     }
                     i++;
                 }, playMoveTime);
-            
-                iterator++;
+                
+                iterator === sol.length - 1 ? iterator = 0 : iterator++;
                 $(this).attr("iterator", iterator);
             });
 

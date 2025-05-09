@@ -152,6 +152,7 @@ export class CubePlayer extends HTMLElement {
             
             $(button).on("click", () => {
                 $(button).prop('disabled', true);
+                $(buttonnxt).prop('disabled', true);
                 resetState();
                 const setup = scramble;
                 const moves = solution;
@@ -170,6 +171,7 @@ export class CubePlayer extends HTMLElement {
                         clearInterval(interval);
                         anim = false;
                         $(button).prop('disabled', false);
+                        $(buttonnxt).prop('disabled', false);
                     }
                     else {
                         if (tween) {
@@ -182,6 +184,13 @@ export class CubePlayer extends HTMLElement {
             });
             
             $(buttonnxt).on("click", () => {
+                $(button).prop('disabled', true);
+                $(buttonnxt).prop('disabled', true);
+                // Instantly finish the current move if it's running
+                if (tween && tween.progress() < 1) {
+                    tween.progress(1);
+                }
+            
                 resetState();
                 let sol = solution.split(" ");
                 let prevSol = sol.slice(0, iterator).join(" ");
@@ -189,32 +198,29 @@ export class CubePlayer extends HTMLElement {
                 const setup = scramble + " " + prevSol;
                 const moves = nextSol;
             
-                for (let m of (setup).split(" ")) {
+                for (let m of setup.split(" ")) {
                     mv(m);
                 }
             
                 anim = true;
-                let mvs = (moves).split(" ");
-                // playMoveTime = time === "" ? stdTime * 1000 : time / mvs.length;
-                playMoveTime = 250;
-                
+                let mvs = moves.split(" ");
+                playMoveTime = 100;
+            
                 let i = 0;
                 let interval = setInterval(() => {
                     if (i === mvs.length) {
                         clearInterval(interval);
                         anim = false;
                         $(button).prop('disabled', false);
-                    }
-                    else {
-                        if (tween) {
-                            tween.progress(1);
-                        }
+                        $(buttonnxt).prop('disabled', false);
+                    } else {
                         mv(mvs[i]);
                     }
                     i++;
                 }, playMoveTime);
+            
                 iterator++;
-                this.setAttribute("iterator", iterator);
+                $(this).attr("iterator", iterator);
             });
 
             $(smartcubeButton).on("click", () => {

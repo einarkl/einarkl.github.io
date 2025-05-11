@@ -81,10 +81,10 @@ export class CubePlayer extends HTMLElement {
             ];
             customcolors = this.getAttribute("customcolors") || "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
             plastic = isColor(this.getAttribute("plastic")) ? this.getAttribute("plastic") : "#000000";
-            playbutton = this.getAttribute("playbutton") || "";
-            nextbutton = this.getAttribute("nextbutton") || "";
+            playbutton = this.getAttribute("playbutton") || "none";
+            nextbutton = this.getAttribute("nextbutton") || "none";
             iterator = this.getAttribute("iterator") ? parseInt(this.getAttribute("iterator")) : 0;
-            smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "";
+            smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "none";
             solvedFunc = window[this.getAttribute("solvedfunc")] ? this.getAttribute("solvedfunc") : "";
             useControls = this.getAttribute("usecontrols") ? this.getAttribute("usecontrols").toLowerCase().trim() === "true" : false;
             fov = parseInt(this.getAttribute("fov")) || 40;
@@ -112,7 +112,7 @@ export class CubePlayer extends HTMLElement {
             buttonDiv.appendChild(smartcubeButton);
             this.appendChild(buttonDiv);
 
-            if (smartcube !== "") {
+            if (smartcube !== "none") {
                 $(buttonDiv).css("display", "none");
                 $(smartcubeButton).css("display", "block");
             }
@@ -364,9 +364,9 @@ export class CubePlayer extends HTMLElement {
             for (let m of scramble.split(" ")) {
                 mv(m);
             }
-            for (let m of solution.split(" ")) {
+            /* for (let m of solution.split(" ")) {
                 mv(m);
-            }
+            } */
         }
     }
 }

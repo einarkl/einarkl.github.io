@@ -181,7 +181,6 @@ export class CubePlayer extends HTMLElement {
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
-        console.log(movesApplied)
         let shouldInit = false;
         if (initialized) {
             currentPlayToken++; // Invalidate current animation

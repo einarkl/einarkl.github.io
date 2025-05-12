@@ -193,7 +193,7 @@ export class CubePlayer extends HTMLElement {
                     break; */
                 case "scramble":
                     scramble = newValue || "";
-                    shouldInit = true;
+                    // shouldInit = true;
                     break;
                 case "solution":
                     solution = newValue || "";

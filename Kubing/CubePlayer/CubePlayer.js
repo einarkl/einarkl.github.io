@@ -636,7 +636,7 @@ function playNext() {
         tween.progress(1);
     }
 
-    resetState();
+    // resetState();
     let sol = solution.split(" ");
     let prevSol = sol.slice(0, iterator).join(" ");
     let nextSol = sol[iterator];

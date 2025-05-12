@@ -28,13 +28,14 @@
                 let plastic = $("#inpPlastic").val();
                 let playbutton = $("#selPlaybutton").find(":selected").val();
                 let smartcube = $("#selSmartcube").find(":selected").val();
+                let playatinit = $("#selPlayatinit").find(":selected").val();
                 let solvedfunc = $("#selSolvedfunc").find(":selected").val();
                 let useControls = $("#selControls").find(":selected").val();
                 let fov = $("#inpfov").val();
                 let rotx = $("#inprotx").val();
                 let roty = $("#inproty").val();
-                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, smartcube, solvedfunc, useControls, fov, rotx, roty];
-                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "fov", "rotx", "roty"].indexOf(attr)]);
+                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, smartcube, playatinit, solvedfunc, useControls, fov, rotx, roty];
+                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "solvedfunc", "usecontrols", "fov", "rotx", "roty"].indexOf(attr)]);
             }
 
             function customSolvedFunction() {
@@ -123,6 +124,14 @@
                     <td>none | giiker</td>
                 </tr>
                 <tr>
+                    <td>playatinit</td>
+                    <td><select id="selPlayatinit" onchange="updateAttr('playatinit')">
+                        <option value="none" selected>none</option>
+                        <option value="yes">yes</option>
+                    </select></td>
+                    <td>Plays automatically at initialization. false | true</td>
+                </tr>
+                <tr>
                     <td>solvedfunc</td>
                     <td><select id="selSolvedfunc" onchange="updateAttr('solvedfunc')">
                         <option value="" selected>none (leave blank)</option>
@@ -177,6 +186,7 @@
             plastic="#000000"
             playbutton="button"
             smartcube="none"
+            playatinit="none"
             solvedfunc="none"
             usecontrols="true"
             fov="40"

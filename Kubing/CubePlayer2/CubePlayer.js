@@ -30,7 +30,7 @@ let movesApplied = [];
 let initialized = false;
 let cubePlayerHeight, cubePlayerWidth;
 
-let scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, nextbutton, smartcube, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, fov, rotx, roty;
+let scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, nextbutton, smartcube, playatinit, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, fov, rotx, roty;
 let planes = [];
 let scene, camera, renderer, controls;
 let anim = false;
@@ -85,6 +85,7 @@ export class CubePlayer extends HTMLElement {
             nextbutton = this.getAttribute("nextbutton") || "none";
             iterator = this.getAttribute("iterator") ? parseInt(this.getAttribute("iterator")) : 0;
             smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "none";
+            playatinit = this.getAttribute("playatinit") === "yes" ? this.getAttribute("playatinit") : "none";
             solvedFunc = window[this.getAttribute("solvedfunc")] ? this.getAttribute("solvedfunc") : "";
             useControls = this.getAttribute("usecontrols") ? this.getAttribute("usecontrols").toLowerCase().trim() === "true" : false;
             fov = parseInt(this.getAttribute("fov")) || 40;
@@ -151,76 +152,11 @@ export class CubePlayer extends HTMLElement {
             adjustSize();
             
             $(button).on("click", () => {
-                $(button).prop('disabled', true);
-                $(buttonnxt).prop('disabled', true);
-                resetState();
-                const setup = scramble;
-                const moves = solution;
-            
-                for (let m of (setup).split(" ")) {
-                    mv(m);
-                }
-            
-                anim = true;
-                let mvs = (moves).split(" ");
-                playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
-                
-                let i = 0;
-                let interval = setInterval(() => {
-                    if (i === mvs.length) {
-                        clearInterval(interval);
-                        anim = false;
-                        $(button).prop('disabled', false);
-                        $(buttonnxt).prop('disabled', false);
-                    }
-                    else {
-                        if (tween) {
-                            tween.progress(1);
-                        }
-                        mv(mvs[i]);
-                    }
-                    i++;
-                }, playMoveTime);
+                playCube();
             });
             
             $(buttonnxt).on("click", () => {
-                $(button).prop('disabled', true);
-                $(buttonnxt).prop('disabled', true);
-                // Instantly finish the current move if it's running
-                if (tween && tween.progress() < 1) {
-                    tween.progress(1);
-                }
-            
-                resetState();
-                let sol = solution.split(" ");
-                let prevSol = sol.slice(0, iterator).join(" ");
-                let nextSol = sol[iterator];
-                const setup = scramble + " " + prevSol;
-                const moves = nextSol;
-            
-                for (let m of setup.split(" ")) {
-                    mv(m);
-                }
-            
-                anim = true;
-                let mvs = moves.split(" ");
-                playMoveTime = 100;
-            
-                let i = 0;
-                let interval = setInterval(() => {
-                    if (i === mvs.length) {
-                        clearInterval(interval);
-                        anim = false;
-                        $(button).prop('disabled', false);
-                        $(buttonnxt).prop('disabled', false);
-                    } else {
-                        mv(mvs[i]);
-                    }
-                    i++;
-                }, playMoveTime);
-                
-                iterator === sol.length - 1 ? iterator = 0 : iterator++;
-                $(this).attr("iterator", iterator);
+                playNext();
             });
 
             $(smartcubeButton).on("click", () => {
@@ -228,8 +164,9 @@ export class CubePlayer extends HTMLElement {
             });
 
             resetState();
-            for (let m of scramble.split(" ")) {
-                mv(m);
+           
+            if (playatinit === "yes") {
+                playCube();
             }
 
             initialized = true;
@@ -237,7 +174,7 @@ export class CubePlayer extends HTMLElement {
     }
     
     static get observedAttributes() {
-        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
+        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -249,9 +186,11 @@ export class CubePlayer extends HTMLElement {
                     break;
                 case "scramble":
                     scramble = newValue || "";
+                    shouldInit = true;
                     break;
                 case "solution":
                     solution = newValue || "";
+                    shouldInit = true;
                     break;
                 case "time":
                     time = newValue || "";
@@ -298,6 +237,9 @@ export class CubePlayer extends HTMLElement {
                 case "smartcube":
                     smartcube = newValue === "giiker" ? newValue : "none";
                     shouldInit = true;
+                    break;
+                case "playatinit":
+                    playatinit = newValue === "yes" ? newValue : "none";
                     break;
                 case "solvedfunc":
                     solvedFunc = newValue || "";
@@ -349,8 +291,6 @@ export class CubePlayer extends HTMLElement {
                 init();
             }
 
-            resetState();
-
             scramble = scramble.replaceAll("(", "").replaceAll(")", "");
             solution = solution.replaceAll("(", "").replaceAll(")", "");
 
@@ -361,12 +301,14 @@ export class CubePlayer extends HTMLElement {
                 solution = commToAlg(solution);
             }
             
-            for (let m of scramble.split(" ")) {
-                mv(m);
-            }
-            /* for (let m of solution.split(" ")) {
+            /* for (let m of scramble.split(" ")) {
                 mv(m);
             } */
+
+            resetState();
+            if (playatinit === "yes") {
+                playCube();
+            }
         }
     }
 }
@@ -611,6 +553,79 @@ function init() {
     animate();
 }
 
+function playCube() {
+    $(button).prop('disabled', true);
+    $(buttonnxt).prop('disabled', true);
+    resetState();
+    const setup = scramble;
+    const moves = solution;
+
+    /* for (let m of (setup).split(" ")) {
+        mv(m);
+    } */
+
+    anim = true;
+    let mvs = (moves).split(" ");
+    playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
+    
+    let i = 0;
+    let interval = setInterval(() => {
+        if (i === mvs.length) {
+            clearInterval(interval);
+            anim = false;
+            $(button).prop('disabled', false);
+            $(buttonnxt).prop('disabled', false);
+        }
+        else {
+            if (tween) {
+                tween.progress(1);
+            }
+            mv(mvs[i]);
+        }
+        i++;
+    }, playMoveTime);
+}
+
+function playNext() {
+    $(button).prop('disabled', true);
+    $(buttonnxt).prop('disabled', true);
+    // Instantly finish the current move if it's running
+    if (tween && tween.progress() < 1) {
+        tween.progress(1);
+    }
+
+    resetState();
+    let sol = solution.split(" ");
+    let prevSol = sol.slice(0, iterator).join(" ");
+    let nextSol = sol[iterator];
+    const setup = scramble + " " + prevSol;
+    const moves = nextSol;
+
+    /* for (let m of setup.split(" ")) {
+        mv(m);
+    } */
+
+    anim = true;
+    let mvs = moves.split(" ");
+    playMoveTime = 100;
+
+    let i = 0;
+    let interval = setInterval(() => {
+        if (i === mvs.length) {
+            clearInterval(interval);
+            anim = false;
+            $(button).prop('disabled', false);
+            $(buttonnxt).prop('disabled', false);
+        } else {
+            mv(mvs[i]);
+        }
+        i++;
+    }, playMoveTime);
+    
+    iterator === sol.length - 1 ? iterator = 0 : iterator++;
+    $(this).attr("iterator", iterator);
+}
+
 function rotateCamera(axis, angle, target = new THREE.Vector3(0, 0, 0)) {
     const offset = camera.position.clone().sub(target); // vector from target to camera
     let radius, currentAngle, newAngle;
@@ -680,16 +695,15 @@ function resetState() {
     for (let m of scramble.split(" ")) {
         mv(m);
     } */
-
     if (movesApplied.length !== 0) {
         for (let m of inverseAlg(movesApplied.slice().join(" ")).split(" ")) {
             mv(m);
         }
         movesApplied = [];
     }
-    /* for (let m of scramble.split(" ")) {
+    for (let m of scramble.split(" ")) {
         mv(m);
-    } */
+    }
 }
 
 function inverseAlg(alg) {

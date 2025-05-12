@@ -30,8 +30,7 @@ let movesApplied = [];
 let initialized = false;
 let cubePlayerHeight, cubePlayerWidth;
 
-let scramble, solution, time, cubestyle, logo, colors, plastic, playbutton, smartcube, cubePlayerDiv, buttonDiv, button, smartcubeButton, useControls;
-
+let scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, nextbutton, smartcube, playatinit, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, fov, rotx, roty;
 let planes = [];
 let scene, camera, renderer, controls;
 let anim = false;
@@ -56,7 +55,6 @@ export class CubePlayer extends HTMLElement {
             this.id = this.getAttribute("id") || this.id;
             scramble = this.getAttribute("scramble") || "";
             solution = this.getAttribute("solution") || "";
-
             
             scramble = scramble.replaceAll("(", "").replaceAll(")", "");
             solution = solution.replaceAll("(", "").replaceAll(")", "");
@@ -69,6 +67,7 @@ export class CubePlayer extends HTMLElement {
             }
 
             time = parseInt(this.getAttribute("time")) || "";
+            tps = time === "" ? (parseFloat(this.getAttribute("tps")) || "") : "";
             cubestyle = this.getAttribute("cubestyle") || "solid";
             logo = this.getAttribute("logo") || "";
             colors = this.getAttribute("colors") && this.getAttribute("colors").split(",").length === 6 ? this.getAttribute("colors").split(",").map(c => c.trim()) : 
@@ -80,43 +79,58 @@ export class CubePlayer extends HTMLElement {
                 "#0000ff",
                 "#ffff00"
             ];
+            customcolors = this.getAttribute("customcolors") || "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
             plastic = isColor(this.getAttribute("plastic")) ? this.getAttribute("plastic") : "#000000";
-            playbutton = this.getAttribute("playbutton") || "";
-            smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "";
+            playbutton = this.getAttribute("playbutton") || "none";
+            nextbutton = this.getAttribute("nextbutton") || "none";
+            iterator = this.getAttribute("iterator") ? parseInt(this.getAttribute("iterator")) : 0;
+            smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "none";
+            playatinit = this.getAttribute("playatinit") === "yes" ? this.getAttribute("playatinit") : "none";
             solvedFunc = window[this.getAttribute("solvedfunc")] ? this.getAttribute("solvedfunc") : "";
             useControls = this.getAttribute("usecontrols") ? this.getAttribute("usecontrols").toLowerCase().trim() === "true" : false;
+            fov = parseInt(this.getAttribute("fov")) || 40;
+            rotx = parseFloat(this.getAttribute("rotx")) || 0;
+            roty = parseFloat(this.getAttribute("roty")) || 0;
 
             cubePlayerDiv = document.createElement("div");
             buttonDiv = document.createElement("div");
             button = document.createElement("button");
+            buttonnxt = document.createElement("button");
             smartcubeButton = document.createElement("button");
             
             this.appendChild(cubePlayerDiv);
 
             button.innerText = "Play";
+            buttonnxt.innerText = "Next";
             smartcubeButton.innerText = "Giiker";
+
+            $(button).addClass("cube-player-button");
+            $(buttonnxt).addClass("cube-player-button");
+            $(smartcubeButton).addClass("cube-player-button");
+
             buttonDiv.appendChild(button);
+            buttonDiv.appendChild(buttonnxt);
             buttonDiv.appendChild(smartcubeButton);
             this.appendChild(buttonDiv);
 
-            if (smartcube !== "") {
-                $(button).css("display", "none");
+            if (smartcube !== "none") {
+                $(buttonDiv).css("display", "none");
                 $(smartcubeButton).css("display", "block");
             }
             else if (playbutton !== "none") {
-                $(button).css("display", "block");
+                $(buttonDiv).css("display", "block");
                 $(smartcubeButton).css("display", "none");
             }
             else {
-                $(button).css("display", "none");
+                $(buttonDiv).css("display", "none");
                 $(smartcubeButton).css("display", "none");
             }
 
             if (solution === "") {
-                $(button).attr("disabled", true);
+                $(buttonDiv).attr("disabled", true);
             }
             else {
-                $(button).attr("disabled", false);
+                $(buttonDiv).attr("disabled", false);
             }
 
             planes = [];
@@ -138,34 +152,11 @@ export class CubePlayer extends HTMLElement {
             adjustSize();
             
             $(button).on("click", () => {
-                $(button).prop('disabled', true);
-                resetState();
-                const setup = scramble;
-                const moves = solution;
+                playCube();
+            });
             
-                for (let m of (setup).split(" ")) {
-                    mv(m);
-                }
-            
-                anim = true;
-                let mvs = (moves).split(" ");
-                playMoveTime = time === "" ? stdTime * 1000 : time / mvs.length;
-                
-                let i = 0;
-                let interval = setInterval(() => {
-                    if (i === mvs.length) {
-                        clearInterval(interval);
-                        anim = false;
-                        $(button).prop('disabled', false);
-                    }
-                    else {
-                        if (tween) {
-                            tween.progress(1);
-                        }
-                        mv(mvs[i]);
-                    }
-                    i++;
-                }, playMoveTime);
+            $(buttonnxt).on("click", () => {
+                playNext();
             });
 
             $(smartcubeButton).on("click", () => {
@@ -173,8 +164,9 @@ export class CubePlayer extends HTMLElement {
             });
 
             resetState();
-            for (let m of scramble.split(" ")) {
-                mv(m);
+           
+            if (playatinit === "yes") {
+                playCube();
             }
 
             initialized = true;
@@ -182,7 +174,7 @@ export class CubePlayer extends HTMLElement {
     }
     
     static get observedAttributes() {
-        return ["id", "scramble", "solution", "time", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols"];
+        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -194,12 +186,17 @@ export class CubePlayer extends HTMLElement {
                     break;
                 case "scramble":
                     scramble = newValue || "";
+                    shouldInit = true;
                     break;
                 case "solution":
                     solution = newValue || "";
+                    shouldInit = true;
                     break;
                 case "time":
                     time = newValue || "";
+                    break;
+                case "tps":
+                    tps = newValue || "";
                     break;
                 case "cubestyle":
                     cubestyle = newValue || "solid";
@@ -221,17 +218,28 @@ export class CubePlayer extends HTMLElement {
                     ];
                     shouldInit = true;
                     break;
+                case "customcolors":
+                    customcolors = newValue.split("").length === 54 ? newValue : "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy" || "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
+                    shouldInit = true;
+                    break;
                 case "plastic":
                     plastic = isColor(newValue) ? newValue : "#000000";
                     shouldInit = true;
                     break;
                 case "playbutton":
-                    playbutton = newValue || "";
+                    playbutton = newValue || "none";
+                    shouldInit = true;
+                    break;
+                case "nextbutton":
+                    nextbutton = newValue || "none";
                     shouldInit = true;
                     break;
                 case "smartcube":
-                    smartcube = newValue === "giiker" ? newValue : "";
+                    smartcube = newValue === "giiker" ? newValue : "none";
                     shouldInit = true;
+                    break;
+                case "playatinit":
+                    playatinit = newValue === "yes" ? newValue : "none";
                     break;
                 case "solvedfunc":
                     solvedFunc = newValue || "";
@@ -240,35 +248,48 @@ export class CubePlayer extends HTMLElement {
                     useControls =  newValue ? newValue.toLowerCase().trim() === "true" : false;
                     shouldInit = true;
                     break;
+                case "fov":
+                    fov = newValue || 40;
+                    shouldInit = true;
+                    break;
+                case "rotx":
+                    rotx = newValue || 0;
+                    shouldInit = true;
+                    break;
+                case "roty":
+                    roty = newValue || 0;
+                    shouldInit = true;
+                    break;
             }
 
-            // console.log(attr, oldValue, newValue);
-            // console.log(playbutton, smartcube);
-            if (smartcube !== "") {
+            if (smartcube !== "none") {
                 $(button).css("display", "none");
+                $(buttonnxt).css("display", "none");
                 $(smartcubeButton).css("display", "block");
             }
             else if (playbutton !== "none") {
                 $(button).css("display", "block");
+                $(buttonnxt).css("display", "block");
                 $(smartcubeButton).css("display", "none");
             }
             else {
                 $(button).css("display", "none");
+                $(buttonnxt).css("display", "none");
                 $(smartcubeButton).css("display", "none");
             }
 
             if (solution === "") {
                 $(button).attr("disabled", true);
+                $(buttonnxt).attr("disabled", true);
             }
             else {
                 $(button).attr("disabled", false);
+                $(buttonnxt).attr("disabled", false);
             }
 
             if (shouldInit && oldValue !== newValue) {
                 init();
             }
-
-            resetState();
 
             scramble = scramble.replaceAll("(", "").replaceAll(")", "");
             solution = solution.replaceAll("(", "").replaceAll(")", "");
@@ -280,11 +301,13 @@ export class CubePlayer extends HTMLElement {
                 solution = commToAlg(solution);
             }
             
-            for (let m of scramble.split(" ")) {
+            /* for (let m of scramble.split(" ")) {
                 mv(m);
-            }
-            for (let m of solution.split(" ")) {
-                mv(m);
+            } */
+
+            resetState();
+            if (playatinit === "yes") {
+                playCube();
             }
         }
     }
@@ -292,7 +315,7 @@ export class CubePlayer extends HTMLElement {
 
 function init() {
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera( 40, 1, 0.1, 10 );
+    camera = new THREE.PerspectiveCamera( (fov), 1, 0.1, 10 );
 
     cube = new THREE.Object3D();
     planeCube = new THREE.Object3D();
@@ -307,6 +330,10 @@ function init() {
     let colRed = isColor(colors[3]) ? colors[3] : "#ff0000";
     let colBlue = isColor(colors[4]) ? colors[4] : "#0000ff";
     let colYellow = isColor(colors[5]) ? colors[5] : "#ffff00";
+    let colCustom0 = isColor(colors[6]) ? colors[6] : "#000";
+    let colCustom1 = isColor(colors[7]) ? colors[7] : "#333";
+    let colCustom2 = isColor(colors[8]) ? colors[8] : "#666";
+    let colGray = "#444";
     
     white = new THREE.MeshBasicMaterial( { color: colWhite });
     yellow = new THREE.MeshBasicMaterial( { color: colYellow } );
@@ -314,7 +341,51 @@ function init() {
     blue = new THREE.MeshBasicMaterial( { color: colBlue } );
     red = new THREE.MeshBasicMaterial( { color: colRed } );
     orange = new THREE.MeshBasicMaterial( { color: colOrange } );
-    
+
+    let cc = customcolors.split("").map(c => 
+        c === "w" ? colWhite :
+        c === "o" ? colOrange :
+        c === "g" ? colGreen :
+        c === "r" ? colRed :
+        c === "b" ? colBlue :
+        c === "y" ? colYellow :
+        c === "0" ? colCustom0 :
+        c === "1" ? colCustom1 :
+        c === "2" ? colCustom2 :
+        colGray
+    );
+    let cCols = [
+        [ // Up
+            [cc[0], cc[1], cc[2]],
+            [cc[3], cc[4], cc[5]],
+            [cc[6], cc[7], cc[8]]
+        ],
+        [ // Left
+            [cc[15], cc[16], cc[17]],
+            [cc[12], cc[13], cc[14]],
+            [cc[9], cc[10], cc[11]]
+        ],
+        [ // Front
+            [cc[24], cc[25], cc[26]],
+            [cc[21], cc[22], cc[23]],
+            [cc[18], cc[19], cc[20]]
+        ],
+        [ // Right
+            [cc[35], cc[34], cc[33]],
+            [cc[32], cc[31], cc[30]],
+            [cc[29], cc[28], cc[27]]
+        ],
+        [ // Back
+            [cc[44], cc[43], cc[42]],
+            [cc[41], cc[40], cc[39]],
+            [cc[38], cc[37], cc[36]]
+        ],
+        [ // Down
+            [cc[51], cc[52], cc[53]],
+            [cc[48], cc[49], cc[50]],
+            [cc[45], cc[46], cc[47]]
+        ]
+    ];
     let materials = [
         red,
         orange,
@@ -354,10 +425,10 @@ function init() {
     }
     let m1 = 1.01;
     let m2 = 1.5// + planeSize / 2;
-    // White
+    // Up
     for (let z = -1; z < 2; z++) {
         for (let x = -1; x < 2; x++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colWhite, side: THREE.DoubleSide} );
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[0][z+1][x+1], side: THREE.DoubleSide} );
             let plane = new THREE.Mesh( planeGeometry, planeMaterial );
             plane.renderOrder = 1;
             plane.position.set(x * m1, 1*m2 * m1, z * m1);
@@ -367,47 +438,10 @@ function init() {
             planes.push(plane);
         }
     }
-    // Yellow
-    for (let z = -1; z < 2; z++) {
-        for (let x = -1; x < 2; x++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colYellow, side: THREE.DoubleSide} );
-            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
-            plane.renderOrder = 1;
-            plane.position.set(x * m1, -1*m2 * m1, z * m1);
-            plane.rotateX(Math.PI / 2);
-            plane.name = "stickerD";
-            planeCube.add(plane);
-            planes.push(plane);
-        }
-    }
-    // Green
-    for (let y = -1; y < 2; y++) {
-        for (let x = -1; x < 2; x++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colGreen, side: THREE.DoubleSide} );
-            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
-            plane.renderOrder = 1;
-            plane.position.set(x * m1, y * m1, 1*m2 * m1);
-            plane.name = "stickerF";
-            planeCube.add(plane);
-            planes.push(plane);
-        }
-    }
-    // Blue
-    for (let y = -1; y < 2; y++) {
-        for (let x = -1; x < 2; x++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colBlue, side: THREE.DoubleSide} );
-            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
-            plane.renderOrder = 1;
-            plane.position.set(x * m1, y * m1, -1*m2 * m1);
-            plane.name = "stickerB";
-            planeCube.add(plane);
-            planes.push(plane);
-        }
-    }
-    // Orange
-    for (let y = -1; y < 2; y++) {
+    // Left
+    for (let y = 1; y > -2; y--) {
         for (let z = -1; z < 2; z++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colOrange, side: THREE.DoubleSide} );
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[1][y+1][z+1], side: THREE.DoubleSide} );
             let plane = new THREE.Mesh( planeGeometry, planeMaterial );
             plane.renderOrder = 1;
             plane.position.set(-1*m2 * m1, y * m1, z * m1);
@@ -417,15 +451,52 @@ function init() {
             planes.push(plane);
         }
     }
-    // Red
-    for (let y = -1; y < 2; y++) {
+    // Front
+    for (let y = 1; y > -2; y--) {
+        for (let x = -1; x < 2; x++) {
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[2][y+1][x+1], side: THREE.DoubleSide} );
+            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
+            plane.renderOrder = 1;
+            plane.position.set(x * m1, y * m1, 1*m2 * m1);
+            plane.name = "stickerF";
+            planeCube.add(plane);
+            planes.push(plane);
+        }
+    }
+    // Right
+    for (let y = 1; y > -2; y--) {
         for (let z = -1; z < 2; z++) {
-            let planeMaterial = new THREE.MeshBasicMaterial( {color: colRed, side: THREE.DoubleSide} );
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[3][y+1][z+1], side: THREE.DoubleSide} );
             let plane = new THREE.Mesh( planeGeometry, planeMaterial );
             plane.renderOrder = 1;
             plane.position.set(1*m2 * m1, y * m1, z * m1);
             plane.rotateY(-Math.PI / 2);
             plane.name = "stickerR";
+            planeCube.add(plane);
+            planes.push(plane);
+        }
+    }
+    // Back
+    for (let y = 1; y > -2; y--) {
+        for (let x = -1; x < 2; x++) {
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[4][y+1][x+1], side: THREE.DoubleSide} );
+            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
+            plane.renderOrder = 1;
+            plane.position.set(x * m1, y * m1, -1*m2 * m1);
+            plane.name = "stickerB";
+            planeCube.add(plane);
+            planes.push(plane);
+        }
+    }
+    // Down
+    for (let z = 1; z > -2; z--) {
+        for (let x = -1; x < 2; x++) {
+            let planeMaterial = new THREE.MeshBasicMaterial( {color: cCols[5][z+1][x+1], side: THREE.DoubleSide} );
+            let plane = new THREE.Mesh( planeGeometry, planeMaterial );
+            plane.renderOrder = 1;
+            plane.position.set(x * m1, -1*m2 * m1, z * m1);
+            plane.rotateX(Math.PI / 2);
+            plane.name = "stickerD";
             planeCube.add(plane);
             planes.push(plane);
         }
@@ -461,8 +532,6 @@ function init() {
     camera.position.y = 5;
     camera.position.z = 5;
     
-    camera.rotateX(-Math.PI / 4);
-    
     renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setClearColor( 0x000000, 0 );
     renderer.setSize($(cubePlayerDiv).parent().width(), $(cubePlayerDiv).parent().width());
@@ -473,13 +542,138 @@ function init() {
     controls.rotateSpeed = 0.5;
     controls.enableRotate = useControls;
     
+    rotateCamera('y', roty);
+    rotateCamera('x', rotx, new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z - 1));
+    
     $(cubePlayerDiv).empty();
     $(cubePlayerDiv).append( renderer.domElement );
-    
     adjustSize();
 
     anim = false;
     animate();
+}
+
+function playCube() {
+    $(button).prop('disabled', true);
+    $(buttonnxt).prop('disabled', true);
+    resetState();
+    const setup = scramble;
+    const moves = solution;
+
+    /* for (let m of (setup).split(" ")) {
+        mv(m);
+    } */
+
+    anim = true;
+    let mvs = (moves).split(" ");
+    playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
+    
+    let i = 0;
+    let interval = setInterval(() => {
+        if (i === mvs.length) {
+            clearInterval(interval);
+            anim = false;
+            $(button).prop('disabled', false);
+            $(buttonnxt).prop('disabled', false);
+        }
+        else {
+            if (tween) {
+                tween.progress(1);
+            }
+            mv(mvs[i]);
+        }
+        i++;
+    }, playMoveTime);
+}
+
+function playNext() {
+    $(button).prop('disabled', true);
+    $(buttonnxt).prop('disabled', true);
+    // Instantly finish the current move if it's running
+    if (tween && tween.progress() < 1) {
+        tween.progress(1);
+    }
+
+    resetState();
+    let sol = solution.split(" ");
+    let prevSol = sol.slice(0, iterator).join(" ");
+    let nextSol = sol[iterator];
+    const setup = scramble + " " + prevSol;
+    const moves = nextSol;
+
+    /* for (let m of setup.split(" ")) {
+        mv(m);
+    } */
+
+    anim = true;
+    let mvs = moves.split(" ");
+    playMoveTime = 100;
+
+    let i = 0;
+    let interval = setInterval(() => {
+        if (i === mvs.length) {
+            clearInterval(interval);
+            anim = false;
+            $(button).prop('disabled', false);
+            $(buttonnxt).prop('disabled', false);
+        } else {
+            mv(mvs[i]);
+        }
+        i++;
+    }, playMoveTime);
+    
+    iterator === sol.length - 1 ? iterator = 0 : iterator++;
+    $(this).attr("iterator", iterator);
+}
+
+function rotateCamera(axis, angle, target = new THREE.Vector3(0, 0, 0)) {
+    const offset = camera.position.clone().sub(target); // vector from target to camera
+    let radius, currentAngle, newAngle;
+
+    // Ensure angle is in radians; if it's in degrees, convert to radians
+    if (Math.abs(angle) > Math.PI) {
+        angle = THREE.MathUtils.degToRad(angle);  // Convert degrees to radians if necessary
+    }
+
+    switch (axis.toLowerCase()) {
+        case 'y': {
+            radius = Math.sqrt(offset.x ** 2 + offset.z ** 2);
+            currentAngle = Math.atan2(offset.x, offset.z); // Get the current angle in the X-Z plane
+            newAngle = currentAngle + angle;  // Adjust the angle based on input
+
+            offset.x = radius * Math.sin(newAngle);  // Recompute the x and z positions
+            offset.z = radius * Math.cos(newAngle);
+            break;
+        }
+
+        case 'x': {
+            radius = Math.sqrt(offset.y ** 2 + offset.z ** 2);
+            currentAngle = Math.atan2(offset.y, offset.z);  // Get the current angle in the Y-Z plane
+            newAngle = currentAngle + angle;  // Adjust the angle based on input
+
+            offset.y = radius * Math.sin(newAngle);  // Recompute the y and z positions
+            offset.z = radius * Math.cos(newAngle);
+            break;
+        }
+
+        case 'z': {
+            radius = Math.sqrt(offset.x ** 2 + offset.y ** 2);
+            currentAngle = Math.atan2(offset.y, offset.x);  // Get the current angle in the X-Y plane
+            newAngle = currentAngle + angle;  // Adjust the angle based on input
+
+            offset.x = radius * Math.cos(newAngle);  // Recompute the x and y positions
+            offset.y = radius * Math.sin(newAngle);
+            break;
+        }
+
+        default:
+            console.warn(`Unknown axis '${axis}' passed to rotateCamera`);
+            return;
+    }
+
+    // Update camera position based on the computed offset and look at the target
+    camera.position.copy(offset.add(target));
+    camera.lookAt(target);
 }
 
 function animate() {
@@ -501,16 +695,15 @@ function resetState() {
     for (let m of scramble.split(" ")) {
         mv(m);
     } */
-
     if (movesApplied.length !== 0) {
         for (let m of inverseAlg(movesApplied.slice().join(" ")).split(" ")) {
             mv(m);
         }
         movesApplied = [];
     }
-    /* for (let m of scramble.split(" ")) {
+    for (let m of scramble.split(" ")) {
         mv(m);
-    } */
+    }
 }
 
 function inverseAlg(alg) {
@@ -807,7 +1000,6 @@ function checkIfSolved() {
         planesB.filter(c => c === planesB[4]).length === 9 &&
         planesD.filter(c => c === planesD[4]).length === 9
     ) {
-        // console.log("SOLVED");
         if (solvedFunc !== "" && window[solvedFunc]) {
             window[solvedFunc]();
         }
@@ -1220,12 +1412,15 @@ function adjustSize() {
     $(buttonDiv).css("text-align", "center");
     $(button).css("position", "relative");
     $(button).css("z-index", "1");
-    $(button).css("min-width", $(cubePlayerDiv).width() * 0.2);
-    $(button).css("margin", "auto");
+    $(nextbutton).css("position", "relative");
+    $(nextbutton).css("z-index", "1");
     $(smartcubeButton).css("position", "relative");
     $(smartcubeButton).css("z-index", "1");
-    $(smartcubeButton).css("min-width", $(cubePlayerDiv).width() * 0.2);
+    $(smartcubeButton).css("min-width", $(cubePlayerDiv).width() * 0.4);
     $(smartcubeButton).css("margin", "auto");
+
+    $(buttonDiv).css("display", "grid");
+    $(buttonDiv).css("grid-template-columns", ("1fr ").repeat($(buttonDiv).children.length));
 
     $("cube-player canvas").css("outline", "none");
 }

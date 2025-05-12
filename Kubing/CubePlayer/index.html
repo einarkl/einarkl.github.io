@@ -20,16 +20,22 @@
                 let scramble = $("#inpScramble").val();
                 let solution = $("#inpSolution").val();
                 let time = $("#inpTime").val();
+                let tps = $("#inpTPS").val();
                 let cubestyle = $("#selCubestyle").find(":selected").val();
                 let logo = $("#inpLogo").val();
                 let colors = $("#inpColors").val();
+                let customcolors = $("#inpCustomcolors").val();
                 let plastic = $("#inpPlastic").val();
                 let playbutton = $("#selPlaybutton").find(":selected").val();
                 let smartcube = $("#selSmartcube").find(":selected").val();
+                let playatinit = $("#selPlayatinit").find(":selected").val();
                 let solvedfunc = $("#selSolvedfunc").find(":selected").val();
                 let useControls = $("#selControls").find(":selected").val();
-                let attributes = [scramble, solution, time, cubestyle, logo, colors, plastic, playbutton, smartcube, solvedfunc, useControls];
-                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "cubestyle", "logo", "colors", "plastic", "playbutton", "smartcube", "solvedfunc", "usecontrols"].indexOf(attr)]);
+                let fov = $("#inpfov").val();
+                let rotx = $("#inprotx").val();
+                let roty = $("#inproty").val();
+                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, smartcube, playatinit, solvedfunc, useControls, fov, rotx, roty];
+                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "solvedfunc", "usecontrols", "fov", "rotx", "roty"].indexOf(attr)]);
             }
 
             function customSolvedFunction() {
@@ -68,6 +74,11 @@
                     <td>time in ms</td>
                 </tr>
                 <tr>
+                    <td>tps</td>
+                    <td><input id="inpTPS" type="number" value="" onchange="updateAttr('tps')"></input></td>
+                    <td>turns per second, will be overwritten by time if it is not set to empty</td>
+                </tr>
+                <tr>
                     <td>cubestyle</td>
                     <td><select id="selCubestyle" onchange="updateAttr('cubestyle')">
                         <option value="solid" selected>solid</option>
@@ -83,8 +94,13 @@
                 </tr>
                 <tr>
                     <td>colors</td>
-                    <td><input id="inpColors" type="text" value="#ffffff,#ffaa00,#00ff00,#ff0000,#0000ff,#ffff00" onchange="updateAttr('colors')"></input></td>
+                    <td><input id="inpColors" type="text" value="#ffffff,#ffaa00,#00ff00,#ff0000,#0000ff,#ffff00,#000,#333,#666" onchange="updateAttr('colors')"></input></td>
                     <td>6 hex colors separated by , in order U L F R B D</td>
+                </tr>
+                <tr>
+                    <td>customcolors</td>
+                    <td><input id="inpCustomcolors" type="text" value="wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy" onchange="updateAttr('customcolors')"></input></td>
+                    <td>stickerbased colors, in order U L F R B D, then left to right on upper row, second row, bottom row for each face. WOGRBY for regular colors, 0-2 for custom colors (default is black and two shades of gray), then gray for anything else.</td>
                 </tr>
                 <tr>
                     <td>plastic</td>
@@ -108,6 +124,14 @@
                     <td>none | giiker</td>
                 </tr>
                 <tr>
+                    <td>playatinit</td>
+                    <td><select id="selPlayatinit" onchange="updateAttr('playatinit')">
+                        <option value="none" selected>none</option>
+                        <option value="yes">yes</option>
+                    </select></td>
+                    <td>Plays automatically at initialization. false | true</td>
+                </tr>
+                <tr>
                     <td>solvedfunc</td>
                     <td><select id="selSolvedfunc" onchange="updateAttr('solvedfunc')">
                         <option value="" selected>none (leave blank)</option>
@@ -123,6 +147,21 @@
                     </select></td>
                     <td>true | false</td>
                 </tr>
+                <tr>
+                    <td>fov</td>
+                    <td><input id="inpfov" type="number" value="40" min="0" max="100" step="1" onchange="updateAttr('fov')"></input></td>
+                    <td>camera fov</td>
+                </tr>
+                <tr>
+                    <td>rotx</td>
+                    <td><input id="inprotx" type="number" value="0" min="-1" max="1" step="0.1" onchange="updateAttr('rotx')"></input></td>
+                    <td>camera rotation x</td>
+                </tr>
+                <tr>
+                    <td>roty</td>
+                    <td><input id="inproty" type="number" value="0" min="-1" max="1" step="0.1" onchange="updateAttr('roty')"></input></td>
+                    <td>camera rotation y</td>
+                </tr>
             </table>
         </div>
         <div id="content">
@@ -130,6 +169,7 @@
             scramble="L2 R2 F2 L' R' D2 R L F2 U' D F2 U2 D2 L2 R2 F2 D' R L D'" 
             solution="D' L' R' U B2 D2 F2 L2 F2 U2 L2 U2 L2" 
             time="3000" 
+            tps="" 
             cubestyle="solid" 
             logo="./dayan-logo.jpg"
             colors="
@@ -138,12 +178,20 @@
                 #00ff00,
                 #ff0000,
                 #0000ff,
-                #ffff00" 
+                #ffff00,
+                #000,
+                #333,
+                #666"
+            customcolors="wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy"
             plastic="#000000"
             playbutton="button"
             smartcube="none"
+            playatinit="none"
             solvedfunc="none"
-            usecontrols="true">
+            usecontrols="true"
+            fov="40"
+            rotx="0"
+            roty="0">
             </cube-player>
         </div>
     </body>

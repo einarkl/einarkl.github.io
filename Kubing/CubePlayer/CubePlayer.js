@@ -177,7 +177,7 @@ export class CubePlayer extends HTMLElement {
     }
     
     static get observedAttributes() {
-        return ["id", "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
+        return [/* "id", */ "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -187,9 +187,9 @@ export class CubePlayer extends HTMLElement {
             clearInterval(interval); // Stop interval
             
             switch (attr) {
-                case "id":
+                /* case "id":
                     this.id = newValue || "";
-                    break;
+                    break; */
                 case "scramble":
                     scramble = newValue || "";
                     // shouldInit = true;

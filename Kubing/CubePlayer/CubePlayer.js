@@ -42,6 +42,9 @@ let white, yellow, green, blue, red, orange;
 
 let solvedFunc;
 
+let interval;
+let currentPlayToken = 0;
+
 export class CubePlayer extends HTMLElement {
     constructor() {
         super();
@@ -180,17 +183,20 @@ export class CubePlayer extends HTMLElement {
     attributeChangedCallback(attr, oldValue, newValue) {
         let shouldInit = false;
         if (initialized) {
+            currentPlayToken++; // Invalidate current animation
+            clearInterval(interval); // Stop interval
+            
             switch (attr) {
                 case "id":
                     this.id = newValue || "";
                     break;
                 case "scramble":
                     scramble = newValue || "";
-                    shouldInit = true;
+                    // shouldInit = true;
                     break;
                 case "solution":
                     solution = newValue || "";
-                    shouldInit = true;
+                    // shouldInit = true;
                     break;
                 case "time":
                     time = newValue || "";
@@ -287,7 +293,7 @@ export class CubePlayer extends HTMLElement {
                 $(buttonnxt).attr("disabled", false);
             }
 
-            if (shouldInit && oldValue !== newValue) {
+            if (shouldInit/*  && oldValue !== newValue */) {
                 init();
             }
 
@@ -553,30 +559,65 @@ function init() {
     animate();
 }
 
+// function playCube() {
+//     $(button).prop('disabled', true);
+//     $(buttonnxt).prop('disabled', true);
+//     resetState();
+//     const setup = scramble;
+//     const moves = solution;
+
+//     /* for (let m of (setup).split(" ")) {
+//         mv(m);
+//     } */
+
+//     anim = true;
+//     let mvs = (moves).split(" ");
+//     playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
+    
+//     let i = 0;
+//     interval = setInterval(() => {
+//         if (i === mvs.length) {
+//             clearInterval(interval);
+//             anim = false;
+//             $(button).prop('disabled', false);
+//             $(buttonnxt).prop('disabled', false);
+//         }
+//         else {
+//             if (tween) {
+//                 tween.progress(1);
+//             }
+//             mv(mvs[i]);
+//         }
+//         i++;
+//     }, playMoveTime);
+// }
 function playCube() {
     $(button).prop('disabled', true);
     $(buttonnxt).prop('disabled', true);
     resetState();
+
     const setup = scramble;
     const moves = solution;
-
-    /* for (let m of (setup).split(" ")) {
-        mv(m);
-    } */
+    const mvs = moves.split(" ");
 
     anim = true;
-    let mvs = (moves).split(" ");
     playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
-    
+
     let i = 0;
-    let interval = setInterval(() => {
+    const token = ++currentPlayToken; // Increment to invalidate previous animations
+
+    interval = setInterval(() => {
+        if (token !== currentPlayToken) {
+            clearInterval(interval); // Stop if token is invalid
+            anim = false;
+            return;
+        }
         if (i === mvs.length) {
             clearInterval(interval);
             anim = false;
             $(button).prop('disabled', false);
             $(buttonnxt).prop('disabled', false);
-        }
-        else {
+        } else {
             if (tween) {
                 tween.progress(1);
             }
@@ -585,6 +626,7 @@ function playCube() {
         i++;
     }, playMoveTime);
 }
+
 
 function playNext() {
     $(button).prop('disabled', true);
@@ -610,7 +652,7 @@ function playNext() {
     playMoveTime = 100;
 
     let i = 0;
-    let interval = setInterval(() => {
+    interval = setInterval(() => {
         if (i === mvs.length) {
             clearInterval(interval);
             anim = false;

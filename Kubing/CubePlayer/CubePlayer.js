@@ -130,10 +130,15 @@ export class CubePlayer extends HTMLElement {
             }
 
             if (solution === "") {
-                $(buttonDiv).attr("disabled", true);
+                $(button).attr("disabled", true);
+                $(buttonnxt).attr("disabled", true);
+            }
+            else if (solution.split(" ").length === 1) {
+                $(buttonnxt).attr("disabled", true);
             }
             else {
-                $(buttonDiv).attr("disabled", false);
+                $(button).attr("disabled", false);
+                $(buttonnxt).attr("disabled", false);
             }
 
             planes = [];
@@ -286,6 +291,9 @@ export class CubePlayer extends HTMLElement {
 
             if (solution === "") {
                 $(button).attr("disabled", true);
+                $(buttonnxt).attr("disabled", true);
+            }
+            else if (solution.split(" ").length === 1) {
                 $(buttonnxt).attr("disabled", true);
             }
             else {

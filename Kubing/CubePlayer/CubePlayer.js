@@ -594,6 +594,10 @@ function init() {
 function playCube() {
     $(button).prop('disabled', true);
     $(buttonnxt).prop('disabled', true);
+    // Instantly finish the current move if it's running
+    if (tween && tween.progress() < 1) {
+        tween.progress(1);
+    }
     resetState();
 
     const setup = scramble;
@@ -652,7 +656,14 @@ function playNext() {
     playMoveTime = 100;
 
     let i = 0;
+    const token = ++currentPlayToken; // Increment to invalidate previous animations
+    
     interval = setInterval(() => {
+        if (token !== currentPlayToken) {
+            clearInterval(interval); // Stop if token is invalid
+            anim = false;
+            return;
+        }
         if (i === mvs.length) {
             clearInterval(interval);
             anim = false;

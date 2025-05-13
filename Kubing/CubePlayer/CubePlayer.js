@@ -174,7 +174,9 @@ export class CubePlayer extends HTMLElement {
             resetState();
            
             if (playatinit === "yes" && !playing) {
-                playCube();
+                setTimeout(() => {
+                    playCube();
+                }, 50);
             }
 
             initialized = true;
@@ -318,7 +320,9 @@ export class CubePlayer extends HTMLElement {
 
             resetState();
             if (playatinit === "yes" && attr === "solution" && !playing) {
-                playCube();
+                setTimeout(() => {
+                    playCube();
+                }, 50);
             }
         }
     }

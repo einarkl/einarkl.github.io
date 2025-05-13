@@ -43,7 +43,7 @@ let white, yellow, green, blue, red, orange;
 let solvedFunc;
 
 let interval;
-let currentPlayToken = 0;
+let playing = false;
 
 export class CubePlayer extends HTMLElement {
     constructor() {
@@ -173,7 +173,7 @@ export class CubePlayer extends HTMLElement {
 
             resetState();
            
-            if (playatinit === "yes") {
+            if (playatinit === "yes" && !playing) {
                 playCube();
             }
 
@@ -188,7 +188,6 @@ export class CubePlayer extends HTMLElement {
     attributeChangedCallback(attr, oldValue, newValue) {
         let shouldInit = false;
         if (initialized) {
-            currentPlayToken++; // Invalidate current animation
             clearInterval(interval); // Stop interval
             
             switch (attr) {
@@ -318,7 +317,7 @@ export class CubePlayer extends HTMLElement {
             } */
 
             resetState();
-            if (playatinit === "yes") {
+            if (playatinit === "yes" && attr === "solution" && !playing) {
                 playCube();
             }
         }
@@ -565,76 +564,43 @@ function init() {
     animate();
 }
 
-// function playCube() {
-//     $(button).prop('disabled', true);
-//     $(buttonnxt).prop('disabled', true);
-//     resetState();
-//     const setup = scramble;
-//     const moves = solution;
-
-//     /* for (let m of (setup).split(" ")) {
-//         mv(m);
-//     } */
-
-//     anim = true;
-//     let mvs = (moves).split(" ");
-//     playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
-    
-//     let i = 0;
-//     interval = setInterval(() => {
-//         if (i === mvs.length) {
-//             clearInterval(interval);
-//             anim = false;
-//             $(button).prop('disabled', false);
-//             $(buttonnxt).prop('disabled', false);
-//         }
-//         else {
-//             if (tween) {
-//                 tween.progress(1);
-//             }
-//             mv(mvs[i]);
-//         }
-//         i++;
-//     }, playMoveTime);
-// }
 function playCube() {
-    $(button).prop('disabled', true);
-    $(buttonnxt).prop('disabled', true);
-    // Instantly finish the current move if it's running
-    if (tween && tween.progress() < 1) {
-        tween.progress(1);
-    }
-    resetState();
-
-    const setup = scramble;
-    const moves = solution;
-    const mvs = moves.split(" ");
-
-    anim = true;
-    playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
-
-    let i = 0;
-    const token = ++currentPlayToken; // Increment to invalidate previous animations
-
-    interval = setInterval(() => {
-        if (token !== currentPlayToken) {
-            clearInterval(interval); // Stop if token is invalid
-            anim = false;
-            return;
+    if (!playing) {
+        console.log(playing)
+        playing = true;
+        $(button).prop('disabled', true);
+        $(buttonnxt).prop('disabled', true);
+        // Instantly finish the current move if it's running
+        if (tween && tween.progress() < 1) {
+            tween.progress(1);
         }
-        if (i === mvs.length) {
-            clearInterval(interval);
-            anim = false;
-            $(button).prop('disabled', false);
-            $(buttonnxt).prop('disabled', false);
-        } else {
-            if (tween) {
-                tween.progress(1);
+        resetState();
+
+        const setup = scramble;
+        const moves = solution;
+        const mvs = moves.split(" ");
+
+        anim = true;
+        playMoveTime = tps !== "" ? 1000 / tps : time === "" ? stdTime * 1000 : time / mvs.length;
+
+        let i = 0;
+
+        interval = setInterval(() => {
+            if (i === mvs.length) {
+                clearInterval(interval);
+                anim = false;
+                $(button).prop('disabled', false);
+                $(buttonnxt).prop('disabled', false);
+                playing = false;
+            } else {
+                if (tween) {
+                    tween.progress(1);
+                }
+                mv(mvs[i]);
             }
-            mv(mvs[i]);
-        }
-        i++;
-    }, playMoveTime);
+            i++;
+        }, playMoveTime);
+    }
 }
 
 
@@ -668,14 +634,8 @@ function playNext() {
         playMoveTime = 100;
 
         let i = 0;
-        const token = ++currentPlayToken; // Increment to invalidate previous animations
         
         interval = setInterval(() => {
-            if (token !== currentPlayToken) {
-                clearInterval(interval); // Stop if token is invalid
-                anim = false;
-                return;
-            }
             if (i === mvs.length) {
                 clearInterval(interval);
                 anim = false;

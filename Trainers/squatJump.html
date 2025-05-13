@@ -47,7 +47,7 @@
 	▶️ Hold <strong>Spacebar</strong><br>
 	⏬ Release it<br>
 	🎯 Re-press <strong>on the next frame</strong><br>
-	⏱️ Hold it for <strong>0.6s (36 frames)</strong><br><br>
+	⏱️ Hold it for <strong>0.3s (18 frames)</strong><br><br>
 	🔁 Hold space again to reset
 </div>
 
@@ -77,67 +77,68 @@
 	let waitingForRepress = false;
 	let frameAfterRelease = null;
 	let holdStartFrame = null;
-	const requiredHoldFrames = 36;
+	const requiredHoldFrames = 18;
 	let inputComplete = false;
 	let repressAccepted = false;
 
-	function setFeedback(el, text, className = "") {
+	function setFeedback(el, text, className = "", bold = false) {
+		document.querySelectorAll('.feedback').forEach(feedback => {
+			feedback.classList.remove('current');
+		});
 		el.textContent = text;
 		el.className = "feedback " + className;
 	}
 
 	window.addEventListener("keydown", (e) => {
-if (e.code === "Space") {
-	const thisPressFrame = currentFrame;
+		if (e.code === "Space") {
+			const thisPressFrame = currentFrame;
 
-	if (!isHolding) {
-	isHolding = true;
+			if (!isHolding) {
+			isHolding = true;
 
-	// If input is complete and you're pressing again, it's a reset
-	if (inputComplete) {
-		reset();
-		setFeedback(feedback1, "Holding... waiting for release", "waiting");
-		return;
-	}
+			// If input is complete and you're pressing again, it's a reset
+			if (inputComplete) {
+				reset();
+				setFeedback(feedback1, "Holding... waiting for release", "waiting");
+				return;
+			}
 
-	// Normal repress logic (after release)
-	if (waitingForRepress) {
-		const delta = thisPressFrame - frameAfterRelease;
+			// Normal repress logic (after release)
+			if (waitingForRepress) {
+				const delta = thisPressFrame - frameAfterRelease;
 
-		if (delta === 0) {
-		holdStartFrame = currentFrame;
-		setFeedback(feedback2, "🎯 Perfect! Repressed on exact frame", "good");
-		} else if (delta < 0) {
-		setFeedback(feedback2, `❌ Too early by ${Math.abs(delta)} frame${Math.abs(delta) === 1 ? '' : 's'}`, "fail");
-		holdStartFrame = currentFrame;
-		} else {
-		setFeedback(feedback2, `❌ Too late by ${delta} frame${delta === 1 ? '' : 's'}`, "fail");
-		holdStartFrame = currentFrame;
+				if (delta === 0) {
+				holdStartFrame = currentFrame;
+				setFeedback(feedback2, "🎯 Perfect! Repressed on exact frame", "good");
+				} else if (delta < 0) {
+				setFeedback(feedback2, `❌ Too early by ${Math.abs(delta)} frame${Math.abs(delta) === 1 ? '' : 's'}`, "fail");
+				holdStartFrame = currentFrame;
+				} else {
+				setFeedback(feedback2, `❌ Too late by ${delta} frame${delta === 1 ? '' : 's'}`, "fail");
+				holdStartFrame = currentFrame;
+				}
+
+				waitingForRepress = false;
+			}
+			} else {
+			// You're trying to press again *while already holding*
+			// But if it's the first time ever, let it start clean
+			if (releasedFrame === null && holdStartFrame === null && !inputComplete) {
+				// First press ever — start the cycle
+				holdStartFrame = null;
+				setFeedback(feedback1, "Holding... waiting for release", "waiting");
+				return;
+			}
+
+			// If you try to repress while still holding, that's a too-early repress
+			if (!waitingForRepress && !inputComplete) {
+				const delta = releasedFrame !== null ? thisPressFrame - releasedFrame : "?";
+				setFeedback(feedback2, `❌ Repressed too early (still holding initial press)`, "fail");
+				inputComplete = true;
+			}
+			}
 		}
-
-		waitingForRepress = false;
-	}
-	} else {
-	// You're trying to press again *while already holding*
-	// But if it's the first time ever, let it start clean
-	if (releasedFrame === null && holdStartFrame === null && !inputComplete) {
-		// First press ever — start the cycle
-		holdStartFrame = null;
-		setFeedback(feedback1, "Holding... waiting for release", "waiting");
-		return;
-	}
-
-	// If you try to repress while still holding, that's a too-early repress
-	if (!waitingForRepress && !inputComplete) {
-		const delta = releasedFrame !== null ? thisPressFrame - releasedFrame : "?";
-		setFeedback(feedback2, `❌ Repressed too early (still holding initial press)`, "fail");
-		inputComplete = true;
-	}
-	}
-}
-});
-
-
+	});
 
 	window.addEventListener("keyup", (e) => {
 		if (e.code === "Space") {
@@ -190,6 +191,5 @@ if (e.code === "Space") {
 
 	gameLoop();
 </script>
-
 </body>
 </html>

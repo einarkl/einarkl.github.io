@@ -191,6 +191,7 @@ export class CubePlayer extends HTMLElement {
         let shouldInit = false;
         if (initialized) {
             clearInterval(interval); // Stop interval
+            playing = false;
             
             switch (attr) {
                 /* case "id":
@@ -202,7 +203,6 @@ export class CubePlayer extends HTMLElement {
                     break;
                 case "solution":
                     solution = newValue || "";
-                    playing = false;
                     // shouldInit = true;
                     break;
                 case "time":
@@ -320,7 +320,7 @@ export class CubePlayer extends HTMLElement {
             } */
 
             resetState();
-            if (playatinit === "yes" && attr === "solution" && !playing) {
+            if (playatinit === "yes" && attr === "solution") {
                 setTimeout(() => {
                     playCube();
                 }, 50);

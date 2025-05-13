@@ -645,46 +645,49 @@ function playNext() {
     if (tween && tween.progress() < 1) {
         tween.progress(1);
     }
-    if (iterator === 0) {
+    if (iterator === -1) {
         resetState();
+        iterator = 0;
+        $(button).prop('disabled', false);
+        $(buttonnxt).prop('disabled', false);
     }
+    else {
+        // resetState();
+        let sol = solution.split(" ");
+        let prevSol = sol.slice(0, iterator).join(" ");
+        let nextSol = sol[iterator];
+        const setup = scramble + " " + prevSol;
+        const moves = nextSol;
 
-    // resetState();
-    let sol = solution.split(" ");
-    let prevSol = sol.slice(0, iterator).join(" ");
-    let nextSol = sol[iterator];
-    const setup = scramble + " " + prevSol;
-    const moves = nextSol;
+        /* for (let m of setup.split(" ")) {
+            mv(m);
+        } */
 
-    /* for (let m of setup.split(" ")) {
-        mv(m);
-    } */
+        anim = true;
+        let mvs = moves.split(" ");
+        playMoveTime = 100;
 
-    anim = true;
-    let mvs = moves.split(" ");
-    playMoveTime = 100;
-
-    let i = 0;
-    const token = ++currentPlayToken; // Increment to invalidate previous animations
-    
-    interval = setInterval(() => {
-        if (token !== currentPlayToken) {
-            clearInterval(interval); // Stop if token is invalid
-            anim = false;
-            return;
-        }
-        if (i === mvs.length) {
-            clearInterval(interval);
-            anim = false;
-            $(button).prop('disabled', false);
-            $(buttonnxt).prop('disabled', false);
-        } else {
-            mv(mvs[i]);
-        }
-        i++;
-    }, playMoveTime);
-    
-    iterator === sol.length - 1 ? iterator = 0 : iterator++;
+        let i = 0;
+        const token = ++currentPlayToken; // Increment to invalidate previous animations
+        
+        interval = setInterval(() => {
+            if (token !== currentPlayToken) {
+                clearInterval(interval); // Stop if token is invalid
+                anim = false;
+                return;
+            }
+            if (i === mvs.length) {
+                clearInterval(interval);
+                anim = false;
+                $(button).prop('disabled', false);
+                $(buttonnxt).prop('disabled', false);
+            } else {
+                mv(mvs[i]);
+            }
+            i++;
+        }, playMoveTime);
+        iterator === sol.length - 1 ? iterator = -1 : iterator++;
+    }
     $(this).attr("iterator", iterator);
 }
 

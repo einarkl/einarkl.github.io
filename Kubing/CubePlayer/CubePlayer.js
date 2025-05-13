@@ -202,6 +202,7 @@ export class CubePlayer extends HTMLElement {
                     break;
                 case "solution":
                     solution = newValue || "";
+                    playing = false;
                     // shouldInit = true;
                     break;
                 case "time":
@@ -579,7 +580,6 @@ function playCube() {
         }
         resetState();
 
-        const setup = scramble;
         const moves = solution;
         const mvs = moves.split(" ");
 
@@ -625,10 +625,10 @@ function playNext() {
         let sol = solution.split(" ");
         let prevSol = sol.slice(0, iterator).join(" ");
         let nextSol = sol[iterator];
-        const setup = scramble + " " + prevSol;
         const moves = nextSol;
 
-        /* for (let m of setup.split(" ")) {
+        /* 
+            const setup = scramble + " " + prevSol;for (let m of setup.split(" ")) {
             mv(m);
         } */
 

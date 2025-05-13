@@ -190,6 +190,9 @@ export class CubePlayer extends HTMLElement {
     attributeChangedCallback(attr, oldValue, newValue) {
         let shouldInit = false;
         if (initialized) {
+            if (tween && tween.progress() < 1) {
+                tween.progress(1);
+            }
             clearInterval(interval); // Stop interval
             playing = false;
             

@@ -58,7 +58,6 @@ export class CubePlayer extends HTMLElement {
             this.id = this.getAttribute("id") || this.id;
             scramble = this.getAttribute("scramble") || "";
             solution = this.getAttribute("solution") || "";
-            
             scramble = scramble.replaceAll("(", "").replaceAll(")", "");
             solution = solution.replaceAll("(", "").replaceAll(")", "");
 
@@ -647,6 +646,9 @@ function playNext() {
     if (tween && tween.progress() < 1) {
         tween.progress(1);
     }
+    if (iterator === 0) {
+        resetState();
+    }
 
     // resetState();
     let sol = solution.split(" ");
@@ -762,6 +764,8 @@ function resetState() {
         }
         movesApplied = [];
     }
+    /* customcolors = "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
+    init(); */
     for (let m of scramble.split(" ")) {
         mv(m);
     }

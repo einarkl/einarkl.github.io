@@ -239,15 +239,15 @@ export class CubePlayer extends HTMLElement {
                     break;
                 case "playbutton":
                     playbutton = newValue || "none";
-                    shouldInit = true;
+                    // shouldInit = true;
                     break;
                 case "nextbutton":
                     nextbutton = newValue || "none";
-                    shouldInit = true;
+                    // shouldInit = true;
                     break;
                 case "smartcube":
                     smartcube = newValue === "giiker" ? newValue : "none";
-                    shouldInit = true;
+                    // shouldInit = true;
                     break;
                 case "playatinit":
                     playatinit = newValue === "yes" ? newValue : "none";

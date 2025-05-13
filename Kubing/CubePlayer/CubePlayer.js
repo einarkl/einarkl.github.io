@@ -566,7 +566,6 @@ function init() {
 
 function playCube() {
     if (!playing) {
-        console.log(playing)
         playing = true;
         $(button).prop('disabled', true);
         $(buttonnxt).prop('disabled', true);

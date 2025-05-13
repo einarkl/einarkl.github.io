@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🚀 Squat Jump Trainer 🪐</title>
+<style>
+	body {
+	font-family: sans-serif;
+	background: #121212;
+	color: white;
+	text-align: center;
+	padding-top: 30px;
+	}
+	.instructions {
+	font-size: 1.2em;
+	margin-bottom: 20px;
+	}
+	.step-container {
+	display: flex;
+	justify-content: center;
+	gap: 20px;
+	margin-top: 30px;
+	}
+	.step-box {
+	background: #1e1e1e;
+	border: 2px solid #333;
+	border-radius: 10px;
+	padding: 15px;
+	width: 200px;
+	}
+	.step-title {
+	font-weight: bold;
+	margin-bottom: 10px;
+	font-size: 1.1em;
+	}
+	.feedback {
+	font-size: 1.1em;
+	}
+	.good { color: lime; }
+	.fail { color: red; }
+	.waiting { color: orange; }
+</style>
+</head>
+<body>
+<h1>🚀 Squat Jump Trainer 🪐</h1>
+<div class="instructions">
+	▶️ Hold <strong>Spacebar</strong><br>
+	⏬ Release it<br>
+	🎯 Re-press <strong>on the next frame</strong><br>
+	⏱️ Hold it for <strong>0.6s (36 frames)</strong><br><br>
+	🔁 Hold space again to reset
+</div>
+
+<div class="step-container">
+	<div class="step-box">
+	<div class="step-title">Step 1: Hold & Release</div>
+	<div id="feedback1" class="feedback waiting">Waiting...</div>
+	</div>
+	<div class="step-box">
+	<div class="step-title">Step 2: Repress Timing</div>
+	<div id="feedback2" class="feedback waiting">Waiting...</div>
+	</div>
+	<div class="step-box">
+	<div class="step-title">Step 3: Hold Duration</div>
+	<div id="feedback3" class="feedback waiting">Waiting...</div>
+	</div>
+</div>
+
+<script>
+	const feedback1 = document.getElementById("feedback1");
+	const feedback2 = document.getElementById("feedback2");
+	const feedback3 = document.getElementById("feedback3");
+
+	let isHolding = false;
+	let releasedFrame = null;
+	let currentFrame = 0;
+	let waitingForRepress = false;
+	let frameAfterRelease = null;
+	let holdStartFrame = null;
+	const requiredHoldFrames = 36;
+	let inputComplete = false;
+	let repressAccepted = false;
+
+	function setFeedback(el, text, className = "") {
+		el.textContent = text;
+		el.className = "feedback " + className;
+	}
+
+	window.addEventListener("keydown", (e) => {
+if (e.code === "Space") {
+	const thisPressFrame = currentFrame;
+
+	if (!isHolding) {
+	isHolding = true;
+
+	// If input is complete and you're pressing again, it's a reset
+	if (inputComplete) {
+		reset();
+		setFeedback(feedback1, "Holding... waiting for release", "waiting");
+		return;
+	}
+
+	// Normal repress logic (after release)
+	if (waitingForRepress) {
+		const delta = thisPressFrame - frameAfterRelease;
+
+		if (delta === 0) {
+		holdStartFrame = currentFrame;
+		setFeedback(feedback2, "🎯 Perfect! Repressed on exact frame", "good");
+		} else if (delta < 0) {
+		setFeedback(feedback2, `❌ Too early by ${Math.abs(delta)} frame${Math.abs(delta) === 1 ? '' : 's'}`, "fail");
+		holdStartFrame = currentFrame;
+		} else {
+		setFeedback(feedback2, `❌ Too late by ${delta} frame${delta === 1 ? '' : 's'}`, "fail");
+		holdStartFrame = currentFrame;
+		}
+
+		waitingForRepress = false;
+	}
+	} else {
+	// You're trying to press again *while already holding*
+	// But if it's the first time ever, let it start clean
+	if (releasedFrame === null && holdStartFrame === null && !inputComplete) {
+		// First press ever — start the cycle
+		holdStartFrame = null;
+		setFeedback(feedback1, "Holding... waiting for release", "waiting");
+		return;
+	}
+
+	// If you try to repress while still holding, that's a too-early repress
+	if (!waitingForRepress && !inputComplete) {
+		const delta = releasedFrame !== null ? thisPressFrame - releasedFrame : "?";
+		setFeedback(feedback2, `❌ Repressed too early (still holding initial press)`, "fail");
+		inputComplete = true;
+	}
+	}
+}
+});
+
+
+
+	window.addEventListener("keyup", (e) => {
+		if (e.code === "Space") {
+			if (!isHolding) return;
+				isHolding = false;
+
+				if (holdStartFrame !== null) {
+					const heldFrames = currentFrame - holdStartFrame;
+					const frameDelta = heldFrames - requiredHoldFrames;
+
+					if (heldFrames === requiredHoldFrames) {
+					setFeedback(feedback3, `🎯 Perfect! Held ${heldFrames} frames`, "good");
+					} else if (heldFrames >= requiredHoldFrames - 5 && heldFrames <= requiredHoldFrames + 5) {
+					const sign = frameDelta > 0 ? "+" : "";
+					setFeedback(feedback3, `✅ Acceptable: Held ${heldFrames} (${sign}${frameDelta})`, "good");
+					} else {
+					const sign = frameDelta > 0 ? "+" : "";
+					setFeedback(feedback3, `❌ Off by ${sign}${frameDelta} frames (held ${heldFrames})`, "fail");
+					}
+
+					holdStartFrame = null;
+					inputComplete = true;
+				} else {
+					releasedFrame = currentFrame;
+					frameAfterRelease = currentFrame + 1;
+					waitingForRepress = true;
+					setFeedback(feedback1, "Released! Wait 1 frame...", "waiting");
+				}
+			}
+	});
+
+	function reset() {
+		releasedFrame = null;
+		frameAfterRelease = null;
+		holdStartFrame = null;
+		waitingForRepress = false;
+		isHolding = true; // space is being held again
+		inputComplete = false;
+		repressAccepted = false;
+
+		setFeedback(feedback1, "Holding... waiting for release", "waiting");
+		setFeedback(feedback2, "Waiting...", "waiting");
+		setFeedback(feedback3, "Waiting...", "waiting");
+	}
+
+	function gameLoop() {
+		currentFrame++;
+		requestAnimationFrame(gameLoop);
+	}
+
+	gameLoop();
+</script>
+
+</body>
+</html>

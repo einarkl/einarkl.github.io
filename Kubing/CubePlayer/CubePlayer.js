@@ -133,6 +133,7 @@ export class CubePlayer extends HTMLElement {
                 $(buttonnxt).attr("disabled", true);
             }
             else if (solution.split(" ").length === 1) {
+                $(button).attr("disabled", false);
                 $(buttonnxt).attr("disabled", true);
             }
             else {

@@ -274,18 +274,15 @@ export class CubePlayer extends HTMLElement {
             }
 
             if (smartcube !== "none") {
-                $(button).css("display", "none");
-                $(buttonnxt).css("display", "none");
+                $(buttonDiv).css("display", "none");
                 $(smartcubeButton).css("display", "block");
             }
             else if (playbutton !== "none") {
-                $(button).css("display", "block");
-                $(buttonnxt).css("display", "block");
+                $(buttonDiv).css("display", "block");
                 $(smartcubeButton).css("display", "none");
             }
             else {
-                $(button).css("display", "none");
-                $(buttonnxt).css("display", "none");
+                $(buttonDiv).css("display", "none");
                 $(smartcubeButton).css("display", "none");
             }
 
@@ -294,6 +291,7 @@ export class CubePlayer extends HTMLElement {
                 $(buttonnxt).attr("disabled", true);
             }
             else if (solution.split(" ").length === 1) {
+                $(button).attr("disabled", false);
                 $(buttonnxt).attr("disabled", true);
             }
             else {

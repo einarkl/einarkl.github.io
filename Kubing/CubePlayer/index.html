@@ -29,13 +29,14 @@
                 let playbutton = $("#selPlaybutton").find(":selected").val();
                 let smartcube = $("#selSmartcube").find(":selected").val();
                 let playatinit = $("#selPlayatinit").find(":selected").val();
+                let triggerplay = $("#selTriggerplay").find(":selected").val();
                 let solvedfunc = $("#selSolvedfunc").find(":selected").val();
                 let useControls = $("#selControls").find(":selected").val();
                 let fov = $("#inpfov").val();
                 let rotx = $("#inprotx").val();
                 let roty = $("#inproty").val();
-                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, smartcube, playatinit, solvedfunc, useControls, fov, rotx, roty];
-                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "solvedfunc", "usecontrols", "fov", "rotx", "roty"].indexOf(attr)]);
+                let attributes = [scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, smartcube, playatinit, triggerplay, solvedfunc, useControls, fov, rotx, roty];
+                $("#content cube-player").attr(attr, attributes[["scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "triggerplay", "solvedfunc", "usecontrols", "fov", "rotx", "roty"].indexOf(attr)]);
             }
 
             function customSolvedFunction() {
@@ -129,7 +130,15 @@
                         <option value="none" selected>none</option>
                         <option value="yes">yes</option>
                     </select></td>
-                    <td>Plays automatically at initialization. false | true</td>
+                    <td>Plays automatically at initialization. none | yes</td>
+                </tr>
+                <tr>
+                    <td>triggerplay</td>
+                    <td><select id="selTriggerplay" onchange="updateAttr('triggerplay'); setTimeout(() => {$(this).val('none')}, 50)">
+                        <option value="none" selected>none</option>
+                        <option value="yes">yes</option>
+                    </select></td>
+                    <td>Plays automatically when attribute is added. none | yes</td>
                 </tr>
                 <tr>
                     <td>solvedfunc</td>

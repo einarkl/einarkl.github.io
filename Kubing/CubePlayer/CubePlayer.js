@@ -30,7 +30,7 @@ let movesApplied = [];
 let initialized = false;
 let cubePlayerHeight, cubePlayerWidth;
 
-let scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, nextbutton, smartcube, playatinit, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, fov, rotx, roty;
+let scramble, solution, time, tps, cubestyle, logo, colors, customcolors, plastic, playbutton, nextbutton, smartcube, playatinit, triggerplay, cubePlayerDiv, buttonDiv, button, buttonnxt, smartcubeButton, useControls, iterator, fov, rotx, roty;
 let planes = [];
 let scene, camera, renderer, controls;
 let anim = false;
@@ -45,6 +45,8 @@ let solvedFunc;
 let interval;
 let playing = false;
 
+let cubeplayer;
+
 export class CubePlayer extends HTMLElement {
     constructor() {
         super();
@@ -55,6 +57,7 @@ export class CubePlayer extends HTMLElement {
     connectedCallback() {
         initScripts();
         setTimeout(() => {
+            cubeplayer = this;
             this.id = this.getAttribute("id") || this.id;
             scramble = this.getAttribute("scramble") || "";
             solution = this.getAttribute("solution") || "";
@@ -88,6 +91,7 @@ export class CubePlayer extends HTMLElement {
             iterator = this.getAttribute("iterator") ? parseInt(this.getAttribute("iterator")) : 0;
             smartcube = this.getAttribute("smartcube") === "giiker" ? this.getAttribute("smartcube") : "none";
             playatinit = this.getAttribute("playatinit") === "yes" ? this.getAttribute("playatinit") : "none";
+            triggerplay = this.getAttribute("triggerplay") === "yes" ? this.getAttribute("triggerplay") : "none";
             solvedFunc = window[this.getAttribute("solvedfunc")] ? this.getAttribute("solvedfunc") : "";
             useControls = this.getAttribute("usecontrols") ? this.getAttribute("usecontrols").toLowerCase().trim() === "true" : false;
             fov = parseInt(this.getAttribute("fov")) || 40;
@@ -178,13 +182,20 @@ export class CubePlayer extends HTMLElement {
                     playCube();
                 }, 50);
             }
+            if (triggerplay === "yes" && !playing) {
+                setTimeout(() => {
+                    playCube();
+                    triggerplay = "none";
+                    this.setAttribute("triggerplay", "none");
+                }, 50);
+            }
 
             initialized = true;
         }, 500);
     }
     
     static get observedAttributes() {
-        return [/* "id", */ "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
+        return [/* "id", */ "scramble", "solution", "time", "tps", "cubestyle", "logo", "colors", "customcolors", "plastic", "playbutton", "smartcube", "playatinit", "triggerplay", "solvedfunc", "usecontrols", "fov", "rotx", "roty"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -257,6 +268,9 @@ export class CubePlayer extends HTMLElement {
                 case "playatinit":
                     playatinit = newValue === "yes" ? newValue : "none";
                     break;
+                case "triggerplay":
+                    triggerplay = newValue === "yes" ? newValue : "none";
+                    break;
                 case "solvedfunc":
                     solvedFunc = newValue || "";
                     break;
@@ -324,6 +338,11 @@ export class CubePlayer extends HTMLElement {
 
             resetState();
             if (playatinit === "yes" && attr === "solution") {
+                setTimeout(() => {
+                    playCube();
+                }, 50);
+            }
+            if (triggerplay === "yes" && !playing) {
                 setTimeout(() => {
                     playCube();
                 }, 50);
@@ -575,6 +594,8 @@ function init() {
 function playCube() {
     if (!playing) {
         playing = true;
+        triggerplay = "none";
+        $(cubeplayer).attr("triggerplay", "none");
         $(button).prop('disabled', true);
         $(buttonnxt).prop('disabled', true);
         // Instantly finish the current move if it's running
@@ -607,7 +628,7 @@ function playCube() {
             i++;
         }, playMoveTime);
         iterator = -1;
-        $(this).attr("iterator", iterator);
+        $(cubeplayer).attr("iterator", iterator);
     }
 }
 
@@ -655,7 +676,7 @@ function playNext() {
         }, playMoveTime);
         iterator === sol.length - 1 ? iterator = -1 : iterator++;
     }
-    $(this).attr("iterator", iterator);
+    $(cubeplayer).attr("iterator", iterator);
 }
 
 function rotateCamera(axis, angle, target = new THREE.Vector3(0, 0, 0)) {

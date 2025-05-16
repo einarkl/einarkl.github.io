@@ -606,9 +606,10 @@ function playCube() {
             }
             i++;
         }, playMoveTime);
+        iterator = -1;
+        $(this).attr("iterator", iterator);
     }
 }
-
 
 function playNext() {
     $(button).prop('disabled', true);

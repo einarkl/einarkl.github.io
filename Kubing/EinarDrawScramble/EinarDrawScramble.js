@@ -1,7 +1,7 @@
 let initializedScripts = false;
 
 export function initScripts() {
-    let urls = ["https://code.jquery.com/jquery-3.6.0.min.js", "https://einarkl.github.io/Kubing/Tools/tools.js"];
+    let urls = ["https://code.jquery.com/jquery-3.6.0.min.js", "https://einarkl.no/Kubing/Tools/tools.js"];
     for (let url of urls) {
         let script = document.createElement('script');
         script.setAttribute('src', url);

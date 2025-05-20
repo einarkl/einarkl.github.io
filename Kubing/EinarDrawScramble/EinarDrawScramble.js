@@ -29,6 +29,7 @@ export class EinarDrawScramble extends HTMLElement {
             let id = "svgEinarDrawScramble_" + (this.getAttribute("id") ? this.getAttribute("id") : "");
             let puzzle = this.getAttribute("puzzle") ? getPuzzle(this.getAttribute("puzzle")) : "3x3";
             let scramble = this.getAttribute("scramble") ? this.getAttribute("scramble") : "";
+            let flags = this.getAttribute("flags") ? this.getAttribute("flags") : "";
 
             let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
             svg.setAttribute("id", id);
@@ -38,13 +39,13 @@ export class EinarDrawScramble extends HTMLElement {
             this.setAttribute("width", "100%");
             this.setAttribute("height", "100%");
 
-            drawScramble("#" + id, puzzle, scramble);
+            drawScramble("#" + id, puzzle, scramble, flags);
             this.initialized = true;
         }, 500);
     }
     
     static get observedAttributes() {
-        return ["puzzle", "scramble"];
+        return ["puzzle", "scramble", "flags"];
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
@@ -52,7 +53,8 @@ export class EinarDrawScramble extends HTMLElement {
             let id = "svgEinarDrawScramble_" + (this.getAttribute("id") ? this.getAttribute("id") : "");
             let puz = this.getAttribute("puzzle") ? getPuzzle(this.getAttribute("puzzle")) : "3x3";
             let scr = this.getAttribute("scramble") ? this.getAttribute("scramble") : "";
-            drawScramble("#" + id, puz, scr);
+            let flags = this.getAttribute("flags") ? this.getAttribute("flags") : "";
+            drawScramble("#" + id, puz, scr, flags);
         }
     }
 }
@@ -66,7 +68,7 @@ function getPuzzle(puzzle) {
     }
 }
 
-function drawScramble(id, puzzle, scramble) {
+function drawScramble(id, puzzle, scramble, flags) {
     resetDrawSvg(id);
     let functions = [drawScrambleSkewb, drawScramblePyraminx, drawScrambleMegaminx, drawScrambleClock, drawScrambleSq1, drawScrambleSq1];
     let n = NaN;
@@ -75,7 +77,8 @@ function drawScramble(id, puzzle, scramble) {
     }
 
     if (n) {
-        drawScrambleNxN(id, n, scramble);
+        // drawScrambleNxN(id, n, scramble);
+        drawScrambleNxN_new(id, n, scramble, flags);
     }
     else if (["skewb", "pyraminx", "megaminx", "clock", "square-1", "sq1"].indexOf(puzzle) !== -1) {
         functions[["skewb", "pyraminx", "megaminx", "clock", "square-1", "sq1"].indexOf(puzzle)](id, scramble);

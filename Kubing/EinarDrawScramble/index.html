@@ -20,8 +20,9 @@
         function updateAttr(attr) {
             let puzzle = $("#selPuzzle").find(":selected").val();
             let scramble = $("#inpScramble").val();
-            let attributes = [puzzle, scramble];
-            $("einar-drawscramble").attr(attr, attributes[["puzzle", "scramble"].indexOf(attr)]);
+            let flags = $("#inpFlags").val();
+            let attributes = [puzzle, scramble, flags];
+            $("einar-drawscramble").attr(attr, attributes[["puzzle", "scramble", "flags"].indexOf(attr)]);
         }
     </script>
 </head>
@@ -31,6 +32,7 @@
             id="id"
             puzzle="3x3"
             scramble="F U R U' R' F'"
+            flags=""
         ></einar-drawscramble>
     </div>
     <div>
@@ -74,6 +76,11 @@
                 <td>scramble</td>
                 <td><input id="inpScramble" type="text" value="F U R U' R' F'" onchange="updateAttr('scramble')"></input></td>
                 <td>scramble</td>
+            </tr>
+            <tr>
+                <td>flags</td>
+                <td><input id="inpFlags" type="text" value="" onchange="updateAttr('flags')"></input></td>
+                <td>see <a href="../AlgDisplayer/colorFlags.md">flags</a> for reference</td>
             </tr>
         </table>
     </div>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagblock scrambler</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../../Tools/tools.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <link rel="shortcut icon" href="https://einarkl.no/favicon.png" type="image/x-icon">
+</head>
+<body>
+    <br>
+    <h3 style="color: white; font-family: monospace;">version 1.1</h3>
+    <label for="selN">N: </label>
+    <select id="selN">
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+    </select>
+    <h1 id="inpH1"><input type="text" placeholder="Scramble" id="inpScramble" oninput="drawScrambleSkewb('#svgSkewb', $(this).val())"></h1>
+    <div><svg id="svgSkewb"></svg></div>
+    <button id="btnScramble" onclick="$('#inpScramble').val(scrambleMiniblock()); drawScrambleSkewb('#svgSkewb', $('#inpScramble').val());">Scramble</button>
+    <h1 id="miniblockSetup">Setup to diagblock: </h1>
+</body>
+<script src="index.js" defer></script>
+</html>

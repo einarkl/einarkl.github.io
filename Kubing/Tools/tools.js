@@ -46,6 +46,11 @@ let colors222 = [
 // Get scramble
 {
     function getScrambleNxN(n) {
+        let bld = false;
+        if (n === "3b") {
+            n = 3;
+            bld = true;
+        }
         if (n < 2) {
             return "Don't be silly :P";
         }
@@ -67,6 +72,8 @@ let colors222 = [
         
         let curAxis = -1;
         let moves = [];
+        let r = bld ? Math.floor(Math.random() * 2 + 1) : 0;
+        
         for (let i = 0; i < num; i++) {
             let axis = Math.floor(Math.random() * axises.length);
 
@@ -84,12 +91,14 @@ let colors222 = [
             }
 
             let move = moves[Math.floor(Math.random() * moves.length)];
+            let moveW = r !== 0 && i >= num - r ? "w" : "";
             let moveE = movesExtra[Math.floor(Math.random() * movesExtra.length)];
             
             moves.splice(moves.indexOf(move), 1);
 
-            scr += move + moveE + " ";
+            scr += move + moveW + moveE + " ";
         }
+
         return scr.trim();
     }
 

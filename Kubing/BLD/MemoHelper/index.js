@@ -307,10 +307,13 @@ function get3style() {
 }
 
 function btnGetScrambleClick(scrType) {
-    cstimerScrambler.getScramble([scrType], function(scramble) {
+    /* cstimerScrambler.getScramble([scrType], function(scramble) {
         $("#inpScramble").val(scramble);
         getMemo();
-    });
+    }); */
+    scramble = getScrambleNxN("3b");
+    $("#inpScramble").val(scramble);
+    getMemo();
 }
 
 function initCSTimerScrambler() {

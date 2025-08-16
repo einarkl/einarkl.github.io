@@ -95,13 +95,13 @@
                 </tr>
                 <tr>
                     <td>colors</td>
-                    <td><input id="inpColors" type="text" value="#ffffff,#ffaa00,#00ff00,#ff0000,#0000ff,#ffff00,#000,#333,#666" onchange="updateAttr('colors')"></input></td>
-                    <td>6 hex colors separated by , in order U L F R B D</td>
+                    <td><input id="inpColors" type="text" value="#ffffff,#ffaa00,#00ff00,#ff0000,#0000ff,#ffff00,#cecece,#c98600,#00bb00,#b30000,#0000c2,#b9b900,#000,#333,#666" onchange="updateAttr('colors')"></input></td>
+                    <td>6 hex colors separated by , in order U L F R B D, then weak colors in same order, then 3 gray scale colors</td>
                 </tr>
                 <tr>
                     <td>customcolors</td>
-                    <td><input id="inpCustomcolors" type="text" value="wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy" onchange="updateAttr('customcolors')"></input></td>
-                    <td>stickerbased colors, in order U L F R B D, then left to right on upper row, second row, bottom row for each face. WOGRBY for regular colors, 0-2 for custom colors (default is black and two shades of gray), then gray for anything else.</td>
+                    <td><input id="inpCustomcolors" type="text" value="WWWWWWWWWOOOOOOOOOGGGGGGGGGRRRRRRRRRBBBBBBBBBYYYYYYYYY" onchange="updateAttr('customcolors')"></input></td>
+                    <td>stickerbased colors, in order U L F R B D, then left to right on upper row, second row, bottom row for each face. WOGRBY for regular colors, wogrby for weak colors, 0-2 for custom colors (default is black and two shades of gray), then gray for anything else.</td>
                 </tr>
                 <tr>
                     <td>plastic</td>
@@ -188,10 +188,16 @@
                 #ff0000,
                 #0000ff,
                 #ffff00,
+                #cecece,
+                #c98600,
+                #00bb00,
+                #b30000,
+                #0000c2,
+                #b9b900,
                 #000,
                 #333,
                 #666"
-            customcolors="wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy"
+            customcolors="WWWWWWWWWOOOOOOOOOGGGGGGGGGRRRRRRRRRBBBBBBBBBYYYYYYYYY"
             plastic="#000000"
             playbutton="button"
             smartcube="none"

@@ -38,7 +38,7 @@ let stdTime = 0.15;
 let playMoveTime;
 let tween;
 let planeCube, cube;
-let white, yellow, green, blue, red, orange;
+let white, yellow, green, blue, red, orange, whiteWeak, yellowWeak, greenWeak, blueWeak, redWeak, orangeWeak;
 
 let solvedFunc;
 
@@ -75,16 +75,22 @@ export class CubePlayer extends HTMLElement {
             tps = time === "" ? (parseFloat(this.getAttribute("tps")) || "") : "";
             cubestyle = this.getAttribute("cubestyle") || "solid";
             logo = this.getAttribute("logo") || "";
-            colors = this.getAttribute("colors") && this.getAttribute("colors").split(",").length === 6 ? this.getAttribute("colors").split(",").map(c => c.trim()) : 
+            colors = this.getAttribute("colors") && this.getAttribute("colors").split(",").length === 12 ? this.getAttribute("colors").split(",").map(c => c.trim()) : 
             [
                 "#ffffff",
                 "#ffaa00",
                 "#00ff00",
                 "#ff0000",
                 "#0000ff",
-                "#ffff00"
+                "#ffff00",
+                "#cecece",
+                "#c98600",
+                "#00bb00",
+                "#b30000",
+                "#0000c2",
+                "#b9b900"
             ];
-            customcolors = this.getAttribute("customcolors") || "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
+            customcolors = this.getAttribute("customcolors") || "WWWWWWWWWOOOOOOOOOGGGGGGGGGRRRRRRRRRBBBBBBBBBYYYYYYYYY";
             plastic = isColor(this.getAttribute("plastic")) ? this.getAttribute("plastic") : "#000000";
             playbutton = this.getAttribute("playbutton") || "none";
             nextbutton = this.getAttribute("nextbutton") || "none";
@@ -234,19 +240,28 @@ export class CubePlayer extends HTMLElement {
                     shouldInit = true;
                     break;
                 case "colors":
-                    colors = newValue.split(",").filter(c => isColor(c)).length === 6 ? newValue.split(",") : 
+                    colors = newValue.split(",").filter(c => isColor(c)).length === 15 ? newValue.split(",") : 
                     [
                         "#ffffff",
                         "#ffaa00",
                         "#00ff00",
                         "#ff0000",
                         "#0000ff",
-                        "#ffff00"
+                        "#ffff00",
+                        "#cecece",
+                        "#c98600",
+                        "#00bb00",
+                        "#b30000",
+                        "#0000c2",
+                        "#b9b900",
+                        "#000",
+                        "#333",
+                        "#666"
                     ];
                     shouldInit = true;
                     break;
                 case "customcolors":
-                    customcolors = newValue.split("").length === 54 ? newValue : "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy" || "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
+                    customcolors = newValue.split("").length === 54 ? newValue : "WWWWWWWWWOOOOOOOOOGGGGGGGGGRRRRRRRRRBBBBBBBBBYYYYYYYYY";
                     shouldInit = true;
                     break;
                 case "plastic":
@@ -361,16 +376,22 @@ function init() {
     let planeSize = cubestyle === "stickerless" ? 1 : 0.925;
     let geometry = new THREE.BoxGeometry( 1, 1, 1 );
     let planeGeometry = new THREE.PlaneGeometry( planeSize, planeSize );
-
+    
     let colWhite = isColor(colors[0]) ? colors[0] : "#ffffff";
     let colOrange = isColor(colors[1]) ? colors[1] : "#ffaa00";
     let colGreen = isColor(colors[2]) ? colors[2] : "#00ff00";
     let colRed = isColor(colors[3]) ? colors[3] : "#ff0000";
     let colBlue = isColor(colors[4]) ? colors[4] : "#0000ff";
     let colYellow = isColor(colors[5]) ? colors[5] : "#ffff00";
-    let colCustom0 = isColor(colors[6]) ? colors[6] : "#000";
-    let colCustom1 = isColor(colors[7]) ? colors[7] : "#333";
-    let colCustom2 = isColor(colors[8]) ? colors[8] : "#666";
+    let colWhiteWeak = isColor(colors[6]) ? colors[6] : "#cecece";
+    let colOrangeWeak = isColor(colors[7]) ? colors[7] : "#c98600";
+    let colGreenWeak = isColor(colors[8]) ? colors[8] : "#00bb00";
+    let colRedWeak = isColor(colors[9]) ? colors[9] : "#b30000";
+    let colBlueWeak = isColor(colors[10]) ? colors[10] : "#0000c2";
+    let colYellowWeak = isColor(colors[11]) ? colors[11] : "#b9b900";
+    let colCustom0 = isColor(colors[12]) ? colors[12] : "#000";
+    let colCustom1 = isColor(colors[13]) ? colors[13] : "#333";
+    let colCustom2 = isColor(colors[14]) ? colors[14] : "#666";
     let colGray = "#444";
     
     white = new THREE.MeshBasicMaterial( { color: colWhite });
@@ -379,14 +400,26 @@ function init() {
     blue = new THREE.MeshBasicMaterial( { color: colBlue } );
     red = new THREE.MeshBasicMaterial( { color: colRed } );
     orange = new THREE.MeshBasicMaterial( { color: colOrange } );
-
+    whiteWeak = new THREE.MeshBasicMaterial( { color: colWhiteWeak });
+    yellowWeak = new THREE.MeshBasicMaterial( { color: colYellowWeak } );
+    greenWeak = new THREE.MeshBasicMaterial( { color: colGreenWeak } );
+    blueWeak = new THREE.MeshBasicMaterial( { color: colBlueWeak } );
+    redWeak = new THREE.MeshBasicMaterial( { color: colRedWeak } );
+    orangeWeak = new THREE.MeshBasicMaterial( { color: colOrangeWeak } );
+    
     let cc = customcolors.split("").map(c => 
-        c === "w" ? colWhite :
-        c === "o" ? colOrange :
-        c === "g" ? colGreen :
-        c === "r" ? colRed :
-        c === "b" ? colBlue :
-        c === "y" ? colYellow :
+        c === "W" ? colWhite :
+        c === "O" ? colOrange :
+        c === "G" ? colGreen :
+        c === "R" ? colRed :
+        c === "B" ? colBlue :
+        c === "Y" ? colYellow :
+        c === "w" ? colWhiteWeak :
+        c === "o" ? colOrangeWeak :
+        c === "g" ? colGreenWeak :
+        c === "r" ? colRedWeak :
+        c === "b" ? colBlueWeak :
+        c === "y" ? colYellowWeak :
         c === "0" ? colCustom0 :
         c === "1" ? colCustom1 :
         c === "2" ? colCustom2 :
@@ -754,7 +787,7 @@ function resetState() {
         }
         movesApplied = [];
     }
-    /* customcolors = "wwwwwwwwwooooooooogggggggggrrrrrrrrrbbbbbbbbbyyyyyyyyy";
+    /* customcolors = "WWWWWWWWWOOOOOOOOOGGGGGGGGGRRRRRRRRRBBBBBBBBBYYYYYYYYY";
     init(); */
     for (let m of scramble.split(" ")) {
         mv(m);

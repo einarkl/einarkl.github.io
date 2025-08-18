@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pokémon Card Finder | EinarKL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script defer src="script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input, select, button { padding: 8px; margin: 5px 0; }
+        .tabs { margin-top: 20px; }
+        .tab-buttons { margin-bottom: 10px; }
+        .tab-buttons button { margin-right: 5px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+        #btnToggleTheme {
+            /* Remove fixed positioning and let it flow with content */
+            position: static;
+            top: unset;
+            right: unset;
+            background: none;
+            border: none;
+            margin-bottom: 16px;
+            cursor: pointer;
+        }
+        .thanks-footer {
+            position: static;
+            margin-top: 40px;
+            padding: 16px 0 0 0;
+            background: transparent;
+            text-align: right;
+            font-size: 0.97em;
+            color: #888;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .thanks-footer a { color: #888; pointer-events: auto; }
+    </style>
+</head>
+<body>
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h1 style="margin: 0;">Pokémon Card Finder</h1>
+        <button id="btnToggleTheme" onclick="toggleTheme()"></button>
+    </div>
+    <label for="names">Enter Pokémon names (comma-separated):</label><br>
+    <input type="text" id="names" size="50" placeholder="e.g. Leafeon, Sprigatito" /><br>
+
+    <label for="appearance">Filter by appearance type:</label><br>
+    <select id="appearance">
+        <option value="both">Main & Cameo</option>
+        <option value="main">Main only</option>
+        <option value="cameo">Cameo only</option>
+    </select><br>
+
+    <label for="format">Download format:</label><br>
+    <select id="format">
+        <option value="excel">Excel (.xlsx)</option>
+        <option value="csv">CSV (.zip)</option>
+    </select><br>
+
+    <button onclick="findCards()">Search</button>
+    <button onclick="downloadResults()">Download</button>
+    <p id="status"></p>
+    <div id="collection-counter"></div>
+
+    <div id="preview" class="tabs"></div>
+
+    <footer class="thanks-footer">
+        Thanks to
+        <a href="https://www.reddit.com/r/pkmntcgcollections/">r/pkmntcgcollections</a>
+        for the amazing
+        <a href="https://docs.google.com/spreadsheets/d/1CEQd82n6KfbNi4Whi4X5ApAk1uVD5LnMKN8FQ-RAAPg/edit?usp=sharing">spreadsheet</a>
+    </footer>
+</body>
+</html>

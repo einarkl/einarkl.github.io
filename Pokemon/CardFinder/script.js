@@ -512,6 +512,11 @@ function findCards(fromURL = false, filterOnly = false, keepTabIndex = 0) {
             }
 
             if (matched.length > 0) {
+                matched.sort((a, b) => {
+                    if (a["Appearance Type"] === b["Appearance Type"]) return 0;
+                    if (a["Appearance Type"] === "Main") return -1;
+                    return 1;
+                });
                 previewData[displayName] = matched;
                 totalFound += matched.length;
             }
@@ -593,6 +598,11 @@ function findCards(fromURL = false, filterOnly = false, keepTabIndex = 0) {
             }
 
             if (matched.length > 0) {
+                matched.sort((a, b) => {
+                    if (a["Appearance Type"] === b["Appearance Type"]) return 0;
+                    if (a["Appearance Type"] === "Main") return -1;
+                    return 1;
+                });
                 previewData[displayName] = matched;
                 totalFound += matched.length;
             }
@@ -673,6 +683,11 @@ function findCards(fromURL = false, filterOnly = false, keepTabIndex = 0) {
                 }
 
                 if (matched.length > 0) {
+                    matched.sort((a, b) => {
+                        if (a["Appearance Type"] === b["Appearance Type"]) return 0;
+                        if (a["Appearance Type"] === "Main") return -1;
+                        return 1;
+                    });
                     previewData[displayName] = matched;
                     totalFound += matched.length;
                 }

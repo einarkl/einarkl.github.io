@@ -462,36 +462,184 @@ function findCards(fromURL = false, filterOnly = false, keepTabIndex = 0) {
     const appearance = document.getElementById("appearance").value;
     const status = document.getElementById("status");
     const container = document.getElementById("preview");
-    if (normalizeNamesInput(namesInput) !== previousSearch) {
-        previousSearch = normalizeNamesInput(namesInput);
 
-        // Only update URL if not from URL load or filterOnly
-        if (!fromURL && !filterOnly) {
-            const newURL = new URL(window.location);
-            if (namesInput) {
-                newURL.searchParams.set('search', namesInput);
-            } else {
-                newURL.searchParams.delete('search');
+    // --- Always allow filtering if filterOnly is true ---
+    if (filterOnly && allFetchedData) {
+        status.textContent = "Filtering cards...";
+        previewData = {};
+        const names = namesInput
+            .split(',')
+            .map(name => normalize(name))
+            .filter(n => n.length > 0);
+
+        let totalFound = 0;
+        for (const rawName of names) {
+            const displayName = toCamelCase(rawName);
+            const seen = new Set();
+            const matched = [];
+
+            for (const row of allFetchedData) {
+                const cardName = row["Card Name"] || "";
+                const otherNames = row["Other Pokémon in Artwork"] || "";
+                const uniqueID = row["ID"];
+
+                const isMain = cardName.toLowerCase().includes(rawName);
+                const isCameo = otherNames.toLowerCase().includes(rawName);
+
+                let include = false;
+                let type = null;
+
+                if (isMain && (appearance === "main" || appearance === "both")) {
+                    include = true;
+                    type = "Main";
+                } else if (isCameo && (appearance === "cameo" || appearance === "both")) {
+                    include = true;
+                    type = "Cameo";
+                }
+
+                if (include && !seen.has(uniqueID)) {
+                    seen.add(uniqueID);
+                    matched.push({
+                        "Appearance Type": type,
+                        "Set": row["Set"],
+                        "Number": row["Number"],
+                        "Card Name": cardName,
+                        "Type": row["Type"],
+                        "Rarity / Variant": row["Rarity / Variant"],
+                        "Other Pokémon in Artwork": otherNames
+                    });
+                }
             }
-            window.history.replaceState({}, '', newURL);
+
+            if (matched.length > 0) {
+                previewData[displayName] = matched;
+                totalFound += matched.length;
+            }
         }
 
-        // If we already have allFetchedData, just filter it
-        if (allFetchedData && filterOnly) {
-            status.textContent = "Filtering cards...";
-            previewData = {};
-            const names = namesInput
-                .split(',')
-                .map(name => normalize(name))
-                .filter(n => n.length > 0);
+        if (totalFound === 0) {
+            status.textContent = "No matching cards found.";
+        } else {
+            status.textContent = `Found ${totalFound} card(s). Preview generated.`;
+            showPreview(previewData, keepTabIndex);
+        }
+        return;
+    }
+
+    // --- Only block new fetch if input is unchanged and not filtering ---
+    if (normalizeNamesInput(namesInput) === previousSearch && !filterOnly) {
+        // Do nothing (search is disabled)
+        return;
+    }
+    previousSearch = normalizeNamesInput(namesInput);
+
+    // Only update URL if not from URL load or filterOnly
+    if (!fromURL && !filterOnly) {
+        const newURL = new URL(window.location);
+        if (namesInput) {
+            newURL.searchParams.set('search', namesInput);
+        } else {
+            newURL.searchParams.delete('search');
+        }
+        window.history.replaceState({}, '', newURL);
+    }
+
+    // If we already have allFetchedData, just filter it
+    if (allFetchedData && filterOnly) {
+        status.textContent = "Filtering cards...";
+        previewData = {};
+        const names = namesInput
+            .split(',')
+            .map(name => normalize(name))
+            .filter(n => n.length > 0);
+
+        let totalFound = 0;
+        for (const rawName of names) {
+            const displayName = toCamelCase(rawName);
+            const seen = new Set();
+            const matched = [];
+
+            for (const row of allFetchedData) {
+                const cardName = row["Card Name"] || "";
+                const otherNames = row["Other Pokémon in Artwork"] || "";
+                const uniqueID = row["ID"];
+
+                const isMain = cardName.toLowerCase().includes(rawName);
+                const isCameo = otherNames.toLowerCase().includes(rawName);
+
+                let include = false;
+                let type = null;
+
+                if (isMain && (appearance === "main" || appearance === "both")) {
+                    include = true;
+                    type = "Main";
+                } else if (isCameo && (appearance === "cameo" || appearance === "both")) {
+                    include = true;
+                    type = "Cameo";
+                }
+
+                if (include && !seen.has(uniqueID)) {
+                    seen.add(uniqueID);
+                    matched.push({
+                        "Appearance Type": type,
+                        "Set": row["Set"],
+                        "Number": row["Number"],
+                        "Card Name": cardName,
+                        "Type": row["Type"],
+                        "Rarity / Variant": row["Rarity / Variant"],
+                        "Other Pokémon in Artwork": otherNames
+                    });
+                }
+            }
+
+            if (matched.length > 0) {
+                previewData[displayName] = matched;
+                totalFound += matched.length;
+            }
+        }
+
+        if (totalFound === 0) {
+            status.textContent = "No matching cards found.";
+        } else {
+            status.textContent = `Found ${totalFound} card(s). Preview generated.`;
+            showPreview(previewData, keepTabIndex);
+        }
+        return;
+    }
+
+    // Otherwise, fetch data as normal
+    container.innerHTML = ""; // Clear table on search
+    status.textContent = "Fetching and filtering cards...";
+    previewData = {};
+
+    const names = namesInput
+        .split(',')
+        .map(name => normalize(name))
+        .filter(n => n.length > 0);
+
+    if (names.length === 0) {
+        status.textContent = "Please enter at least one Pokémon name.";
+        return;
+    }
+
+    showLoading(); // Show overlay
+
+    Papa.parse(SHEET_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+            const data = results.data;
+            allFetchedData = data; // Store for later filtering
 
             let totalFound = 0;
+
             for (const rawName of names) {
                 const displayName = toCamelCase(rawName);
                 const seen = new Set();
                 const matched = [];
 
-                for (const row of allFetchedData) {
+                for (const row of data) {
                     const cardName = row["Card Name"] || "";
                     const otherNames = row["Other Pokémon in Artwork"] || "";
                     const uniqueID = row["ID"];
@@ -530,102 +678,21 @@ function findCards(fromURL = false, filterOnly = false, keepTabIndex = 0) {
                 }
             }
 
+            hideLoading(); // Hide overlay
+
             if (totalFound === 0) {
                 status.textContent = "No matching cards found.";
             } else {
                 status.textContent = `Found ${totalFound} card(s). Preview generated.`;
-                showPreview(previewData, keepTabIndex);
+                showPreview(previewData, 0);
             }
-            return;
+        },
+        error: function (err) {
+            hideLoading(); // Hide overlay on error
+            console.error("Error:", err);
+            status.textContent = "Error fetching the sheet.";
         }
-
-        // Otherwise, fetch data as normal
-        container.innerHTML = ""; // Clear table on search
-        status.textContent = "Fetching and filtering cards...";
-        previewData = {};
-
-        const names = namesInput
-            .split(',')
-            .map(name => normalize(name))
-            .filter(n => n.length > 0);
-
-        if (names.length === 0) {
-            status.textContent = "Please enter at least one Pokémon name.";
-            return;
-        }
-
-        showLoading(); // Show overlay
-
-        Papa.parse(SHEET_URL, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function (results) {
-                const data = results.data;
-                allFetchedData = data; // Store for later filtering
-
-                let totalFound = 0;
-
-                for (const rawName of names) {
-                    const displayName = toCamelCase(rawName);
-                    const seen = new Set();
-                    const matched = [];
-
-                    for (const row of data) {
-                        const cardName = row["Card Name"] || "";
-                        const otherNames = row["Other Pokémon in Artwork"] || "";
-                        const uniqueID = row["ID"];
-
-                        const isMain = cardName.toLowerCase().includes(rawName);
-                        const isCameo = otherNames.toLowerCase().includes(rawName);
-
-                        let include = false;
-                        let type = null;
-
-                        if (isMain && (appearance === "main" || appearance === "both")) {
-                            include = true;
-                            type = "Main";
-                        } else if (isCameo && (appearance === "cameo" || appearance === "both")) {
-                            include = true;
-                            type = "Cameo";
-                        }
-
-                        if (include && !seen.has(uniqueID)) {
-                            seen.add(uniqueID);
-                            matched.push({
-                                "Appearance Type": type,
-                                "Set": row["Set"],
-                                "Number": row["Number"],
-                                "Card Name": cardName,
-                                "Type": row["Type"],
-                                "Rarity / Variant": row["Rarity / Variant"],
-                                "Other Pokémon in Artwork": otherNames
-                            });
-                        }
-                    }
-
-                    if (matched.length > 0) {
-                        previewData[displayName] = matched;
-                        totalFound += matched.length;
-                    }
-                }
-
-                hideLoading(); // Hide overlay
-
-                if (totalFound === 0) {
-                    status.textContent = "No matching cards found.";
-                } else {
-                    status.textContent = `Found ${totalFound} card(s). Preview generated.`;
-                    showPreview(previewData, 0);
-                }
-            },
-            error: function (err) {
-                hideLoading(); // Hide overlay on error
-                console.error("Error:", err);
-                status.textContent = "Error fetching the sheet.";
-            }
-        });
-    }
+    });
 }
 
 function normalizeNamesInput(str) {

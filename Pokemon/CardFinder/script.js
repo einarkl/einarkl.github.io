@@ -2,6 +2,7 @@ const SHEET_URL = "https://docs.google.com/spreadsheets/d/1CEQd82n6KfbNi4Whi4X5A
 
 let previewData = {};
 let allPreviewData = {}; // Store all matches for current search, unfiltered
+let previousSearch = ""; // Store previous search input for comparison
 
 function normalize(str) {
     return (str || "").trim().toLowerCase();
@@ -93,115 +94,6 @@ function filterPreviewDataByAppearance(appearance) {
         });
     }
     return filtered;
-}
-
-// --- MODIFIED: findCards stores allPreviewData and always filters before showing ---
-function findCards(fromURL = false) {
-    const namesInputElem = document.getElementById("names");
-    const namesInput = fromURL ? namesInputElem.value : namesInputElem.value.trim();
-
-    // Update URL with ?search= only if not from URL load to avoid loops
-    if (!fromURL) {
-        const newURL = new URL(window.location);
-        if (namesInput) {
-            newURL.searchParams.set('search', namesInput);
-        } else {
-            newURL.searchParams.delete('search');
-        }
-        window.history.replaceState({}, '', newURL);
-    }
-
-    const appearance = document.getElementById("appearance").value;
-    const status = document.getElementById("status");
-    const container = document.getElementById("preview");
-    container.innerHTML = ""; // Clear table on search
-    status.textContent = "Fetching and filtering cards...";
-    previewData = {};
-    allPreviewData = {};
-
-    const names = namesInput
-        .split(',')
-        .map(name => normalize(name))
-        .filter(n => n.length > 0);
-
-    if (names.length === 0) {
-        status.textContent = "Please enter at least one Pokémon name.";
-        return;
-    }
-
-    showLoading(); // Show overlay
-
-    Papa.parse(SHEET_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function (results) {
-            const data = results.data;
-
-            let totalFound = 0;
-
-            for (const rawName of names) {
-                const displayName = toCamelCase(rawName);
-                const seen = new Set();
-                const matched = [];
-
-                for (const row of data) {
-                    const cardName = row["Card Name"] || "";
-                    const otherNames = row["Other Pokémon in Artwork"] || "";
-                    const uniqueID = row["ID"];
-
-                    const isMain = cardName.toLowerCase().includes(rawName);
-                    const isCameo = otherNames.toLowerCase().includes(rawName);
-
-                    let include = false;
-                    let type = null;
-
-                    if (isMain) {
-                        include = true;
-                        type = "Main";
-                    } else if (isCameo) {
-                        include = true;
-                        type = "Cameo";
-                    }
-
-                    if (include && !seen.has(uniqueID)) {
-                        seen.add(uniqueID);
-                        matched.push({
-                            "Appearance Type": type,
-                            "Set": row["Set"],
-                            "Number": row["Number"],
-                            "Card Name": cardName,
-                            "Type": row["Type"],
-                            "Rarity / Variant": row["Rarity / Variant"],
-                            "Other Pokémon in Artwork": otherNames
-                        });
-                    }
-                }
-
-                if (matched.length > 0) {
-                    allPreviewData[displayName] = matched; // store all matches, unfiltered
-                }
-            }
-
-            hideLoading(); // Hide overlay
-
-            // Now filter by appearance and show
-            previewData = filterPreviewDataByAppearance(appearance);
-            let totalFiltered = Object.values(previewData).reduce((sum, arr) => sum + arr.length, 0);
-
-            if (totalFiltered === 0) {
-                status.textContent = "No matching cards found.";
-            } else {
-                status.textContent = `Found ${totalFiltered} card(s). Preview generated.`;
-                showPreview(previewData, keepTabIndex);
-            }
-        },
-        error: function (err) {
-            hideLoading(); // Hide overlay on error
-            console.error("Error:", err);
-            status.textContent = "Error fetching the sheet.";
-        }
-    });
 }
 
 // --- NEW: Listen for appearance filter changes and update preview without fetching ---
@@ -329,110 +221,6 @@ function updateLoadingSpinnerIcon(theme) {
 function hideLoading() {
     const overlay = document.getElementById("loadingOverlay");
     if (overlay) overlay.style.display = "none";
-}
-
-function findCards(fromURL = false) {
-    const namesInputElem = document.getElementById("names");
-    const namesInput = fromURL ? namesInputElem.value : namesInputElem.value.trim();
-
-    // Update URL with ?search= only if not from URL load to avoid loops
-    if (!fromURL) {
-        const newURL = new URL(window.location);
-        if (namesInput) {
-            newURL.searchParams.set('search', namesInput);
-        } else {
-            newURL.searchParams.delete('search');
-        }
-        window.history.replaceState({}, '', newURL);
-    }
-
-    const appearance = document.getElementById("appearance").value;
-    const status = document.getElementById("status");
-    const container = document.getElementById("preview");
-    container.innerHTML = ""; // Clear table on search
-    status.textContent = "Fetching and filtering cards...";
-    previewData = {};
-
-    const names = namesInput
-        .split(',')
-        .map(name => normalize(name))
-        .filter(n => n.length > 0);
-
-    if (names.length === 0) {
-        status.textContent = "Please enter at least one Pokémon name.";
-        return;
-    }
-
-    showLoading(); // Show overlay
-
-    Papa.parse(SHEET_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function (results) {
-            const data = results.data;
-
-            let totalFound = 0;
-
-            for (const rawName of names) {
-                const displayName = toCamelCase(rawName);
-                const seen = new Set();
-                const matched = [];
-
-                for (const row of data) {
-                    const cardName = row["Card Name"] || "";
-                    const otherNames = row["Other Pokémon in Artwork"] || "";
-                    const uniqueID = row["ID"];
-
-                    const isMain = cardName.toLowerCase().includes(rawName);
-                    const isCameo = otherNames.toLowerCase().includes(rawName);
-
-                    let include = false;
-                    let type = null;
-
-                    if (isMain && (appearance === "main" || appearance === "both")) {
-                        include = true;
-                        type = "Main";
-                    } else if (isCameo && (appearance === "cameo" || appearance === "both")) {
-                        include = true;
-                        type = "Cameo";
-                    }
-
-                    if (include && !seen.has(uniqueID)) {
-                        seen.add(uniqueID);
-                        matched.push({
-                            "Appearance Type": type,
-                            "Set": row["Set"],
-                            "Number": row["Number"],
-                            "Card Name": cardName,
-                            "Type": row["Type"],
-                            "Rarity / Variant": row["Rarity / Variant"],
-                            "Other Pokémon in Artwork": otherNames
-                        });
-                    }
-                }
-
-                if (matched.length > 0) {
-                    previewData[displayName] = matched;
-                    totalFound += matched.length;
-                }
-            }
-
-            hideLoading(); // Hide overlay
-
-            if (totalFound === 0) {
-                status.textContent = "No matching cards found.";
-            } else {
-                status.textContent = `Found ${totalFound} card(s). Preview generated.`;
-                showPreview(previewData, 0);
-            }
-        },
-        error: function (err) {
-            hideLoading(); // Hide overlay on error
-            console.error("Error:", err);
-            status.textContent = "Error fetching the sheet.";
-        }
-    });
 }
 
 // On page load, check for ?search= and trigger search
@@ -674,114 +462,36 @@ function findCards(fromURL = false, filterOnly = false, keepTabIndex = 0) {
     const appearance = document.getElementById("appearance").value;
     const status = document.getElementById("status");
     const container = document.getElementById("preview");
+    if (normalizeNamesInput(namesInput) !== previousSearch) {
+        previousSearch = normalizeNamesInput(namesInput);
 
-    // Only update URL if not from URL load or filterOnly
-    if (!fromURL && !filterOnly) {
-        const newURL = new URL(window.location);
-        if (namesInput) {
-            newURL.searchParams.set('search', namesInput);
-        } else {
-            newURL.searchParams.delete('search');
-        }
-        window.history.replaceState({}, '', newURL);
-    }
-
-    // If we already have allFetchedData, just filter it
-    if (allFetchedData && filterOnly) {
-        status.textContent = "Filtering cards...";
-        previewData = {};
-        const names = namesInput
-            .split(',')
-            .map(name => normalize(name))
-            .filter(n => n.length > 0);
-
-        let totalFound = 0;
-        for (const rawName of names) {
-            const displayName = toCamelCase(rawName);
-            const seen = new Set();
-            const matched = [];
-
-            for (const row of allFetchedData) {
-                const cardName = row["Card Name"] || "";
-                const otherNames = row["Other Pokémon in Artwork"] || "";
-                const uniqueID = row["ID"];
-
-                const isMain = cardName.toLowerCase().includes(rawName);
-                const isCameo = otherNames.toLowerCase().includes(rawName);
-
-                let include = false;
-                let type = null;
-
-                if (isMain && (appearance === "main" || appearance === "both")) {
-                    include = true;
-                    type = "Main";
-                } else if (isCameo && (appearance === "cameo" || appearance === "both")) {
-                    include = true;
-                    type = "Cameo";
-                }
-
-                if (include && !seen.has(uniqueID)) {
-                    seen.add(uniqueID);
-                    matched.push({
-                        "Appearance Type": type,
-                        "Set": row["Set"],
-                        "Number": row["Number"],
-                        "Card Name": cardName,
-                        "Type": row["Type"],
-                        "Rarity / Variant": row["Rarity / Variant"],
-                        "Other Pokémon in Artwork": otherNames
-                    });
-                }
+        // Only update URL if not from URL load or filterOnly
+        if (!fromURL && !filterOnly) {
+            const newURL = new URL(window.location);
+            if (namesInput) {
+                newURL.searchParams.set('search', namesInput);
+            } else {
+                newURL.searchParams.delete('search');
             }
-
-            if (matched.length > 0) {
-                previewData[displayName] = matched;
-                totalFound += matched.length;
-            }
+            window.history.replaceState({}, '', newURL);
         }
 
-        if (totalFound === 0) {
-            status.textContent = "No matching cards found.";
-        } else {
-            status.textContent = `Found ${totalFound} card(s). Preview generated.`;
-            showPreview(previewData, keepTabIndex);
-        }
-        return;
-    }
-
-    // Otherwise, fetch data as normal
-    container.innerHTML = ""; // Clear table on search
-    status.textContent = "Fetching and filtering cards...";
-    previewData = {};
-
-    const names = namesInput
-        .split(',')
-        .map(name => normalize(name))
-        .filter(n => n.length > 0);
-
-    if (names.length === 0) {
-        status.textContent = "Please enter at least one Pokémon name.";
-        return;
-    }
-
-    showLoading(); // Show overlay
-
-    Papa.parse(SHEET_URL, {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function (results) {
-            const data = results.data;
-            allFetchedData = data; // Store for later filtering
+        // If we already have allFetchedData, just filter it
+        if (allFetchedData && filterOnly) {
+            status.textContent = "Filtering cards...";
+            previewData = {};
+            const names = namesInput
+                .split(',')
+                .map(name => normalize(name))
+                .filter(n => n.length > 0);
 
             let totalFound = 0;
-
             for (const rawName of names) {
                 const displayName = toCamelCase(rawName);
                 const seen = new Set();
                 const matched = [];
 
-                for (const row of data) {
+                for (const row of allFetchedData) {
                     const cardName = row["Card Name"] || "";
                     const otherNames = row["Other Pokémon in Artwork"] || "";
                     const uniqueID = row["ID"];
@@ -820,20 +530,104 @@ function findCards(fromURL = false, filterOnly = false, keepTabIndex = 0) {
                 }
             }
 
-            hideLoading(); // Hide overlay
-
             if (totalFound === 0) {
                 status.textContent = "No matching cards found.";
             } else {
                 status.textContent = `Found ${totalFound} card(s). Preview generated.`;
-                showPreview(previewData, 0);
+                showPreview(previewData, keepTabIndex);
             }
-        },
-        error: function (err) {
-            hideLoading(); // Hide overlay on error
-            console.error("Error:", err);
-            status.textContent = "Error fetching the sheet.";
+            return;
         }
-    });
+
+        // Otherwise, fetch data as normal
+        container.innerHTML = ""; // Clear table on search
+        status.textContent = "Fetching and filtering cards...";
+        previewData = {};
+
+        const names = namesInput
+            .split(',')
+            .map(name => normalize(name))
+            .filter(n => n.length > 0);
+
+        if (names.length === 0) {
+            status.textContent = "Please enter at least one Pokémon name.";
+            return;
+        }
+
+        showLoading(); // Show overlay
+
+        Papa.parse(SHEET_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function (results) {
+                const data = results.data;
+                allFetchedData = data; // Store for later filtering
+
+                let totalFound = 0;
+
+                for (const rawName of names) {
+                    const displayName = toCamelCase(rawName);
+                    const seen = new Set();
+                    const matched = [];
+
+                    for (const row of data) {
+                        const cardName = row["Card Name"] || "";
+                        const otherNames = row["Other Pokémon in Artwork"] || "";
+                        const uniqueID = row["ID"];
+
+                        const isMain = cardName.toLowerCase().includes(rawName);
+                        const isCameo = otherNames.toLowerCase().includes(rawName);
+
+                        let include = false;
+                        let type = null;
+
+                        if (isMain && (appearance === "main" || appearance === "both")) {
+                            include = true;
+                            type = "Main";
+                        } else if (isCameo && (appearance === "cameo" || appearance === "both")) {
+                            include = true;
+                            type = "Cameo";
+                        }
+
+                        if (include && !seen.has(uniqueID)) {
+                            seen.add(uniqueID);
+                            matched.push({
+                                "Appearance Type": type,
+                                "Set": row["Set"],
+                                "Number": row["Number"],
+                                "Card Name": cardName,
+                                "Type": row["Type"],
+                                "Rarity / Variant": row["Rarity / Variant"],
+                                "Other Pokémon in Artwork": otherNames
+                            });
+                        }
+                    }
+
+                    if (matched.length > 0) {
+                        previewData[displayName] = matched;
+                        totalFound += matched.length;
+                    }
+                }
+
+                hideLoading(); // Hide overlay
+
+                if (totalFound === 0) {
+                    status.textContent = "No matching cards found.";
+                } else {
+                    status.textContent = `Found ${totalFound} card(s). Preview generated.`;
+                    showPreview(previewData, 0);
+                }
+            },
+            error: function (err) {
+                hideLoading(); // Hide overlay on error
+                console.error("Error:", err);
+                status.textContent = "Error fetching the sheet.";
+            }
+        });
+    }
 }
 
+function normalizeNamesInput(str) {
+    return (str || "").replace(/\s+/g, '').toLowerCase();
+}

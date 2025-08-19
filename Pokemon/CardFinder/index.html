@@ -48,23 +48,32 @@
         <button id="btnToggleTheme" onclick="toggleTheme()"></button>
     </div>
     <label for="names">Enter Pokémon names (comma-separated):</label><br>
-    <input type="text" id="names" size="50" placeholder="e.g. Leafeon, Sprigatito" /><br>
+    <div style="display: flex; align-items: center;">
+        <input type="text" id="names" size="50" placeholder="e.g. Leafeon, Sprigatito" />
+        &nbsp;
+        <button onclick="findCards()">Search</button>
+    </div>
+    <br>
 
     <label for="appearance">Filter by appearance type:</label><br>
     <select id="appearance">
         <option value="both">Main & Cameo</option>
         <option value="main">Main only</option>
         <option value="cameo">Cameo only</option>
-    </select><br>
+    </select>
+    <br>
+    <br>
 
     <label for="format">Download format:</label><br>
-    <select id="format">
-        <option value="excel">Excel (.xlsx)</option>
-        <option value="csv">CSV (.zip)</option>
-    </select><br>
-
-    <button onclick="findCards()">Search</button>
-    <button onclick="downloadResults()">Download</button>
+    <div style="display: flex; align-items: center;">
+        <select id="format">
+            
+            <option value="excel">Excel (.xlsx)</option>
+            <option value="csv">CSV (.zip)</option>
+        </select>
+        &nbsp;
+        <button onclick="downloadResults()">Download</button>
+    </div>
     <p id="status"></p>
     <div id="collection-counter"></div>
 

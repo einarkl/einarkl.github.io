@@ -2,6 +2,11 @@ function scrambleN() {
     let n = parseInt($("#inpN").val()) || 5;
     let sets = parseInt($("#inpSets").val()) || 1;
     let prefix = $("#selPrefix").find(":selected").val() !== "none" ? $("#selPrefix").find(":selected").val() + " " : "";
+    let linesBetweenSets = parseInt($("#inpLines").val()) || 3;
+    let lines = "";
+    for (let i = 0; i < linesBetweenSets; i++) {
+        lines += "\n";
+    }
     let scr = "";
     for (let j = 0; j < sets; j++) {
         for (let i = 0; i < n; i++) {
@@ -13,7 +18,7 @@ function scrambleN() {
         }
 
         if (j !== (sets - 1)) {
-            scr += "\n\n\n";
+            scr += lines;
         }
     }
     $("#scrambles").html(scr);

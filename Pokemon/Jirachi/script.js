@@ -2,7 +2,7 @@ const SHEET_ID = "1oC4KAdpbUDg64wjNZ_AU9SflkZsxBXcpCOSgLYwpO8Q";
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
 let allItems = [];
-let currentLanguageOrder = "release-old";
+let currentLanguageOrder = "art";
 let currentCollectionOrder = "none";
 let currentLanguageFilter = "all";
 
@@ -53,7 +53,8 @@ fetch(URL)
         otherPokemon,
         embeddedPicture,
         pictureUrl,
-        language
+        language,
+        art
       ] = row.c.map(c => c?.v ?? "");
 
       return {
@@ -66,7 +67,8 @@ fetch(URL)
         type,
         rarity,
         pictureUrl,
-        language
+        language,
+        art: Number(art) || 0
       };
     });
 
@@ -118,6 +120,14 @@ function sortItems(items) {
     if (currentLanguageOrder === 'language-az') {
       const diff = String(a.language || '').localeCompare(String(b.language || ''));
       if (diff !== 0) return diff;
+    }
+
+    // Art id order
+    if (currentLanguageOrder === 'art') {
+      const diff = (a.art || 0) - (b.art || 0);
+      if (diff !== 0) return diff;
+      // If art id is equal, sort by release year old->new
+      return (a.releaseYear || 0) - (b.releaseYear || 0);
     }
 
     // Chronological order

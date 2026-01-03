@@ -6,7 +6,7 @@
     --card-bg: #ffffff;
     --text: #222;
     --muted: #555;
-    --header-bg: #243d8e;
+    --header-bg: #3a3a3a;
     --control-bg: #ffffff;
     --border: #ddd;
 }
@@ -16,7 +16,7 @@ body.dark {
     --card-bg: #1e1e1e;
     --text: #eeeeee;
     --muted: #aaaaaa;
-    --header-bg: #243d8e;
+    --header-bg: #2a2a2a;
     --control-bg: #1a1a1a;
     --border: #333;
 }

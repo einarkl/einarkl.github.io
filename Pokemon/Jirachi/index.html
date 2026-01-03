@@ -10,6 +10,7 @@
 
 <header>
   <h1>Jirachi Collection</h1>
+  <img src="./icons/385-jirachi.png" alt="Jirachi" class="header-icon" />
   <button id="themeToggle" class="theme-toggle">
     <img src="./icons/dark-theme.svg" alt="Dark theme" />
   </button>
@@ -17,11 +18,20 @@
 
 <div class="controls">
   <label>
-    Language order:
+    Order:
     <select id="languageOrder">
-      <option value="mix" selected>Mix</option>
-      <option value="en">English first</option>
-      <option value="jp">Japanese first</option>
+      <option value="release-old" selected>Release old→new</option>
+      <option value="release-new">Release new→old</option>
+      <option value="language-az">Language a→z</option>
+    </select>
+  </label>
+
+  <label>
+    Language display:
+    <select id="languageFilter">
+      <option value="all" selected>All</option>
+      <option value="en">English only</option>
+      <option value="jp">Japanese only</option>
     </select>
   </label>
 
@@ -29,11 +39,43 @@
     Collection order:
     <select id="collectionOrder">
       <option value="none" selected>Default</option>
-      <option value="owned-first">Owned → Bought → Missing</option>
-      <option value="owned-last">Missing → Bought → Owned</option>
+      <option value="owned-first">Owned first</option>
+      <option value="owned-last">Missing first</option>
     </select>
   </label>
 </div>
+
+<section class="progress-section" aria-label="Collection progress">
+  <div class="progress-row" id="rowAll">
+    <div class="progress-label">Overall</div>
+    <div class="progress" id="progressAll">
+      <div class="progress-fill-bought"></div>
+      <div class="progress-fill-owned"></div>
+      <div class="progress-text"></div>
+    </div>
+    <div class="progress-star" id="starAll" aria-hidden="true" title="Completion star"></div>
+  </div>
+
+  <div class="progress-row" id="rowEn">
+    <div class="progress-label">English</div>
+    <div class="progress" id="progressEn">
+      <div class="progress-fill-bought"></div>
+      <div class="progress-fill-owned"></div>
+      <div class="progress-text"></div>
+    </div>
+    <div class="progress-star" id="starEn" aria-hidden="true" title="Completion star"></div>
+  </div>
+
+  <div class="progress-row" id="rowJp">
+    <div class="progress-label">Japanese</div>
+    <div class="progress" id="progressJp">
+      <div class="progress-fill-bought"></div>
+      <div class="progress-fill-owned"></div>
+      <div class="progress-text"></div>
+    </div>
+    <div class="progress-star" id="starJp" aria-hidden="true" title="Completion star"></div>
+  </div>
+</section>
 
 <main>
   <div id="card-grid" class="grid"></div>

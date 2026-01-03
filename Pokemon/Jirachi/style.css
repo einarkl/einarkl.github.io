@@ -43,13 +43,30 @@ header {
     padding: 16px;
     background: var(--header-bg);
     color: white;
-    text-align: center;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 header h1 {
-    max-width: 75%;
-    margin: auto;
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.header-icon {
+    position: static;
+    margin-left: 8px;
+    height: 40px;
+    width: auto;
+    display: inline-block;
+}
+
+@media (max-width: 480px) {
+    .header-icon {
+        height: 32px;
+    }
 }
 
 .theme-toggle {
@@ -153,4 +170,106 @@ header h1 {
 .badge.bought {
     background: #fbc02d;
     color: #222;
+}
+
+/* =====================
+     PROGRESS BARS
+===================== */
+.progress-section {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--control-bg);
+}
+
+.progress-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.progress-label {
+    min-width: 80px;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.progress {
+    position: relative;
+    flex: 1;
+    height: 18px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.03));
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #43a047, #66bb6a);
+    width: 0%;
+    transition: width 300ms ease;
+}
+
+.progress-fill-bought {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #fbc02d, #ffd54f);
+    width: 0%;
+    transition: width 300ms ease;
+    z-index: 1;
+}
+
+.progress-fill-owned {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #43a047, #66bb6a);
+    width: 0%;
+    transition: width 300ms ease;
+    z-index: 2;
+}
+
+.progress-text {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    color: var(--text);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+body.dark .progress {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+body.dark .progress-fill {
+    background: linear-gradient(90deg, #66bb6a, #43a047);
+}
+
+/* Completion star */
+.progress-star {
+    min-width: 24px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: gold;
+    line-height: 1;
+    margin-left: 8px;
+}
+
+.progress-row.completed .progress-text {
+    font-weight: 700;
+}
+
+/* hide star when not completed (empty content) */
+.progress-star:empty {
+    display: inline-block;
+    /* Changed from none to inline-block to reserve space */
 }

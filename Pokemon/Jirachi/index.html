@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jirachi Collection</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <h1>Jirachi Collection</h1>
+  <button id="themeToggle" class="theme-toggle">
+    <img src="./icons/dark-theme.svg" alt="Dark theme" />
+  </button>
+</header>
+
+<div class="controls">
+  <label>
+    Language order:
+    <select id="languageOrder">
+      <option value="mix" selected>Mix</option>
+      <option value="en">English first</option>
+      <option value="jp">Japanese first</option>
+    </select>
+  </label>
+
+  <label>
+    Collection order:
+    <select id="collectionOrder">
+      <option value="none" selected>Default</option>
+      <option value="owned-first">Owned → Bought → Missing</option>
+      <option value="owned-last">Missing → Bought → Owned</option>
+    </select>
+  </label>
+</div>
+
+<main>
+  <div id="card-grid" class="grid"></div>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

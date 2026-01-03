@@ -1,0 +1,156 @@
+/* =====================
+   CSS VARIABLES
+===================== */
+:root {
+    --bg: #f2f2f2;
+    --card-bg: #ffffff;
+    --text: #222;
+    --muted: #555;
+    --header-bg: #243d8e;
+    --control-bg: #ffffff;
+    --border: #ddd;
+}
+
+body.dark {
+    --bg: #121212;
+    --card-bg: #1e1e1e;
+    --text: #eeeeee;
+    --muted: #aaaaaa;
+    --header-bg: #243d8e;
+    --control-bg: #1a1a1a;
+    --border: #333;
+}
+
+/* =====================
+   BASE
+===================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.2s, color 0.2s;
+}
+
+/* =====================
+   HEADER
+===================== */
+header {
+    padding: 16px;
+    background: var(--header-bg);
+    color: white;
+    text-align: center;
+    position: relative;
+}
+
+header h1 {
+    max-width: 75%;
+    margin: auto;
+}
+
+.theme-toggle {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    background: rgba(17, 15, 15, 0.2);
+    border: none;
+    color: white;
+    /* make the button span the header inner height and keep horizontal padding */
+    bottom: 16px;
+    padding: 0 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.theme-toggle img {
+    /* make the icon fill the button's height while keeping aspect ratio */
+    height: 50%;
+    width: auto;
+    display: block;
+}
+
+/* =====================
+   CONTROLS
+===================== */
+.controls {
+    padding: 12px 16px;
+    background: var(--control-bg);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+}
+
+/* =====================
+   GRID & CARDS
+===================== */
+.grid {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.card img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    background: #444;
+}
+
+.card-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card-title {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.card-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+/* =====================
+   BADGES
+===================== */
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.badge {
+    font-size: 0.7rem;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: #444;
+    color: white;
+}
+
+.badge.owned {
+    background: #43a047;
+}
+
+.badge.bought {
+    background: #fbc02d;
+    color: #222;
+}

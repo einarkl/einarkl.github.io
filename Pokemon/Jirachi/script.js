@@ -3,8 +3,7 @@ const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:
 
 let allItems = [];
 let allTabs = [];
-let currentLanguageOrder = "art";
-let currentCollectionOrder = "none";
+let currentOrder = "art";
 let currentLanguageFilter = "all";
 
 const languageMap = {
@@ -214,7 +213,7 @@ function sortItems(items) {
     /* =====================
        ART SORT — MUST BE FIRST
     ===================== */
-    if (currentLanguageOrder === 'art') {
+    if (currentOrder === 'art') {
       const artDiff = (a.art || 0) - (b.art || 0);
       if (artDiff !== 0) return artDiff;
 
@@ -238,27 +237,35 @@ function sortItems(items) {
     if (a.appearanceType !== "Cameo" && b.appearanceType === "Cameo") return -1;
 
     // Collection order
-    if (currentCollectionOrder !== "none") {
-      const aC = normalize(a.inCollection);
-      const bC = normalize(b.inCollection);
+    if (currentOrder === 'owned-first') {
+      const ownedDiff = { x: 0, k: 1, "": 2 }[a.inCollection] - { x: 0, k: 1, "": 2 }[b.inCollection];
+      if (ownedDiff !== 0) return ownedDiff;
 
-      const priority =
-        currentCollectionOrder === "owned-first"
-          ? { x: 0, k: 1, "": 2 }
-          : { "": 0, k: 1, x: 2 };
+      const yearDiff = (a.releaseYear || 0) - (b.releaseYear || 0);
+      if (yearDiff !== 0) return yearDiff;
 
-      const diff = (priority[aC] ?? 99) - (priority[bC] ?? 99);
-      if (diff !== 0) return diff;
+      return String(a.set || '').localeCompare(String(b.set || '')) ||
+             String(a.number || '').localeCompare(String(b.number || ''));
+    }
+    if (currentOrder === 'owned-last') {
+      const ownedDiff = { "": 0, k: 1, x: 2 }[a.inCollection] - { "": 0, k: 1, x: 2 }[b.inCollection];
+      if (ownedDiff !== 0) return ownedDiff;
+
+      const yearDiff = (a.releaseYear || 0) - (b.releaseYear || 0);
+      if (yearDiff !== 0) return yearDiff;
+
+      return String(a.set || '').localeCompare(String(b.set || '')) ||
+             String(a.number || '').localeCompare(String(b.number || ''));
     }
 
     // Language alphabetical
-    if (currentLanguageOrder === 'language-az') {
+    if (currentOrder === 'language-az') {
       return String(a.language || '').localeCompare(String(b.language || ''));
     }
 
     // Chronological
-    if (currentLanguageOrder === 'release-old') return a.releaseYear - b.releaseYear;
-    if (currentLanguageOrder === 'release-new') return b.releaseYear - a.releaseYear;
+    if (currentOrder === 'release-old') return a.releaseYear - b.releaseYear;
+    if (currentOrder === 'release-new') return b.releaseYear - a.releaseYear;
 
     return a.releaseYear - b.releaseYear;
   });
@@ -316,13 +323,8 @@ function render() {
 /* =====================
    CONTROLS
 ===================== */
-document.getElementById("languageOrder").addEventListener("change", e => {
-  currentLanguageOrder = e.target.value;
-  render();
-});
-
-document.getElementById("collectionOrder").addEventListener("change", e => {
-  currentCollectionOrder = e.target.value;
+document.getElementById("order").addEventListener("change", e => {
+  currentOrder = e.target.value;
   render();
 });
 

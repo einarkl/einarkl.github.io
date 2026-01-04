@@ -7,6 +7,22 @@ let currentLanguageOrder = "art";
 let currentCollectionOrder = "none";
 let currentLanguageFilter = "all";
 
+const languageMap = {
+  "english": "EN",
+  "japanese": "JP",
+  "french": "FR",
+  "german": "DE",
+  "italian": "IT",
+  "russian": "RU",
+  "portuguese-b": "PT-B",
+  "spanish": "ES",
+  "chinese-S": "CH-S",
+  "chinese-T": "CH-T",
+  "korean": "KR",
+  "indonesian": "ID",
+  "thai": "TH"
+};
+
 /* =====================
    THEME HANDLING
 ===================== */
@@ -41,19 +57,21 @@ function parseSheetData(json, language) {
   const rows = json.table.rows;
   return rows.map(row => {
     const [
-      inCollection,
-      appearanceType,
-      releaseYear,
-      set,
-      number,
-      cardName,
-      type,
-      rarity,
-      otherPokemon,
-      embeddedPicture,
-      pictureUrl,
-      art
+      inCollection,        // A
+      appearanceType,      // B
+      releaseYear,         // C
+      set,                 // D
+      number,              // E
+      cardName,            // F
+      type,                // G
+      rarity,              // H
+      ,                    // I Other Pokémon in Artwork
+      ,                    // J Picture
+      pictureUrl,          // K
+      language,            // L
+      art                  // M
     ] = row.c.map(c => c?.v ?? "");
+
 
     return {
       inCollection,
@@ -193,6 +211,24 @@ function isValidItem(item) {
 function sortItems(items) {
   return items.sort((a, b) => {
 
+    /* =====================
+       ART SORT — MUST BE FIRST
+    ===================== */
+    if (currentLanguageOrder === 'art') {
+      const artDiff = (a.art || 0) - (b.art || 0);
+      if (artDiff !== 0) return artDiff;
+
+      const yearDiff = (a.releaseYear || 0) - (b.releaseYear || 0);
+      if (yearDiff !== 0) return yearDiff;
+
+      return String(a.set || '').localeCompare(String(b.set || '')) ||
+             String(a.number || '').localeCompare(String(b.number || ''));
+    }
+
+    /* =====================
+       OTHER SORT RULES
+    ===================== */
+
     // Packs last
     if (a.type === "Pack" && b.type !== "Pack") return 1;
     if (a.type !== "Pack" && b.type === "Pack") return -1;
@@ -215,24 +251,15 @@ function sortItems(items) {
       if (diff !== 0) return diff;
     }
 
-    // Language alphabetical order (a->z)
+    // Language alphabetical
     if (currentLanguageOrder === 'language-az') {
-      const diff = String(a.language || '').localeCompare(String(b.language || ''));
-      if (diff !== 0) return diff;
+      return String(a.language || '').localeCompare(String(b.language || ''));
     }
 
-    // Art id order: group by art id, then by release year old->new
-    if (currentLanguageOrder === 'art') {
-      const diff = (a.art || 0) - (b.art || 0);
-      if (diff !== 0) return diff;
-      return (a.releaseYear || 0) - (b.releaseYear || 0);
-    }
-
-    // Chronological order
+    // Chronological
     if (currentLanguageOrder === 'release-old') return a.releaseYear - b.releaseYear;
     if (currentLanguageOrder === 'release-new') return b.releaseYear - a.releaseYear;
 
-    // default fallback
     return a.releaseYear - b.releaseYear;
   });
 }
@@ -249,7 +276,7 @@ function render() {
 
   // apply language filter (show only items matching the language selection)
   if (currentLanguageFilter !== 'all') {
-    itemsToShow = itemsToShow.filter(i => normalize(i.language) === currentLanguageFilter);
+    itemsToShow = itemsToShow.filter(i => i.language === languageMap[currentLanguageFilter]);
   }
   const items = sortItems(itemsToShow);
 
@@ -350,7 +377,7 @@ function updateProgress() {
   // Process each tab's progress
   allTabs.forEach(tab => {
     const tabNormalized = normalize(tab);
-    const tabItems = valid.filter(i => normalize(i.language) === tabNormalized);
+    const tabItems = valid.filter(i => i.language === languageMap[tabNormalized]);
     const totalTab = tabItems.length;
     const ownedTab = tabItems.filter(i => normalize(i.inCollection) === 'x').length;
     const boughtTab = tabItems.filter(i => normalize(i.inCollection) === 'k').length;

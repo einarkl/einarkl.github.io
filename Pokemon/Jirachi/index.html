@@ -28,7 +28,7 @@
   </label>
 
   <label>
-    Language display:
+    Language:
     <select id="languageFilter">
       <option value="all" selected>All</option>
       <option value="en">English only</option>
@@ -56,26 +56,7 @@
     </div>
     <div class="progress-star" id="starAll" aria-hidden="true" title="Completion star"></div>
   </div>
-
-  <div class="progress-row" id="rowEn">
-    <div class="progress-label">English</div>
-    <div class="progress" id="progressEn">
-      <div class="progress-fill-bought"></div>
-      <div class="progress-fill-owned"></div>
-      <div class="progress-text"></div>
-    </div>
-    <div class="progress-star" id="starEn" aria-hidden="true" title="Completion star"></div>
-  </div>
-
-  <div class="progress-row" id="rowJp">
-    <div class="progress-label">Japanese</div>
-    <div class="progress" id="progressJp">
-      <div class="progress-fill-bought"></div>
-      <div class="progress-fill-owned"></div>
-      <div class="progress-text"></div>
-    </div>
-    <div class="progress-star" id="starJp" aria-hidden="true" title="Completion star"></div>
-  </div>
+  <div id="languageRows"></div>
 </section>
 
 <main>

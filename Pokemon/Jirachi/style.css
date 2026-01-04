@@ -109,7 +109,18 @@ header h1 {
     display: grid;
     gap: 16px;
     padding: 16px;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    /* Use fixed column width and center the grid so cards don't stretch to fill space */
+    grid-template-columns: repeat(auto-fill, 220px);
+    justify-content: center;
+}
+
+@media (max-width: 520px) {
+
+    /* On narrow screens allow cards to be fluid and fill available width */
+    .grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        justify-content: start;
+    }
 }
 
 .card {

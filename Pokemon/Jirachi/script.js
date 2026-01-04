@@ -2,6 +2,7 @@ const SHEET_ID = "1oC4KAdpbUDg64wjNZ_AU9SflkZsxBXcpCOSgLYwpO8Q";
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
 let allItems = [];
+let allTabs = [];
 let currentLanguageOrder = "art";
 let currentCollectionOrder = "none";
 let currentLanguageFilter = "all";
@@ -34,46 +35,144 @@ themeToggle.addEventListener("click", () => {
 /* =====================
    DATA FETCH
 ===================== */
-fetch(URL)
-  .then(res => res.text())
-  .then(text => {
-    const json = JSON.parse(text.substring(47).slice(0, -2));
-    const rows = json.table.rows;
+let pendingFetches = 0;
 
-    allItems = rows.map(row => {
-      const [
-        inCollection,
-        appearanceType,
-        releaseYear,
-        set,
-        number,
-        cardName,
-        type,
-        rarity,
-        otherPokemon,
-        embeddedPicture,
-        pictureUrl,
-        language,
-        art
-      ] = row.c.map(c => c?.v ?? "");
+function parseSheetData(json, language) {
+  const rows = json.table.rows;
+  return rows.map(row => {
+    const [
+      inCollection,
+      appearanceType,
+      releaseYear,
+      set,
+      number,
+      cardName,
+      type,
+      rarity,
+      otherPokemon,
+      embeddedPicture,
+      pictureUrl,
+      art
+    ] = row.c.map(c => c?.v ?? "");
 
-      return {
-        inCollection,
-        appearanceType,
-        releaseYear: Number(releaseYear) || 9999,
-        set,
-        number,
-        cardName,
-        type,
-        rarity,
-        pictureUrl,
-        language,
-        art: Number(art) || 0
-      };
-    });
-
-    render();
+    return {
+      inCollection,
+      appearanceType,
+      releaseYear: Number(releaseYear) || 9999,
+      set,
+      number,
+      cardName,
+      type,
+      rarity,
+      pictureUrl,
+      language,
+      art: Number(art) || 0
+    };
   });
+}
+
+function fetchSheetTab(tabName) {
+  const tabURL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+
+  pendingFetches++;
+  fetch(tabURL)
+    .then(res => res.text())
+    .then(text => {
+      const json = JSON.parse(text.substring(47).slice(0, -2));
+      const items = parseSheetData(json, tabName);
+      allItems = allItems.concat(items);
+      pendingFetches--;
+      if (pendingFetches === 0) {
+        render();
+      }
+    })
+    .catch(err => {
+      console.error(`Error fetching tab ${tabName}:`, err);
+      pendingFetches--;
+      if (pendingFetches === 0) {
+        render();
+      }
+    });
+}
+
+function discoverAndFetchAllTabs() {
+  // Read the Languages sheet and use column A values as exact sheet/tab names, in order
+  const languagesURL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent('Languages')}`;
+
+  fetch(languagesURL)
+    .then(res => res.text())
+    .then(text => {
+      try {
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+        const rows = json.table && json.table.rows ? json.table.rows : [];
+        // Column A is index 0 in each row.c
+        const names = rows.map(r => (r.c && r.c[0] && r.c[0].v) ? String(r.c[0].v).trim() : '').filter(Boolean);
+
+        if (names.length === 0) {
+          console.warn('Languages sheet found but no names in column A. Ensure sheet names are listed in column A.');
+          return;
+        }
+
+        // Use the exact order listed in the Languages sheet
+        allTabs = names;
+        createProgressRows();
+        populateLanguageFilter();
+        allTabs.forEach(tab => fetchSheetTab(tab));
+      } catch (e) {
+        console.error('Error parsing Languages sheet response:', e);
+      }
+    })
+    .catch(err => {
+      console.error('Error fetching Languages sheet:', err);
+    });
+}
+
+function populateLanguageFilter() {
+  const filterSelect = document.getElementById('languageFilter');
+  if (!filterSelect) return;
+
+  // Clear existing options except "All"
+  filterSelect.innerHTML = '<option value="all" selected>All</option>';
+
+  // Add option for each tab
+  allTabs.forEach(tab => {
+    const option = document.createElement('option');
+    option.value = normalize(tab);
+    option.textContent = tab;
+    filterSelect.appendChild(option);
+  });
+}
+
+function createProgressRows() {
+  const container = document.getElementById('languageRows');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  allTabs.forEach(tab => {
+    const tabNormalized = normalize(tab);
+    const rowId = `row${tabNormalized}`;
+    const progressId = `progress${tabNormalized}`;
+    const starId = `star${tabNormalized}`;
+
+    const row = document.createElement('div');
+    row.className = 'progress-row';
+    row.id = rowId;
+    row.innerHTML = `
+      <div class="progress-label">${tab}</div>
+      <div class="progress" id="${progressId}">
+        <div class="progress-fill-bought"></div>
+        <div class="progress-fill-owned"></div>
+        <div class="progress-text"></div>
+      </div>
+      <div class="progress-star" id="${starId}" aria-hidden="true" title="Completion star"></div>
+    `;
+
+    container.appendChild(row);
+  });
+}
+
+discoverAndFetchAllTabs();
 
 
 /* =====================
@@ -149,10 +248,8 @@ function render() {
   let itemsToShow = allItems.filter(isValidItem);
 
   // apply language filter (show only items matching the language selection)
-  if (currentLanguageFilter === 'en') {
-    itemsToShow = itemsToShow.filter(i => i.language === 'En');
-  } else if (currentLanguageFilter === 'jp') {
-    itemsToShow = itemsToShow.filter(i => i.language === 'Jp');
+  if (currentLanguageFilter !== 'all') {
+    itemsToShow = itemsToShow.filter(i => normalize(i.language) === currentLanguageFilter);
   }
   const items = sortItems(itemsToShow);
 
@@ -214,16 +311,6 @@ function updateProgress() {
   const ownedAll = valid.filter(i => normalize(i.inCollection) === 'x').length;
   const boughtAll = valid.filter(i => normalize(i.inCollection) === 'k').length;
 
-  const enItems = valid.filter(i => i.language === 'En');
-  const totalEn = enItems.length;
-  const ownedEn = enItems.filter(i => normalize(i.inCollection) === 'x').length;
-  const boughtEn = enItems.filter(i => normalize(i.inCollection) === 'k').length;
-
-  const jpItems = valid.filter(i => i.language === 'Jp');
-  const totalJp = jpItems.length;
-  const ownedJp = jpItems.filter(i => normalize(i.inCollection) === 'x').length;
-  const boughtJp = jpItems.filter(i => normalize(i.inCollection) === 'k').length;
-
   function renderBar(containerId, owned, bought, total) {
     const container = document.getElementById(containerId);
     if (!container) return 0;
@@ -254,41 +341,58 @@ function updateProgress() {
   }
 
   const pctAll = renderBar('progressAll', ownedAll, boughtAll, totalAll);
-  const pctEn = renderBar('progressEn', ownedEn, boughtEn, totalEn);
-  const pctJp = renderBar('progressJp', ownedJp, boughtJp, totalJp);
 
   // Show/hide language rows based on currentLanguageFilter
-  const showEn = currentLanguageFilter === 'all' || currentLanguageFilter === 'en';
-  const showJp = currentLanguageFilter === 'all' || currentLanguageFilter === 'jp';
   const showAll = currentLanguageFilter === 'all';
-
-  const rowEn = document.getElementById('rowEn');
-  const rowJp = document.getElementById('rowJp');
-
-  if (rowEn) rowEn.style.display = showEn ? 'flex' : 'none';
-  if (rowJp) rowJp.style.display = showJp ? 'flex' : 'none';
   const rowAll = document.getElementById('rowAll');
   if (rowAll) rowAll.style.display = showAll ? 'flex' : 'none';
 
-  // completion stars: show star when 100%
-  function updateStar(rowId, starId, pct, owned, bought, total) {
+  // Process each tab's progress
+  allTabs.forEach(tab => {
+    const tabNormalized = normalize(tab);
+    const tabItems = valid.filter(i => normalize(i.language) === tabNormalized);
+    const totalTab = tabItems.length;
+    const ownedTab = tabItems.filter(i => normalize(i.inCollection) === 'x').length;
+    const boughtTab = tabItems.filter(i => normalize(i.inCollection) === 'k').length;
+
+    const rowId = `row${tabNormalized}`;
+    const progressId = `progress${tabNormalized}`;
+    const starId = `star${tabNormalized}`;
+
+    const pctTab = renderBar(progressId, ownedTab, boughtTab, totalTab);
+
+    const showTab = currentLanguageFilter === 'all' || currentLanguageFilter === tabNormalized;
     const row = document.getElementById(rowId);
-    const star = document.getElementById(starId);
-    if (!row || !star) return;
-    if (pct === 100) {
-      row.classList.add('completed');
-      star.textContent = '★';
-      star.setAttribute('aria-hidden', 'false');
-      star.title = `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`;
-      star.setAttribute('aria-label', `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`);
+    if (row) row.style.display = showTab ? 'flex' : 'none';
+
+    // completion star
+    function updateStar(starId, pct, owned, bought, total) {
+      const star = document.getElementById(starId);
+      if (!star) return;
+      if (pct === 100) {
+        star.textContent = '★';
+        star.setAttribute('aria-hidden', 'false');
+        star.title = `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`;
+        star.setAttribute('aria-label', `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`);
+      } else {
+        star.textContent = '';
+        star.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    updateStar(starId, pctTab, ownedTab, boughtTab, totalTab);
+  });
+
+  // overall completion star
+  const overallStar = document.getElementById('starAll');
+  if (overallStar) {
+    const pctOverall = totalAll > 0 ? Math.round(((ownedAll + boughtAll) / totalAll) * 100) : 0;
+    if (pctOverall === 100) {
+      overallStar.textContent = '★';
+      overallStar.setAttribute('aria-hidden', 'false');
     } else {
-      row.classList.remove('completed');
-      star.textContent = '';
-      star.setAttribute('aria-hidden', 'true');
+      overallStar.textContent = '';
+      overallStar.setAttribute('aria-hidden', 'true');
     }
   }
-
-  updateStar('rowAll', 'starAll', pctAll, ownedAll, boughtAll, totalAll);
-  updateStar('rowEn', 'starEn', pctEn, ownedEn, boughtEn, totalEn);
-  updateStar('rowJp', 'starJp', pctJp, ownedJp, boughtJp, totalJp);
 }

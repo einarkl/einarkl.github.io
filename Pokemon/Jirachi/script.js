@@ -16,8 +16,8 @@ const languageMap = {
   "russian": "RU",
   "portuguese-b": "PT-B",
   "spanish": "ES",
-  "chinese-s": "CH-S",
-  "chinese-t": "CH-T",
+  "chinese-s": "CN-S",
+  "chinese-t": "CN-T",
   "korean": "KR",
   "indonesian": "ID",
   "thai": "TH"
@@ -276,7 +276,7 @@ function render() {
 
   // apply language filter (show only items matching the language selection)
   if (currentLanguageFilter !== 'all') {
-    itemsToShow = itemsToShow.filter(i => i.language === languageMap[currentLanguageFilter]);
+    itemsToShow = itemsToShow.filter(i => i.language === languageMap[currentLanguageFilter]);console.log(itemsToShow, currentLanguageFilter, languageMap[currentLanguageFilter]);
   }
   const items = sortItems(itemsToShow);
 

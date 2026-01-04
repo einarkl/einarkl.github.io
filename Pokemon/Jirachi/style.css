@@ -156,6 +156,18 @@ header h1 {
     color: var(--muted);
 }
 
+/* Fallback image visual cue */
+.grayscale {
+  filter: grayscale(100%) contrast(0.9) brightness(0.95);
+}
+
+/* Optional: slight color return on hover */
+.grayscale:hover {
+  filter: grayscale(0%);
+  transition: filter 0.2s ease;
+}
+
+
 /* =====================
    BADGES
 ===================== */

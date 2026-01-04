@@ -312,7 +312,6 @@ function render() {
 
     const card = document.createElement("div");
     card.className = "card";
-
     card.innerHTML = `
       <img src="${resolvePictureUrl(item, artImageMap)}" alt="${item.cardName}">
       <div class="card-content">
@@ -328,6 +327,11 @@ function render() {
         </div>
       </div>
     `;
+    //add style if item.pictureUrl is missing
+    
+    if (!item.pictureUrl) {
+      card.classList.add("grayscale");
+    }
 
     grid.appendChild(card);
   });

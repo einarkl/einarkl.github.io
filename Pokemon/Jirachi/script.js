@@ -204,23 +204,48 @@ function isValidItem(item) {
   return v === "x" || v === "k" || v === "";
 }
 
+const FALLBACK_LANGUAGE_PRIORITY = ["JP", "EN"];
+
 function buildArtImageMap(items) {
   const map = {};
+
   items.forEach(item => {
-    if (item.art && item.pictureUrl) {
-      // only set the first valid image for an art id
-      if (!map[item.art]) {
-        map[item.art] = item.pictureUrl;
-      }
+    if (!item.art || !item.pictureUrl || !item.language) return;
+
+    const lang = item.language;
+    const rank = FALLBACK_LANGUAGE_PRIORITY.indexOf(lang);
+    const priority = rank === -1 ? Infinity : rank;
+
+    if (!map[item.art]) {
+      map[item.art] = {
+        url: item.pictureUrl,
+        language: lang,
+        priority
+      };
+      return;
+    }
+
+    const current = map[item.art];
+
+    // Lower priority number wins (JP=0, EN=1, others=Infinity)
+    if (priority < current.priority) {
+      map[item.art] = {
+        url: item.pictureUrl,
+        language: lang,
+        priority
+      };
     }
   });
+
   return map;
 }
 
 function resolvePictureUrl(item, artImageMap) {
   if (item.pictureUrl) return item.pictureUrl;
-  if (item.art && artImageMap[item.art]) return artImageMap[item.art];
-  return "./icons/385-Jirachi.png"; // optional final fallback
+  if (item.art && artImageMap[item.art]) {
+    return artImageMap[item.art].url;
+  }
+  return "./icons/385-Jirachi.png";
 }
 
 /* =====================

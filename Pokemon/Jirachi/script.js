@@ -204,6 +204,25 @@ function isValidItem(item) {
   return v === "x" || v === "k" || v === "";
 }
 
+function buildArtImageMap(items) {
+  const map = {};
+  items.forEach(item => {
+    if (item.art && item.pictureUrl) {
+      // only set the first valid image for an art id
+      if (!map[item.art]) {
+        map[item.art] = item.pictureUrl;
+      }
+    }
+  });
+  return map;
+}
+
+function resolvePictureUrl(item, artImageMap) {
+  if (item.pictureUrl) return item.pictureUrl;
+  if (item.art && artImageMap[item.art]) return artImageMap[item.art];
+  return "./icons/385-Jirachi.png"; // optional final fallback
+}
+
 /* =====================
    SORTING
 ===================== */
@@ -270,6 +289,7 @@ function sortItems(items) {
    RENDER
 ===================== */
 function render() {
+  const artImageMap = buildArtImageMap(allItems);
   const grid = document.getElementById("card-grid");
   grid.innerHTML = "";
 
@@ -294,7 +314,7 @@ function render() {
     card.className = "card";
 
     card.innerHTML = `
-      <img src="${item.pictureUrl}" alt="${item.cardName}">
+      <img src="${resolvePictureUrl(item, artImageMap)}" alt="${item.cardName}">
       <div class="card-content">
         <div class="card-title">${item.cardName}</div>
         <div class="card-meta">${item.set} • #${item.number}</div>

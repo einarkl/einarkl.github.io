@@ -202,7 +202,7 @@ header h1 {
 }
 
 .progress-label {
-    min-width: 80px;
+    min-width: 100px;
     font-size: 0.9rem;
     color: var(--muted);
 }

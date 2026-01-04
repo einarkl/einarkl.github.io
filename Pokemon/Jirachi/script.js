@@ -16,8 +16,8 @@ const languageMap = {
   "russian": "RU",
   "portuguese-b": "PT-B",
   "spanish": "ES",
-  "chinese-S": "CH-S",
-  "chinese-T": "CH-T",
+  "chinese-s": "CH-S",
+  "chinese-t": "CH-T",
   "korean": "KR",
   "indonesian": "ID",
   "thai": "TH"

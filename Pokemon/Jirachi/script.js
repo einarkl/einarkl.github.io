@@ -258,11 +258,6 @@ function sortItems(items) {
              String(a.number || '').localeCompare(String(b.number || ''));
     }
 
-    // Language alphabetical
-    if (currentOrder === 'language-az') {
-      return String(a.language || '').localeCompare(String(b.language || ''));
-    }
-
     // Chronological
     if (currentOrder === 'release-old') return a.releaseYear - b.releaseYear;
     if (currentOrder === 'release-new') return b.releaseYear - a.releaseYear;

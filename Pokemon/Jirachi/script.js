@@ -276,7 +276,7 @@ function render() {
 
   // apply language filter (show only items matching the language selection)
   if (currentLanguageFilter !== 'all') {
-    itemsToShow = itemsToShow.filter(i => i.language === languageMap[currentLanguageFilter]);console.log(itemsToShow, currentLanguageFilter, languageMap[currentLanguageFilter]);
+    itemsToShow = itemsToShow.filter(i => i.language === languageMap[currentLanguageFilter]);
   }
   const items = sortItems(itemsToShow);
 

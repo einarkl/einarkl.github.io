@@ -248,6 +248,11 @@ function resolvePictureUrl(item, artImageMap) {
   return "./icons/385-Jirachi.png";
 }
 
+function getLanguagePriority(lang) {
+  const idx = FALLBACK_LANGUAGE_PRIORITY.indexOf(lang);
+  return idx === -1 ? Infinity : idx;
+}
+
 /* =====================
    SORTING
 ===================== */
@@ -264,8 +269,16 @@ function sortItems(items) {
       const yearDiff = (a.releaseYear || 0) - (b.releaseYear || 0);
       if (yearDiff !== 0) return yearDiff;
 
-      return String(a.set || '').localeCompare(String(b.set || '')) ||
-             String(a.number || '').localeCompare(String(b.number || ''));
+      // 🔹 LANGUAGE PRIORITY (JP → EN → others)
+      const langDiff =
+        getLanguagePriority(a.language) - getLanguagePriority(b.language);
+      if (langDiff !== 0) return langDiff;
+
+      // final stable tie-breakers
+      return (
+        String(a.set || '').localeCompare(String(b.set || '')) ||
+        String(a.number || '').localeCompare(String(b.number || ''))
+      );
     }
 
     /* =====================

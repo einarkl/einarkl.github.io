@@ -249,11 +249,14 @@ function buildArtImageMap(items) {
 }
 
 function resolvePictureUrl(item, artImageMap) {
-  if (item.pictureUrl) return item.pictureUrl;
+  if (item.pictureUrl) return { url: item.pictureUrl, sourceLanguage: null };
   if (item.art && artImageMap[item.art]) {
-    return artImageMap[item.art].url;
+    return { 
+      url: artImageMap[item.art].url, 
+      sourceLanguage: artImageMap[item.art].language 
+    };
   }
-  return "./icons/385-Jirachi.png";
+  return { url: "./icons/385-Jirachi.png", sourceLanguage: null };
 }
 
 function getLanguagePriority(lang) {
@@ -373,8 +376,16 @@ function render() {
 
     const card = document.createElement("div");
     card.className = "card";
+    const resolvedImage = resolvePictureUrl(item, artImageMap);
+    const showLanguageOverlay = !item.pictureUrl && item.language;
+    const languageOverlay = showLanguageOverlay
+      ? `<div class="language-overlay">${item.language}</div>` 
+      : '';
     card.innerHTML = `
-      <img src="${resolvePictureUrl(item, artImageMap)}" alt="${item.cardName}">
+      <div class="card-image-wrapper">
+        <img src="${resolvedImage.url}" alt="${item.cardName}">
+        ${languageOverlay}
+      </div>
       <div class="card-content">
         <div class="card-title">${item.cardName}</div>
         <div class="card-meta">${item.set} • #${item.number}</div>

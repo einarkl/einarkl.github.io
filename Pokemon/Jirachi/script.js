@@ -22,6 +22,9 @@ const languageMap = {
   "thai": "TH"
 };
 
+const loader = document.getElementById("loader");
+const loaderIcon = document.getElementById("loaderIcon");
+
 /* =====================
    THEME HANDLING
 ===================== */
@@ -29,14 +32,15 @@ const body = document.body;
 const themeToggle = document.getElementById("themeToggle");
 
 function setTheme(theme) {
-  if (theme === "dark") {
-    body.classList.add("dark");
-    themeToggle.innerHTML = '<img src="./icons/dark-theme.svg" alt="Dark theme" />';
-  } else {
-    body.classList.remove("dark");
-    themeToggle.innerHTML = '<img src="./icons/light-theme.svg" alt="Light theme" />';
-  }
-  localStorage.setItem("theme", theme);
+    if (theme === "dark") {
+      body.classList.add("dark");
+      themeToggle.innerHTML = '<img src="./icons/dark-theme.svg" alt="Dark theme" />';
+    } else {
+      body.classList.remove("dark");
+      themeToggle.innerHTML = '<img src="./icons/light-theme.svg" alt="Light theme" />';
+    }
+    localStorage.setItem("theme", theme);
+    updateLoaderIcon();
 }
 
 // Load saved theme
@@ -46,6 +50,8 @@ themeToggle.addEventListener("click", () => {
   const isDark = body.classList.contains("dark");
   setTheme(isDark ? "light" : "dark");
 });
+
+showLoader();
 
 /* =====================
    DATA FETCH
@@ -101,6 +107,7 @@ function fetchSheetTab(tabName) {
       pendingFetches--;
       if (pendingFetches === 0) {
         render();
+        hideLoader();
       }
     })
     .catch(err => {
@@ -108,6 +115,7 @@ function fetchSheetTab(tabName) {
       pendingFetches--;
       if (pendingFetches === 0) {
         render();
+        hideLoader();
       }
     });
 }
@@ -251,6 +259,21 @@ function resolvePictureUrl(item, artImageMap) {
 function getLanguagePriority(lang) {
   const idx = FALLBACK_LANGUAGE_PRIORITY.indexOf(lang);
   return idx === -1 ? Infinity : idx;
+}
+
+function showLoader() {
+  loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+  loader.classList.add("hidden");
+}
+
+function updateLoaderIcon() {
+  const isDark = document.body.classList.contains("dark");
+  loaderIcon.src = isDark
+    ? "./icons/rotate-dark.svg"
+    : "./icons/rotate-light.svg";
 }
 
 /* =====================

@@ -427,9 +427,26 @@ document.getElementById('languageFilter').addEventListener('change', e => {
 
 function updateProgress() {
   const valid = allItems.filter(isValidItem);
-  const totalAll = valid.length;
-  const ownedAll = valid.filter(i => normalize(i.inCollection) === 'x').length;
-  const boughtAll = valid.filter(i => normalize(i.inCollection) === 'k').length;
+  
+  // Separate packs from cards for progress tracking
+  const packs = valid.filter(i => normalize(i.type) === 'pack');
+  const cards = valid.filter(i => normalize(i.type) !== 'pack');
+  
+  const totalAll = cards.length;
+  const ownedAll = cards.filter(i => normalize(i.inCollection) === 'x').length;
+  const boughtAll = cards.filter(i => normalize(i.inCollection) === 'k').length;
+  
+  // Packs progress (filtered by language if applicable)
+  let packsToShow = packs;
+  if (currentLanguageFilter !== 'all') {
+    const filterLang = languageMap[currentLanguageFilter];
+    if (filterLang) {
+      packsToShow = packs.filter(i => i.language === filterLang);
+    }
+  }
+  const totalPacks = packsToShow.length;
+  const ownedPacks = packsToShow.filter(i => normalize(i.inCollection) === 'x').length;
+  const boughtPacks = packsToShow.filter(i => normalize(i.inCollection) === 'k').length;
 
   function renderBar(containerId, owned, bought, total) {
     const container = document.getElementById(containerId);
@@ -467,10 +484,10 @@ function updateProgress() {
   const rowAll = document.getElementById('rowAll');
   if (rowAll) rowAll.style.display = showAll ? 'flex' : 'none';
 
-  // Process each tab's progress
+  // Process each tab's progress (excluding packs)
   allTabs.forEach(tab => {
     const tabNormalized = normalize(tab);
-    const tabItems = valid.filter(i => i.language === languageMap[tabNormalized]);
+    const tabItems = cards.filter(i => i.language === languageMap[tabNormalized]);
     const totalTab = tabItems.length;
     const ownedTab = tabItems.filter(i => normalize(i.inCollection) === 'x').length;
     const boughtTab = tabItems.filter(i => normalize(i.inCollection) === 'k').length;
@@ -515,4 +532,24 @@ function updateProgress() {
       overallStar.setAttribute('aria-hidden', 'true');
     }
   }
+  
+  // Packs progress bar (always visible, all languages combined)
+  const pctPacks = renderBar('progressPacks', ownedPacks, boughtPacks, totalPacks);
+  const rowPacks = document.getElementById('rowPacks');
+  if (rowPacks) rowPacks.style.display = 'flex';
+  
+  function updatePacksStar(starId, pct, owned, bought, total) {
+    const star = document.getElementById(starId);
+    if (!star) return;
+    if (pct === 100) {
+      star.textContent = '★';
+      star.setAttribute('aria-hidden', 'false');
+      star.title = `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`;
+      star.setAttribute('aria-label', `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`);
+    } else {
+      star.textContent = '';
+      star.setAttribute('aria-hidden', 'true');
+    }
+  }
+  updatePacksStar('starPacks', pctPacks, ownedPacks, boughtPacks, totalPacks);
 }

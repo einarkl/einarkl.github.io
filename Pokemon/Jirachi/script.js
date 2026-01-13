@@ -279,28 +279,64 @@ function updateLoaderIcon() {
     : "./icons/rotate-light.svg";
 }
 
+function buildFirstReleaseByArt(items, activeLanguage) {
+  const map = new Map();
+
+  items.forEach(item => {
+    if (!item.art) return;
+
+    // respect current language filter
+    if (activeLanguage !== 'all' && item.language !== languageMap[activeLanguage]) return;
+
+    const art = item.art;
+    const year = item.releaseYear || 9999;
+
+    if (!map.has(art) || year < map.get(art)) {
+      map.set(art, year);
+    }
+  });
+
+  return map;
+}
+
 /* =====================
    SORTING
 ===================== */
 function sortItems(items) {
+  // 🔹 build first-release map once per sort
+  const firstReleaseByArt = buildFirstReleaseByArt(items, currentLanguageFilter);
+
   return items.sort((a, b) => {
 
     /* =====================
        ART SORT — MUST BE FIRST
     ===================== */
     if (currentOrder === 'art') {
-      const artDiff = (a.art || 0) - (b.art || 0);
+
+      const aArt = a.art || 0;
+      const bArt = b.art || 0;
+
+      const aFirst = firstReleaseByArt.get(aArt) || 9999;
+      const bFirst = firstReleaseByArt.get(bArt) || 9999;
+
+      // 🔹 1. ORDER ART GROUPS BY FIRST RELEASE
+      const firstReleaseDiff = aFirst - bFirst;
+      if (firstReleaseDiff !== 0) return firstReleaseDiff;
+
+      // 🔹 2. GROUP BY ART ID
+      const artDiff = aArt - bArt;
       if (artDiff !== 0) return artDiff;
 
+      // 🔹 3. ORDER WITHIN ART BY RELEASE YEAR
       const yearDiff = (a.releaseYear || 0) - (b.releaseYear || 0);
       if (yearDiff !== 0) return yearDiff;
 
-      // 🔹 LANGUAGE PRIORITY (JP → EN → others)
+      // 🔹 4. LANGUAGE PRIORITY (JP → EN → others)
       const langDiff =
         getLanguagePriority(a.language) - getLanguagePriority(b.language);
       if (langDiff !== 0) return langDiff;
 
-      // final stable tie-breakers
+      // 🔹 5. FINAL STABLE TIE-BREAKERS
       return (
         String(a.set || '').localeCompare(String(b.set || '')) ||
         String(a.number || '').localeCompare(String(b.number || ''))

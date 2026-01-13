@@ -32,15 +32,15 @@ const body = document.body;
 const themeToggle = document.getElementById("themeToggle");
 
 function setTheme(theme) {
-    if (theme === "dark") {
-      body.classList.add("dark");
-      themeToggle.innerHTML = '<img src="./icons/dark-theme.svg" alt="Dark theme" />';
-    } else {
-      body.classList.remove("dark");
-      themeToggle.innerHTML = '<img src="./icons/light-theme.svg" alt="Light theme" />';
-    }
-    localStorage.setItem("theme", theme);
-    updateLoaderIcon();
+  if (theme === "dark") {
+    body.classList.add("dark");
+    themeToggle.innerHTML = '<img src="./icons/dark-theme.svg" alt="Dark theme" />';
+  } else {
+    body.classList.remove("dark");
+    themeToggle.innerHTML = '<img src="./icons/light-theme.svg" alt="Light theme" />';
+  }
+  localStorage.setItem("theme", theme);
+  updateLoaderIcon();
 }
 
 // Load saved theme
@@ -251,9 +251,9 @@ function buildArtImageMap(items) {
 function resolvePictureUrl(item, artImageMap) {
   if (item.pictureUrl) return { url: item.pictureUrl, sourceLanguage: null };
   if (item.art && artImageMap[item.art]) {
-    return { 
-      url: artImageMap[item.art].url, 
-      sourceLanguage: artImageMap[item.art].language 
+    return {
+      url: artImageMap[item.art].url,
+      sourceLanguage: artImageMap[item.art].language
     };
   }
   return { url: "./icons/385-Jirachi.png", sourceLanguage: null };
@@ -328,7 +328,7 @@ function sortItems(items) {
       if (yearDiff !== 0) return yearDiff;
 
       return String(a.set || '').localeCompare(String(b.set || '')) ||
-             String(a.number || '').localeCompare(String(b.number || ''));
+        String(a.number || '').localeCompare(String(b.number || ''));
     }
     if (currentOrder === 'owned-last') {
       const ownedDiff = { "": 0, k: 1, x: 2 }[a.inCollection] - { "": 0, k: 1, x: 2 }[b.inCollection];
@@ -338,7 +338,7 @@ function sortItems(items) {
       if (yearDiff !== 0) return yearDiff;
 
       return String(a.set || '').localeCompare(String(b.set || '')) ||
-             String(a.number || '').localeCompare(String(b.number || ''));
+        String(a.number || '').localeCompare(String(b.number || ''));
     }
 
     // Chronological
@@ -379,7 +379,7 @@ function render() {
     const resolvedImage = resolvePictureUrl(item, artImageMap);
     const showLanguageOverlay = !item.pictureUrl && item.language;
     const languageOverlay = showLanguageOverlay
-      ? `<div class="language-overlay">${item.language}</div>` 
+      ? `<div class="language-overlay">${item.language}</div>`
       : '';
     card.innerHTML = `
       <div class="card-image-wrapper">
@@ -400,7 +400,7 @@ function render() {
       </div>
     `;
     //add style if item.pictureUrl is missing
-    
+
     if (!item.pictureUrl) {
       card.classList.add("grayscale");
     }
@@ -427,15 +427,15 @@ document.getElementById('languageFilter').addEventListener('change', e => {
 
 function updateProgress() {
   const valid = allItems.filter(isValidItem);
-  
+
   // Separate packs from cards for progress tracking
   const packs = valid.filter(i => normalize(i.type) === 'pack');
   const cards = valid.filter(i => normalize(i.type) !== 'pack');
-  
+
   const totalAll = cards.length;
   const ownedAll = cards.filter(i => normalize(i.inCollection) === 'x').length;
   const boughtAll = cards.filter(i => normalize(i.inCollection) === 'k').length;
-  
+
   // Packs progress (filtered by language if applicable)
   let packsToShow = packs;
   if (currentLanguageFilter !== 'all') {
@@ -532,12 +532,12 @@ function updateProgress() {
       overallStar.setAttribute('aria-hidden', 'true');
     }
   }
-  
+
   // Packs progress bar (always visible, all languages combined)
   const pctPacks = renderBar('progressPacks', ownedPacks, boughtPacks, totalPacks);
   const rowPacks = document.getElementById('rowPacks');
   if (rowPacks) rowPacks.style.display = 'flex';
-  
+
   function updatePacksStar(starId, pct, owned, bought, total) {
     const star = document.getElementById(starId);
     if (!star) return;

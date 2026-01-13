@@ -308,6 +308,14 @@ function sortItems(items) {
 
   return items.sort((a, b) => {
 
+    // Packs last
+    if (a.type === "Pack" && b.type !== "Pack") return 1;
+    if (a.type !== "Pack" && b.type === "Pack") return -1;
+
+    // Cameos last
+    if (a.appearanceType === "Cameo" && b.appearanceType !== "Cameo") return 1;
+    if (a.appearanceType !== "Cameo" && b.appearanceType === "Cameo") return -1;
+
     /* =====================
        ART SORT — MUST BE FIRST
     ===================== */
@@ -346,14 +354,6 @@ function sortItems(items) {
     /* =====================
        OTHER SORT RULES
     ===================== */
-
-    // Packs last
-    if (a.type === "Pack" && b.type !== "Pack") return 1;
-    if (a.type !== "Pack" && b.type === "Pack") return -1;
-
-    // Cameos last
-    if (a.appearanceType === "Cameo" && b.appearanceType !== "Cameo") return 1;
-    if (a.appearanceType !== "Cameo" && b.appearanceType === "Cameo") return -1;
 
     // Collection order
     if (currentOrder === 'owned-first') {

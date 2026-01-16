@@ -572,7 +572,7 @@ function updateProgress() {
   // Packs progress bar (always visible, all languages combined)
   const pctPacks = renderBar('progressPacks', ownedPacks, boughtPacks, totalPacks);
   const rowPacks = document.getElementById('rowPacks');
-  if (rowPacks) rowPacks.style.display = 'flex';
+  if (rowPacks) rowPacks.style.display = totalPacks > 0 ? 'flex' : 'none';
 
   function updatePacksStar(starId, pct, owned, bought, total) {
     const star = document.getElementById(starId);

@@ -81,6 +81,32 @@ header {
     gap: 8px;
 }
 
+.print-button {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.print-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.print-button svg {
+    width: 20px;
+    height: 20px;
+}
+
 header h1 {
     margin: 0;
     font-size: 1.25rem;

@@ -110,6 +110,29 @@
 				font-weight: normal;
 			}
 
+			.back-button {
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				padding: 10px 20px;
+				background: #2a2a2a;
+				color: #eee;
+				text-decoration: none;
+				border-radius: 6px;
+				font-size: 0.9rem;
+				transition: background 0.2s;
+				border: 1px solid #333;
+			}
+
+			.back-button:hover {
+				background: #3a3a3a;
+			}
+
+			.back-button svg {
+				width: 20px;
+				height: 20px;
+			}
+
 			/* =====================
            PRINT STYLES
         ===================== */
@@ -278,7 +301,36 @@
 	</head>
 	<body>
 		<div class="screen-only">
-			<h1>Print Jirachi Card Placeholders</h1>
+			<div
+				style="
+					display: flex;
+					align-items: center;
+					justify-content: space-between;
+					margin-bottom: 20px;
+				"
+			>
+				<h1 style="margin: 0">Print Jirachi Card Placeholders</h1>
+				<a
+					href="index.html"
+					class="back-button"
+					title="Back to collection"
+				>
+					<svg
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						<line x1="19" y1="12" x2="5" y2="12"></line>
+						<polyline points="12 19 5 12 12 5"></polyline>
+					</svg>
+					Back
+				</a>
+			</div>
 
 			<div class="controls">
 				<div class="control-group">

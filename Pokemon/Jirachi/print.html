@@ -177,7 +177,7 @@
 				.card {
 					width: 63mm;
 					height: 88mm;
-					border: 1px solid #333;
+					border: 1px dotted #999;
 					background: white;
 					display: flex;
 					flex-direction: column;
@@ -248,13 +248,12 @@
 				justify-content: center;
 				align-content: center;
 				padding: 5mm;
-				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 			}
 
 			.card {
 				width: 63mm;
 				height: 88mm;
-				border: 1px solid #333;
+				border: 1px dotted #999;
 				background: white;
 				display: flex;
 				flex-direction: column;
@@ -694,8 +693,62 @@
 
 			function printCards() {
 				generateCards();
+
+				// Set document title based on filters for PDF filename
+				const languageFilter =
+					document.getElementById("languageFilter").value;
+				const statusFilter =
+					document.getElementById("statusFilter").value;
+				const displayMode = document.querySelector(
+					'input[name="displayMode"]:checked'
+				).value;
+				const includeCards =
+					document.getElementById("includeCards").checked;
+				const includePacks =
+					document.getElementById("includePacks").checked;
+
+				let filename = "Jirachi";
+
+				// Add language
+				if (languageFilter !== "all") {
+					const langText =
+						document.getElementById("languageFilter").options[
+							document.getElementById("languageFilter")
+								.selectedIndex
+						].text;
+					filename += `_${langText}`;
+				}
+
+				// Add status
+				if (statusFilter !== "all") {
+					const statusText = document
+						.getElementById("statusFilter")
+						.options[
+							document.getElementById("statusFilter")
+								.selectedIndex
+						].text.replace(/\s+/g, "_");
+					filename += `_${statusText}`;
+				}
+
+				// Add type
+				if (includeCards && !includePacks) {
+					filename += "_Cards";
+				} else if (!includeCards && includePacks) {
+					filename += "_Packs";
+				}
+
+				// Add mode
+				filename +=
+					displayMode === "image" ? "_Images" : "_Placeholders";
+
+				document.title = filename;
+
 				setTimeout(() => {
 					window.print();
+					// Reset title after print
+					setTimeout(() => {
+						document.title = "Print Jirachi Cards";
+					}, 1000);
 				}, 500);
 			}
 

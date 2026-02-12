@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Print Jirachi Cards</title>
+		<style>
+			/* =====================
+           SCREEN STYLES
+        ===================== */
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				font-family: system-ui, sans-serif;
+				background: #121212;
+				color: #eeeeee;
+			}
+
+			.screen-only {
+				padding: 20px;
+				max-width: 800px;
+				margin: 0 auto;
+			}
+
+			h1 {
+				margin-top: 0;
+			}
+
+			.controls {
+				background: #1e1e1e;
+				padding: 20px;
+				border-radius: 8px;
+				margin-bottom: 20px;
+			}
+
+			.control-group {
+				margin-bottom: 16px;
+			}
+
+			label {
+				display: block;
+				margin-bottom: 8px;
+				font-weight: 600;
+			}
+
+			select,
+			button {
+				padding: 8px 12px;
+				font-size: 14px;
+				border-radius: 4px;
+				border: 1px solid #333;
+				background: #2a2a2a;
+				color: #eee;
+			}
+
+			select {
+				width: 100%;
+				max-width: 300px;
+			}
+
+			button {
+				cursor: pointer;
+				background: #43a047;
+				color: white;
+				border: none;
+				padding: 12px 24px;
+				font-weight: 600;
+				margin-right: 12px;
+				margin-top: 8px;
+			}
+
+			button:hover {
+				background: #66bb6a;
+			}
+
+			button.secondary {
+				background: #555;
+			}
+
+			button.secondary:hover {
+				background: #666;
+			}
+
+			.status {
+				margin-top: 16px;
+				padding: 12px;
+				background: #2a2a2a;
+				border-radius: 4px;
+			}
+
+			.checkbox-group {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				margin-bottom: 8px;
+			}
+
+			.checkbox-group input[type="checkbox"] {
+				width: 20px;
+				height: 20px;
+				cursor: pointer;
+			}
+
+			.checkbox-group label {
+				margin: 0;
+				cursor: pointer;
+				font-weight: normal;
+			}
+
+			/* =====================
+           PRINT STYLES
+        ===================== */
+			@media print {
+				body {
+					background: white;
+					margin: 0;
+					padding: 0;
+				}
+
+				.screen-only {
+					display: none !important;
+				}
+
+				.print-container {
+					display: block !important;
+				}
+
+				/* A4 page setup */
+				@page {
+					size: A4 portrait;
+					margin: 10mm;
+				}
+
+				.page {
+					page-break-after: always;
+					width: 210mm;
+					height: 297mm;
+					padding: 5mm;
+					display: grid;
+					grid-template-columns: repeat(3, 63mm);
+					grid-template-rows: repeat(3, 88mm);
+					gap: 0;
+					justify-content: center;
+					align-content: center;
+				}
+
+				.page:last-child {
+					page-break-after: auto;
+				}
+
+				.card {
+					width: 63mm;
+					height: 88mm;
+					border: 1px solid #333;
+					background: white;
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					padding: 2mm;
+					font-size: 8pt;
+					color: #000;
+					text-align: center;
+					overflow: hidden;
+				}
+
+				.card.image-mode img {
+					width: 100%;
+					height: auto;
+					max-height: 60mm;
+					object-fit: contain;
+					filter: grayscale(100%);
+					margin-bottom: 2mm;
+				}
+
+				.card.placeholder-mode {
+					background: white;
+				}
+
+				.card-info {
+					font-size: 7pt;
+					line-height: 1.3;
+					width: 100%;
+				}
+
+				.card-info div {
+					margin: 1mm 0;
+				}
+
+				.card-name {
+					font-weight: bold;
+					font-size: 9pt;
+					margin-bottom: 2mm !important;
+				}
+
+				.card-language {
+					font-size: 10pt;
+					font-weight: bold;
+					margin-bottom: 2mm !important;
+				}
+			}
+
+			/* Screen preview */
+			.print-container {
+				display: none;
+				background: #2a2a2a;
+				padding: 20px;
+			}
+
+			.print-container.preview {
+				display: block;
+			}
+
+			.page {
+				background: white;
+				margin: 0 auto 20px;
+				width: 210mm;
+				display: grid;
+				grid-template-columns: repeat(3, 63mm);
+				grid-template-rows: repeat(3, 88mm);
+				gap: 0;
+				justify-content: center;
+				align-content: center;
+				padding: 5mm;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+			}
+
+			.card {
+				width: 63mm;
+				height: 88mm;
+				border: 1px solid #333;
+				background: white;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				padding: 2mm;
+				font-size: 8pt;
+				color: #000;
+				text-align: center;
+				overflow: hidden;
+			}
+
+			.card.image-mode img {
+				width: 100%;
+				height: auto;
+				max-height: 60mm;
+				object-fit: contain;
+				filter: grayscale(100%);
+				margin-bottom: 2mm;
+			}
+
+			.card-info {
+				font-size: 7pt;
+				line-height: 1.3;
+				width: 100%;
+			}
+
+			.card-info div {
+				margin: 1mm 0;
+			}
+
+			.card-name {
+				font-weight: bold;
+				font-size: 9pt;
+				margin-bottom: 2mm !important;
+			}
+
+			.card-language {
+				font-size: 10pt;
+				font-weight: bold;
+				margin-bottom: 2mm !important;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="screen-only">
+			<h1>Print Jirachi Card Placeholders</h1>
+
+			<div class="controls">
+				<div class="control-group">
+					<label for="languageFilter">Filter by Language:</label>
+					<select id="languageFilter">
+						<option value="all" selected>All Languages</option>
+					</select>
+				</div>
+
+				<div class="control-group">
+					<label for="statusFilter">Filter by Status:</label>
+					<select id="statusFilter">
+						<option value="all" selected>All Cards</option>
+						<option value="missing">
+							Missing Only (not owned/bought)
+						</option>
+						<option value="bought">Bought Only</option>
+						<option value="owned">Owned Only</option>
+						<option value="not-owned">
+							Not Owned (Missing + Bought)
+						</option>
+					</select>
+				</div>
+
+				<div class="control-group">
+					<label>Card Type:</label>
+					<div class="checkbox-group">
+						<input type="checkbox" id="includeCards" checked />
+						<label for="includeCards">Include Cards</label>
+					</div>
+					<div class="checkbox-group">
+						<input type="checkbox" id="includePacks" />
+						<label for="includePacks">Include Packs</label>
+					</div>
+				</div>
+
+				<div class="control-group">
+					<label>Display Mode:</label>
+					<div class="checkbox-group">
+						<input
+							type="radio"
+							id="imageMode"
+							name="displayMode"
+							value="image"
+							checked
+						/>
+						<label for="imageMode">Images (grayscale)</label>
+					</div>
+					<div class="checkbox-group">
+						<input
+							type="radio"
+							id="placeholderMode"
+							name="displayMode"
+							value="placeholder"
+						/>
+						<label for="placeholderMode"
+							>Plain placeholders (text only)</label
+						>
+					</div>
+				</div>
+
+				<button id="generateBtn">Generate Cards</button>
+				<button id="printBtn" class="secondary">
+					Generate & Print
+				</button>
+
+				<div class="status" id="status">
+					Click "Generate Cards" to preview, or "Generate & Print" to
+					open print dialog.
+				</div>
+			</div>
+		</div>
+
+		<div class="print-container" id="printContainer">
+			<!-- Cards will be generated here -->
+		</div>
+
+		<script>
+			const SHEET_ID = "1oC4KAdpbUDg64wjNZ_AU9SflkZsxBXcpCOSgLYwpO8Q";
+
+			const languageMap = {
+				english: "EN",
+				japanese: "JP",
+				french: "FR",
+				german: "DE",
+				italian: "IT",
+				russian: "RU",
+				"portuguese-b": "PT-B",
+				spanish: "ES",
+				"chinese-s": "CN-S",
+				"chinese-t": "CN-T",
+				korean: "KR",
+				indonesian: "ID",
+				thai: "TH",
+			};
+
+			let allItems = [];
+			let allTabs = [];
+			const FALLBACK_LANGUAGE_PRIORITY = ["JP", "EN"];
+
+			function normalize(value) {
+				return String(value).trim().toLowerCase();
+			}
+
+			function parseSheetData(json, language) {
+				const rows = json.table.rows;
+				return rows.map((row) => {
+					const [
+						inCollection,
+						appearanceType,
+						releaseYear,
+						set,
+						number,
+						cardName,
+						type,
+						rarity,
+						,
+						,
+						pictureUrl,
+						language,
+						art,
+					] = row.c.map((c) => c?.v ?? "");
+
+					return {
+						inCollection,
+						appearanceType,
+						releaseYear: Number(releaseYear) || 9999,
+						set,
+						number,
+						cardName,
+						type,
+						rarity,
+						pictureUrl,
+						language,
+						art: Number(art) || 0,
+					};
+				});
+			}
+
+			let pendingFetches = 0;
+
+			function fetchSheetTab(tabName) {
+				const tabURL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(
+					tabName
+				)}`;
+
+				pendingFetches++;
+				return fetch(tabURL)
+					.then((res) => res.text())
+					.then((text) => {
+						const json = JSON.parse(
+							text.substring(47).slice(0, -2)
+						);
+						const items = parseSheetData(json, tabName);
+						allItems = allItems.concat(items);
+						pendingFetches--;
+					})
+					.catch((err) => {
+						console.error(`Error fetching tab ${tabName}:`, err);
+						pendingFetches--;
+					});
+			}
+
+			function discoverAndFetchAllTabs() {
+				const languagesURL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(
+					"Languages"
+				)}`;
+
+				return fetch(languagesURL)
+					.then((res) => res.text())
+					.then((text) => {
+						const json = JSON.parse(
+							text.substring(47).slice(0, -2)
+						);
+						const rows =
+							json.table && json.table.rows
+								? json.table.rows
+								: [];
+						const names = rows
+							.map((r) =>
+								r.c && r.c[0] && r.c[0].v
+									? String(r.c[0].v).trim()
+									: ""
+							)
+							.filter(Boolean);
+
+						allTabs = names;
+						populateLanguageFilter();
+						return Promise.all(
+							allTabs.map((tab) => fetchSheetTab(tab))
+						);
+					});
+			}
+
+			function populateLanguageFilter() {
+				const filterSelect = document.getElementById("languageFilter");
+				filterSelect.innerHTML =
+					'<option value="all" selected>All Languages</option>';
+
+				allTabs.forEach((tab) => {
+					const option = document.createElement("option");
+					option.value = normalize(tab);
+					option.textContent = tab;
+					filterSelect.appendChild(option);
+				});
+			}
+
+			function buildArtImageMap(items) {
+				const map = {};
+				items.forEach((item) => {
+					if (!item.art || !item.pictureUrl || !item.language) return;
+					const lang = item.language;
+					const rank = FALLBACK_LANGUAGE_PRIORITY.indexOf(lang);
+					const priority = rank === -1 ? Infinity : rank;
+
+					if (!map[item.art]) {
+						map[item.art] = {
+							url: item.pictureUrl,
+							language: lang,
+							priority,
+						};
+						return;
+					}
+
+					const current = map[item.art];
+					if (priority < current.priority) {
+						map[item.art] = {
+							url: item.pictureUrl,
+							language: lang,
+							priority,
+						};
+					}
+				});
+				return map;
+			}
+
+			function resolvePictureUrl(item, artImageMap) {
+				if (item.pictureUrl) return item.pictureUrl;
+				if (item.art && artImageMap[item.art]) {
+					return artImageMap[item.art].url;
+				}
+				return "./icons/385-Jirachi.png";
+			}
+
+			function filterItems() {
+				const languageFilter =
+					document.getElementById("languageFilter").value;
+				const statusFilter =
+					document.getElementById("statusFilter").value;
+				const includeCards =
+					document.getElementById("includeCards").checked;
+				const includePacks =
+					document.getElementById("includePacks").checked;
+
+				let filtered = allItems.filter((item) => {
+					const status = normalize(item.inCollection);
+					const isValid =
+						status === "x" || status === "k" || status === "";
+					if (!isValid) return false;
+
+					// Type filter
+					const isPack = normalize(item.type) === "pack";
+					if (isPack && !includePacks) return false;
+					if (!isPack && !includeCards) return false;
+
+					// Language filter
+					if (languageFilter !== "all") {
+						const filterLang = languageMap[languageFilter];
+						if (item.language !== filterLang) return false;
+					}
+
+					// Status filter
+					if (statusFilter === "missing" && status !== "")
+						return false;
+					if (statusFilter === "bought" && status !== "k")
+						return false;
+					if (statusFilter === "owned" && status !== "x")
+						return false;
+					if (statusFilter === "not-owned" && status === "x")
+						return false;
+
+					return true;
+				});
+
+				return filtered;
+			}
+
+			function generateCards() {
+				const items = filterItems();
+				const displayMode = document.querySelector(
+					'input[name="displayMode"]:checked'
+				).value;
+				const artImageMap = buildArtImageMap(allItems);
+
+				const container = document.getElementById("printContainer");
+				container.innerHTML = "";
+
+				if (items.length === 0) {
+					document.getElementById("status").textContent =
+						"No cards match the selected filters.";
+					return;
+				}
+
+				const cardsPerPage = 9;
+				const pageCount = Math.ceil(items.length / cardsPerPage);
+
+				for (let p = 0; p < pageCount; p++) {
+					const page = document.createElement("div");
+					page.className = "page";
+
+					const startIdx = p * cardsPerPage;
+					const endIdx = Math.min(
+						startIdx + cardsPerPage,
+						items.length
+					);
+
+					for (let i = startIdx; i < endIdx; i++) {
+						const item = items[i];
+						const card = document.createElement("div");
+						card.className = `card ${displayMode}-mode`;
+
+						const imageUrl = resolvePictureUrl(item, artImageMap);
+
+						if (displayMode === "image") {
+							card.innerHTML = `
+                            <img src="${imageUrl}" alt="${item.cardName}">
+                            <div class="card-info">
+                                <div class="card-name">${item.cardName}</div>
+                                <div>${item.language || ""}</div>
+                                <div>${item.set} #${item.number}</div>
+                                <div>${item.type} • ${item.rarity}</div>
+                            </div>
+                        `;
+						} else {
+							card.innerHTML = `
+                            <div class="card-info">
+                                <div class="card-name">${item.cardName}</div>
+                                <div class="card-language">${
+									item.language || ""
+								}</div>
+                                <div>${item.set}</div>
+                                <div>#${item.number}</div>
+                                <div>${item.type}</div>
+                                <div>${item.rarity}</div>
+                                <div>${item.releaseYear}</div>
+                            </div>
+                        `;
+						}
+
+						page.appendChild(card);
+					}
+
+					container.appendChild(page);
+				}
+
+				document.getElementById(
+					"status"
+				).textContent = `Generated ${items.length} cards across ${pageCount} page(s). Scroll down to preview.`;
+				container.classList.add("preview");
+			}
+
+			function printCards() {
+				generateCards();
+				setTimeout(() => {
+					window.print();
+				}, 500);
+			}
+
+			// Initialize
+			document.getElementById("status").textContent = "Loading data...";
+			discoverAndFetchAllTabs().then(() => {
+				document.getElementById(
+					"status"
+				).textContent = `Loaded ${allItems.length} cards. Configure options and click Generate.`;
+			});
+
+			document
+				.getElementById("generateBtn")
+				.addEventListener("click", generateCards);
+			document
+				.getElementById("printBtn")
+				.addEventListener("click", printCards);
+		</script>
+	</body>
+</html>

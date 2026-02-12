@@ -1,70 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Jirachi Collection</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="shortcut icon" href="./icons/385-Jirachi.png" type="image/x-icon">
-</head>
-<body>
-    <div id="loader" class="loader">
-        <img id="loaderIcon" src="./icons/rotate-dark.svg" alt="Loading">
-    </div>
-    <header>
-        <h1>Jirachi Collection</h1>
-        <img src="./icons/385-Jirachi.png" alt="Jirachi" class="header-icon" />
-        <button id="themeToggle" class="theme-toggle">
-        <img src="./icons/dark-theme.svg" alt="Dark theme" />
-        </button>
-    </header>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Jirachi Collection</title>
+		<link rel="stylesheet" href="style.css" />
+		<link
+			rel="shortcut icon"
+			href="./icons/385-Jirachi.png"
+			type="image/x-icon"
+		/>
+	</head>
+	<body>
+		<div id="loader" class="loader">
+			<img id="loaderIcon" src="./icons/rotate-dark.svg" alt="Loading" />
+		</div>
+		<header>
+			<h1>Jirachi Collection</h1>
+			<img
+				src="./icons/385-Jirachi.png"
+				alt="Jirachi"
+				class="header-icon"
+			/>
+		</header>
 
-  <div class="controls">
-    <label>
-      Order:
-      <select id="order">
-        <option value="art" selected>Art</option>
-        <option value="release-old">Release old→new</option>
-        <option value="release-new">Release new→old</option>
-        <option value="owned-first">Owned first</option>
-        <option value="owned-last">Missing first</option>
-      </select>
-    </label>
+		<div class="controls">
+			<label>
+				Order:
+				<select id="order">
+					<option value="art" selected>Art</option>
+					<option value="release-old">Release old→new</option>
+					<option value="release-new">Release new→old</option>
+					<option value="owned-first">Owned first</option>
+					<option value="owned-last">Missing first</option>
+				</select>
+			</label>
 
-    <label>
-      Language:
-      <select id="languageFilter">
-        <option value="all" selected>All</option>
-      </select>
-    </label>
-  </div>
+			<label>
+				Language:
+				<select id="languageFilter">
+					<option value="all" selected>All</option>
+				</select>
+			</label>
+		</div>
 
-  <section class="progress-section" aria-label="Collection progress">
-    <div class="progress-row" id="rowAll">
-      <div class="progress-label">Overall</div>
-      <div class="progress" id="progressAll">
-        <div class="progress-fill-bought"></div>
-        <div class="progress-fill-owned"></div>
-        <div class="progress-text"></div>
-      </div>
-      <div class="progress-star" id="starAll" aria-hidden="true" title="Completion star"></div>
-    </div>
-    <div id="languageRows"></div>
-    <div class="progress-row" id="rowPacks">
-      <div class="progress-label">Packs</div>
-      <div class="progress" id="progressPacks">
-        <div class="progress-fill-bought"></div>
-        <div class="progress-fill-owned"></div>
-        <div class="progress-text"></div>
-      </div>
-      <div class="progress-star" id="starPacks" aria-hidden="true" title="Completion star"></div>
-    </div>
-  </section>
+		<section class="progress-section" aria-label="Collection progress">
+			<div class="progress-row" id="rowAll">
+				<div class="progress-label">Overall</div>
+				<div class="progress" id="progressAll">
+					<div class="progress-fill-bought"></div>
+					<div class="progress-fill-owned"></div>
+					<div class="progress-text"></div>
+				</div>
+				<div
+					class="progress-star"
+					id="starAll"
+					aria-hidden="true"
+					title="Completion star"
+				></div>
+			</div>
+			<div id="languageRows"></div>
+			<div class="progress-row" id="rowPacks">
+				<div class="progress-label">Packs</div>
+				<div class="progress" id="progressPacks">
+					<div class="progress-fill-bought"></div>
+					<div class="progress-fill-owned"></div>
+					<div class="progress-text"></div>
+				</div>
+				<div
+					class="progress-star"
+					id="starPacks"
+					aria-hidden="true"
+					title="Completion star"
+				></div>
+			</div>
 
-  <main>
-    <div id="card-grid" class="grid"></div>
-  </main>
+			<div class="progress-toggle-wrap">
+				<button
+					id="progressToggle"
+					class="progress-toggle"
+					aria-expanded="false"
+				>
+					Show languages ▾
+				</button>
+			</div>
+		</section>
 
-  <script src="script.js"></script>
-</body>
+		<main>
+			<div id="card-grid" class="grid"></div>
+		</main>
+
+		<script src="script.js"></script>
+	</body>
 </html>

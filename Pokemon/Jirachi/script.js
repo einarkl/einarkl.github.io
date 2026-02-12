@@ -23,33 +23,13 @@ const languageMap = {
 };
 
 const loader = document.getElementById("loader");
-const loaderIcon = document.getElementById("loaderIcon");
 
 /* =====================
    THEME HANDLING
 ===================== */
 const body = document.body;
-const themeToggle = document.getElementById("themeToggle");
-
-function setTheme(theme) {
-  if (theme === "dark") {
-    body.classList.add("dark");
-    themeToggle.innerHTML = '<img src="./icons/dark-theme.svg" alt="Dark theme" />';
-  } else {
-    body.classList.remove("dark");
-    themeToggle.innerHTML = '<img src="./icons/light-theme.svg" alt="Light theme" />';
-  }
-  localStorage.setItem("theme", theme);
-  updateLoaderIcon();
-}
-
-// Load saved theme
-setTheme(localStorage.getItem("theme") || "dark");
-
-themeToggle.addEventListener("click", () => {
-  const isDark = body.classList.contains("dark");
-  setTheme(isDark ? "light" : "dark");
-});
+// Always use dark theme
+body.classList.add("dark");
 
 showLoader();
 
@@ -272,13 +252,6 @@ function hideLoader() {
   loader.classList.add("hidden");
 }
 
-function updateLoaderIcon() {
-  const isDark = document.body.classList.contains("dark");
-  loaderIcon.src = isDark
-    ? "./icons/rotate-dark.svg"
-    : "./icons/rotate-light.svg";
-}
-
 function buildFirstReleaseByArt(items, activeLanguage) {
   const map = new Map();
 
@@ -458,8 +431,50 @@ document.getElementById("order").addEventListener("change", e => {
 // Language display filter
 document.getElementById('languageFilter').addEventListener('change', e => {
   currentLanguageFilter = e.target.value;
+  updateToggleState();
   render();
 });
+
+/* =====================
+   COLLAPSIBLE PROGRESS
+===================== */
+const progressSection = document.querySelector('.progress-section');
+const progressToggle = document.getElementById('progressToggle');
+
+// Default to collapsed (show only Overall, current lang, and packs)
+let progressCollapsed = localStorage.getItem('progressCollapsed') !== 'false';
+
+function updateToggleState() {
+  const isAllLanguages = currentLanguageFilter === 'all';
+  
+  if (!isAllLanguages) {
+    // When specific language selected, always expand and hide toggle
+    progressSection.classList.remove('collapsed');
+    progressToggle.style.display = 'none';
+  } else {
+    // When "All" is selected, show and enable toggle
+    progressToggle.style.display = '';
+    progressToggle.removeAttribute('aria-disabled');
+    if (progressCollapsed) {
+      progressSection.classList.add('collapsed');
+      progressToggle.textContent = 'Show languages ▾';
+    } else {
+      progressSection.classList.remove('collapsed');
+      progressToggle.textContent = 'Hide languages ▴';
+    }
+  }
+}
+
+progressToggle.addEventListener('click', () => {
+  if (progressToggle.getAttribute('aria-disabled') === 'true') return;
+  
+  progressCollapsed = !progressCollapsed;
+  localStorage.setItem('progressCollapsed', progressCollapsed);
+  updateToggleState();
+});
+
+// Initialize toggle state
+updateToggleState();
 
 function updateProgress() {
   const valid = allItems.filter(isValidItem);
@@ -494,6 +509,8 @@ function updateProgress() {
     const pctOwned = total > 0 ? (owned / total) * 100 : 0;
     const pctBought = total > 0 ? (bought / total) * 100 : 0;
     const pctTotal = Math.min(100, Math.round((owned + bought) / total * 100) || 0);
+    const pctOwnedRounded = Math.min(100, Math.round(pctOwned) || 0);
+    const pctBoughtRounded = Math.min(100, Math.round(pctBought) || 0);
 
     if (fillBought) {
       fillBought.style.width = Math.min(100, Math.round(pctOwned + pctBought)) + '%';
@@ -505,12 +522,16 @@ function updateProgress() {
     }
 
     if (text) {
-      text.textContent = `${pctTotal}% (${owned}/${total})`;
+      const combinedCount = owned + bought;
+      text.innerHTML = `
+        <div class="progress-main">${pctTotal}% (${combinedCount}/${total})</div>
+        <div class="progress-sub">Owned: ${pctOwnedRounded}% (${owned}/${total}) — Bought: ${pctBoughtRounded}% (${bought}/${total})</div>
+      `;
       text.title = `Owned: ${owned}, Bought: ${bought}, Total: ${total}`;
       text.setAttribute('aria-label', `Progress ${pctTotal} percent. Owned ${owned}, Bought ${bought}, Total ${total}`);
     }
 
-    return pctTotal;
+    return pctOwnedRounded;
   }
 
   const pctAll = renderBar('progressAll', ownedAll, boughtAll, totalAll);
@@ -542,11 +563,12 @@ function updateProgress() {
     function updateStar(starId, pct, owned, bought, total) {
       const star = document.getElementById(starId);
       if (!star) return;
-      if (pct === 100) {
+      // Show star only when 100% owned (not counting bought)
+      if (total > 0 && owned === total) {
         star.textContent = '★';
         star.setAttribute('aria-hidden', 'false');
-        star.title = `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`;
-        star.setAttribute('aria-label', `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`);
+        star.title = `Completed: Owned ${owned}, Total ${total}`;
+        star.setAttribute('aria-label', `Completed: Owned ${owned}, Total ${total}`);
       } else {
         star.textContent = '';
         star.setAttribute('aria-hidden', 'true');
@@ -559,8 +581,8 @@ function updateProgress() {
   // overall completion star
   const overallStar = document.getElementById('starAll');
   if (overallStar) {
-    const pctOverall = totalAll > 0 ? Math.round(((ownedAll + boughtAll) / totalAll) * 100) : 0;
-    if (pctOverall === 100) {
+    // Show star only when 100% owned (not counting bought)
+    if (totalAll > 0 && ownedAll === totalAll) {
       overallStar.textContent = '★';
       overallStar.setAttribute('aria-hidden', 'false');
     } else {
@@ -577,11 +599,12 @@ function updateProgress() {
   function updatePacksStar(starId, pct, owned, bought, total) {
     const star = document.getElementById(starId);
     if (!star) return;
-    if (pct === 100) {
+    // Show star only when 100% owned (not counting bought)
+    if (total > 0 && owned === total) {
       star.textContent = '★';
       star.setAttribute('aria-hidden', 'false');
-      star.title = `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`;
-      star.setAttribute('aria-label', `Completed: Owned ${owned}, Bought ${bought}, Total ${total}`);
+      star.title = `Completed: Owned ${owned}, Total ${total}`;
+      star.setAttribute('aria-label', `Completed: Owned ${owned}, Total ${total}`);
     } else {
       star.textContent = '';
       star.setAttribute('aria-hidden', 'true');

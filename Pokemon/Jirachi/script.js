@@ -442,7 +442,7 @@ const progressSection = document.querySelector('.progress-section');
 const progressToggle = document.getElementById('progressToggle');
 
 // Default to collapsed (show only Overall, current lang, and packs)
-let progressCollapsed = localStorage.getItem('progressCollapsed') !== 'false';
+let progressCollapsed = true;
 
 function updateToggleState() {
   const isAllLanguages = currentLanguageFilter === 'all';
@@ -451,6 +451,7 @@ function updateToggleState() {
     // When specific language selected, always expand and hide toggle
     progressSection.classList.remove('collapsed');
     progressToggle.style.display = 'none';
+    progressToggle.setAttribute('aria-expanded', 'true');
   } else {
     // When "All" is selected, show and enable toggle
     progressToggle.style.display = '';
@@ -458,9 +459,11 @@ function updateToggleState() {
     if (progressCollapsed) {
       progressSection.classList.add('collapsed');
       progressToggle.textContent = 'Show languages ▾';
+      progressToggle.setAttribute('aria-expanded', 'false');
     } else {
       progressSection.classList.remove('collapsed');
       progressToggle.textContent = 'Hide languages ▴';
+      progressToggle.setAttribute('aria-expanded', 'true');
     }
   }
 }
@@ -469,7 +472,6 @@ progressToggle.addEventListener('click', () => {
   if (progressToggle.getAttribute('aria-disabled') === 'true') return;
   
   progressCollapsed = !progressCollapsed;
-  localStorage.setItem('progressCollapsed', progressCollapsed);
   updateToggleState();
 });
 

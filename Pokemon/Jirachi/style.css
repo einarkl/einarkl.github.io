@@ -72,6 +72,7 @@ body {
 ===================== */
 header {
     padding: 16px;
+    padding-right: 128px;
     background: var(--header-bg);
     color: white;
     position: relative;
@@ -120,9 +121,51 @@ header h1 {
     display: inline-block;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 700px) {
+    header {
+        padding-right: 88px;
+    }
+
+    header h1 {
+        font-size: 1.1rem;
+    }
+
     .header-icon {
         height: 32px;
+        margin-left: 6px;
+    }
+
+    .print-button {
+        right: 12px;
+        padding: 8px;
+    }
+
+    .print-button .print-label {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding-right: 64px;
+    }
+
+    header h1 {
+        font-size: 1rem;
+    }
+
+    .header-icon {
+        height: 26px;
+        margin-left: 4px;
+    }
+
+    .print-button {
+        right: 10px;
+    }
+
+    .print-button svg {
+        width: 18px;
+        height: 18px;
     }
 }
 
@@ -279,7 +322,6 @@ header h1 {
 .progress {
     position: relative;
     flex: 1;
-    max-width: calc(100% - 144px);
     height: 48px;
     background: linear-gradient(90deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.03));
     border-radius: 12px;
@@ -404,4 +446,42 @@ body.dark .progress-fill {
     border-top: none;
     margin-top: 0;
     padding-top: 8px;
+}
+
+@media (max-width: 700px) {
+    .progress-row {
+        gap: 8px;
+    }
+
+    .progress-label {
+        min-width: 78px;
+        font-size: 0.8rem;
+    }
+
+    .progress {
+        height: 40px;
+    }
+
+    .progress-text .progress-main {
+        font-size: 0.8rem;
+    }
+
+    .progress-text .progress-sub {
+        display: none;
+    }
+
+    .progress-star {
+        min-width: 24px;
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .progress-label {
+        min-width: 64px;
+    }
+
+    .progress-text .progress-main {
+        font-size: 0.75rem;
+    }
 }

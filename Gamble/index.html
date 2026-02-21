@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamble | EinarKL</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Gamble</h1>
+            <div class="points-display">
+                <span class="label">Points</span>
+                <p id="points" class="amount">0</p>
+            </div>
+            
+            <div class="buttons-group">
+                <button class="btn btn-small" onclick="gamble(25)">Gamble 25%</button>
+                <button class="btn btn-small" onclick="gamble(50)">Gamble 50%</button>
+                <button class="btn btn-danger" onclick="gamble(100)">Gamble All</button>
+            </div>
+            
+            <button class="btn btn-reset" onclick="reset()">Reset</button>
+        </div>
+    </div>
+</body>
+</html>

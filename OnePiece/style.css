@@ -242,14 +242,14 @@ header h1 {
     border-radius: 999px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    background: linear-gradient(180deg, rgba(120, 168, 207, 0.16), rgba(59, 108, 158, 0.24));
+    background: linear-gradient(180deg, rgba(24, 192, 237, 0.2), rgba(30, 82, 163, 0.3));
 }
 
 .ocean-fill {
     position: relative;
     height: 100%;
     width: 0%;
-    background: linear-gradient(180deg, #5fb7f3 0%, #2e87cc 55%, #1e5e9a 100%);
+    background: linear-gradient(180deg, #18C0ED 0%, #1E52A3 100%);
     transition: width 500ms ease;
 }
 
@@ -456,7 +456,7 @@ header h1 {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(180deg, #5fb7f3 0%, #2e87cc 55%, #1e5e9a 100%);
+    background: linear-gradient(180deg, #18C0ED 0%, #1E52A3 100%);
     width: 0%;
     transition: width 300ms ease;
 }
@@ -466,7 +466,7 @@ header h1 {
     left: 0;
     top: 0;
     height: 100%;
-    background: linear-gradient(180deg, #5fb7f3 0%, #2e87cc 55%, #1e5e9a 100%);
+    background: linear-gradient(180deg, #18C0ED 0%, #1E52A3 100%);
     width: 0%;
     transition: width 300ms ease;
     z-index: 1;
@@ -477,7 +477,7 @@ header h1 {
     left: 0;
     top: 0;
     height: 100%;
-    background: linear-gradient(180deg, #5fb7f3 0%, #2e87cc 55%, #1e5e9a 100%);
+    background: linear-gradient(180deg, #18C0ED 0%, #1E52A3 100%);
     width: 0%;
     transition: width 300ms ease;
     z-index: 2;
@@ -515,7 +515,7 @@ body.dark .progress {
 }
 
 body.dark .progress-fill {
-    background: linear-gradient(180deg, #5fb7f3 0%, #2e87cc 55%, #1e5e9a 100%);
+    background: linear-gradient(180deg, #18C0ED 0%, #1E52A3 100%);
 }
 
 /* Completion star */

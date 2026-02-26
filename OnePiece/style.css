@@ -211,6 +211,83 @@ header h1 {
 }
 
 /* =====================
+   OCEAN JOURNEY
+===================== */
+.ocean-journey {
+    padding: 12px 16px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--control-bg);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.ocean-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.ocean-lane {
+    position: relative;
+    padding-top: 18px;
+}
+
+.ocean-track {
+    --ship-left: 0%;
+    position: relative;
+    height: 28px;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(120, 168, 207, 0.16), rgba(59, 108, 158, 0.24));
+}
+
+.ocean-fill {
+    position: relative;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(180deg, #5fb7f3 0%, #2e87cc 55%, #1e5e9a 100%);
+    transition: width 500ms ease;
+}
+
+.ocean-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        -45deg,
+        rgba(255, 255, 255, 0.18) 0,
+        rgba(255, 255, 255, 0.18) 14px,
+        rgba(255, 255, 255, 0.06) 14px,
+        rgba(255, 255, 255, 0.06) 28px
+    );
+    opacity: 0.45;
+}
+
+.journey-ship {
+    position: absolute;
+    left: clamp(26px, var(--ship-left), calc(100% - 26px));
+    top: 0;
+    width: 58px;
+    height: auto;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+    transition: left 500ms ease;
+    animation: ship-float 2.8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes ship-float {
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0) rotate(-2deg);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-4px) rotate(2deg);
+    }
+}
+
+/* =====================
    CONTROLS
 ===================== */
 .controls {
@@ -498,6 +575,10 @@ body.dark .progress-fill {
         padding: 12px;
     }
 
+    .ocean-journey {
+        padding: 12px;
+    }
+
     .journey-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
@@ -556,6 +637,15 @@ body.dark .progress-fill {
 
     .journey-value {
         font-size: 0.95rem;
+    }
+
+    .ocean-track {
+        height: 24px;
+    }
+
+    .journey-ship {
+        width: 48px;
+        left: clamp(22px, var(--ship-left), calc(100% - 22px));
     }
 
     .progress-row {

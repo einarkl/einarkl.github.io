@@ -51,7 +51,7 @@ function updateJourneyShowcase(watchedEpisodes, totalEpisodes) {
 	if (!startedEl || !daysEl || !episodesEl || !totalTimeEl || !perDayEl || !endDateEl) return;
 
 	startedEl.textContent = formatDate(JOURNEY_START_DATE);
-	episodesEl.textContent = `${watchedEpisodes}/${totalEpisodes}`;
+	episodesEl.textContent = `${watchedEpisodes}/${totalEpisodes}` + (totalEpisodes > 0 ? ` (${Math.round((watchedEpisodes / totalEpisodes) * 100)}%)` : "");
 
 	const totalWatchMinutes = watchedEpisodes * MINUTES_PER_EPISODE;
 	totalTimeEl.textContent = `~${formatDuration(totalWatchMinutes)}`;
@@ -80,6 +80,21 @@ function updateJourneyShowcase(watchedEpisodes, totalEpisodes) {
 	const estimatedEnd = new Date(now.getTime() + remainingDays * 24 * 60 * 60 * 1000);
 
 	endDateEl.textContent = formatDate(estimatedEnd);
+}
+
+function updateOceanJourney(watchedEpisodes, totalEpisodes) {
+	const lane = document.querySelector(".ocean-lane");
+	const track = document.getElementById("oceanTrack");
+	const fill = document.getElementById("oceanFill");
+	const ship = document.getElementById("journeyShip");
+	if (!lane || !track || !fill || !ship) return;
+
+	const pct = totalEpisodes > 0 ? (watchedEpisodes / totalEpisodes) * 100 : 0;
+	const clampedPct = Math.max(0, Math.min(100, pct));
+
+	fill.style.width = `${clampedPct}%`;
+	lane.style.setProperty("--ship-left", `${clampedPct}%`);
+	ship.style.left = `${clampedPct}%`;
 }
 
 function getSeasonEpisodeRange(episodes) {
@@ -193,9 +208,7 @@ function updateProgress() {
 	const watchedTotal = validEpisodes.filter(item => isWatched(item.watchedRaw)).length;
 	const totalEpisodes = validEpisodes.length;
 	updateJourneyShowcase(watchedTotal, totalEpisodes);
-
-	renderBar("progressTotal", watchedTotal, totalEpisodes);
-	updateStar("starTotal", watchedTotal, totalEpisodes);
+	updateOceanJourney(watchedTotal, totalEpisodes);
 
 	seasonDefinitions.forEach(season => {
 		const key = normalize(season.tab).replace(/[^a-z0-9]+/g, "-");

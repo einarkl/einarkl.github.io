@@ -1,0 +1,493 @@
+/* =====================
+   CSS VARIABLES
+===================== */
+:root {
+    --bg: #f2f2f2;
+    --card-bg: #ffffff;
+    --text: #222;
+    --muted: #555;
+    --header-bg: #3a3a3a;
+    --control-bg: #ffffff;
+    --border: #ddd;
+}
+
+body.dark {
+    --bg: #121212;
+    --card-bg: #1e1e1e;
+    --text: #eeeeee;
+    --muted: #aaaaaa;
+    --header-bg: #2a2a2a;
+    --control-bg: #1a1a1a;
+    --border: #333;
+}
+
+/* =====================
+   BASE
+===================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.2s, color 0.2s;
+}
+
+/* =====================
+   LOADER
+===================== */
+
+.loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loader img {
+  width: 80px;
+  height: 80px;
+  animation: spin 1s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* hide helper */
+.loader.hidden {
+  display: none;
+}
+
+/* =====================
+   HEADER
+===================== */
+header {
+    padding: 16px;
+    background: var(--header-bg);
+    color: white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.print-button {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.print-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.print-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.header-icon {
+    position: static;
+    margin-left: 8px;
+    height: 40px;
+    width: auto;
+    display: inline-block;
+}
+
+@media (max-width: 700px) {
+    header h1 {
+        font-size: 1.1rem;
+    }
+
+    .header-icon {
+        height: 32px;
+        margin-left: 6px;
+    }
+
+    .print-button {
+        right: 12px;
+        padding: 8px;
+    }
+
+    .print-button .print-label {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1rem;
+    }
+
+    .header-icon {
+        height: 26px;
+        margin-left: 4px;
+    }
+
+    .print-button {
+        right: 10px;
+    }
+
+    .print-button svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* =====================
+   CONTROLS
+===================== */
+.controls {
+    padding: 12px 16px;
+    background: var(--control-bg);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+}
+
+/* =====================
+   GRID & CARDS
+===================== */
+.grid {
+    display: grid;
+    gap: 16px;
+    padding: 16px;
+    /* Use fixed column width and center the grid so cards don't stretch to fill space */
+    grid-template-columns: repeat(auto-fill, 220px);
+    justify-content: center;
+}
+
+@media (max-width: 520px) {
+
+    /* On narrow screens allow cards to be fluid and fill available width */
+    .grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        justify-content: start;
+    }
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-image-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.card img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    background: #444;
+    display: block;
+}
+
+.language-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    pointer-events: none;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.card-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.card-title {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.card-meta {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+/* Fallback image visual cue */
+.grayscale img {
+  filter: grayscale(100%) contrast(0.9) brightness(0.95);
+}
+
+/* Optional: slight color return on hover */
+.grayscale img:hover {
+  filter: grayscale(0%);
+  transition: filter 0.2s ease;
+}
+
+
+/* =====================
+   BADGES
+===================== */
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.badge {
+    font-size: 0.7rem;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: #444;
+    color: white;
+}
+
+.badge.owned {
+    background: #43a047;
+}
+
+.badge.bought {
+    background: #fbc02d;
+    color: #222;
+}
+
+/* =====================
+     PROGRESS BARS
+===================== */
+.progress-section {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    background: var(--control-bg);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.progress-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) minmax(0, 1fr) 36px;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.progress-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.25;
+}
+
+.progress {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.03));
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #43a047, #66bb6a);
+    width: 0%;
+    transition: width 300ms ease;
+}
+
+.progress-fill-bought {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #fbc02d, #ffd54f);
+    width: 0%;
+    transition: width 300ms ease;
+    z-index: 1;
+}
+
+.progress-fill-owned {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #43a047, #66bb6a);
+    width: 0%;
+    transition: width 300ms ease;
+    z-index: 2;
+}
+
+.progress-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.85rem;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    z-index: 3;
+    white-space: nowrap;
+}
+
+.progress-text .progress-main {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.progress-text .progress-sub {
+    font-size: 0.75rem;
+    opacity: 0.95;
+}
+
+body.dark .progress {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+body.dark .progress-fill {
+    background: linear-gradient(90deg, #66bb6a, #43a047);
+}
+
+/* Completion star */
+.progress-star {
+    min-width: 32px;
+    text-align: center;
+    font-size: 2rem;
+    color: #FFD700;
+    line-height: 1;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.progress-row.completed .progress-text {
+    font-weight: 700;
+}
+
+/* Toggle button styles */
+.progress-toggle-wrap {
+    display: flex;
+    justify-content: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+}
+
+.progress-toggle {
+    background: var(--control-bg);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.progress-toggle:hover {
+    background: var(--bg);
+}
+
+.progress-toggle[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Collapsed state */
+.progress-section.collapsed #languageRows,
+.progress-section.collapsed #rowPacks {
+    display: none;
+}
+
+.progress-section.collapsed .progress-toggle-wrap {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 8px;
+}
+
+@media (max-width: 700px) {
+    .progress-section {
+        padding: 12px;
+    }
+
+    .progress-row {
+        grid-template-columns: minmax(0, 1fr) 24px;
+        grid-template-rows: auto auto;
+        gap: 8px;
+    }
+
+    .progress-label {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        font-size: 0.8rem;
+    }
+
+    .progress {
+        grid-column: 1;
+        grid-row: 2;
+        height: 40px;
+    }
+
+    .progress-star {
+        grid-column: 2;
+        grid-row: 2;
+        min-width: 24px;
+        font-size: 1.4rem;
+    }
+
+    .progress-text .progress-main {
+        font-size: 0.8rem;
+    }
+
+    .progress-text .progress-sub {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .progress-row {
+        gap: 6px;
+    }
+
+    .progress-text .progress-main {
+        font-size: 0.75rem;
+    }
+}

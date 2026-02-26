@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>One Piece Progress</title>
+		<link rel="stylesheet" href="style.css" />
+		<link rel="shortcut icon" href="./icons/op.png" type="image/x-icon" />
+	</head>
+	<body>
+		<header>
+			<h1>One Piece Progress</h1>
+			<img src="./icons/op.png" alt="One Piece" class="header-icon" />
+		</header>
+
+		<section class="progress-section" aria-label="Collection progress">
+			<div class="progress-row" id="rowTotal">
+				<div class="progress-label">Total</div>
+				<div class="progress" id="progressTotal">
+					<div class="progress-fill-bought"></div>
+					<div class="progress-fill-owned"></div>
+					<div class="progress-text"></div>
+				</div>
+				<div
+					class="progress-star"
+					id="starTotal"
+					aria-hidden="true"
+					title="Completion star"
+				></div>
+			</div>
+			<div id="seasonRows"></div>
+		</section>
+
+		<script src="script.js"></script>
+	</body>
+</html>

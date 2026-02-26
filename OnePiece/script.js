@@ -1,4 +1,6 @@
 const SHEET_ID = "1PcgjJ06RIcM2nNJ1CLsfcJ7jdQc4oo1s0eUqnIoJtg8";
+const JOURNEY_START_DATE = new Date("2026-02-14T00:00:00");
+const MINUTES_PER_EPISODE = 20;
 
 let allEpisodes = [];
 let seasonDefinitions = [];
@@ -17,6 +19,67 @@ function isWatched(value) {
 
 function hasEpisodeNumber(value) {
 	return String(value ?? "").trim() !== "";
+}
+
+function formatDate(date) {
+	const day = date.getDate();
+	const month = date.toLocaleString("en-GB", { month: "short" });
+	const year = date.getFullYear();
+	return `${day} ${month} ${year}`;
+}
+
+function formatDuration(minutes) {
+	if (!Number.isFinite(minutes) || minutes <= 0) return "0m";
+
+	const rounded = Math.round(minutes);
+	const hours = Math.floor(rounded / 60);
+	const mins = rounded % 60;
+
+	if (hours === 0) return `${mins}m`;
+	if (mins === 0) return `${hours}h`;
+	return `${hours}h ${mins}m`;
+}
+
+function updateJourneyShowcase(watchedEpisodes, totalEpisodes) {
+	const startedEl = document.getElementById("journeyStarted");
+	const daysEl = document.getElementById("journeyDays");
+	const episodesEl = document.getElementById("journeyEpisodes");
+	const totalTimeEl = document.getElementById("journeyTotalTime");
+	const perDayEl = document.getElementById("journeyPerDay");
+	const endDateEl = document.getElementById("journeyEndDate");
+
+	if (!startedEl || !daysEl || !episodesEl || !totalTimeEl || !perDayEl || !endDateEl) return;
+
+	startedEl.textContent = formatDate(JOURNEY_START_DATE);
+	episodesEl.textContent = `${watchedEpisodes}/${totalEpisodes}`;
+
+	const totalWatchMinutes = watchedEpisodes * MINUTES_PER_EPISODE;
+	totalTimeEl.textContent = `~${formatDuration(totalWatchMinutes)}`;
+
+	const now = new Date();
+	const elapsedMs = Math.max(0, now.getTime() - JOURNEY_START_DATE.getTime());
+	const elapsedDays = Math.max(1, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)) + 1);
+	daysEl.textContent = String(elapsedDays);
+	const watchMinutesPerDay = totalWatchMinutes / elapsedDays;
+
+	perDayEl.textContent = `~${formatDuration(watchMinutesPerDay)}/day`;
+
+	if (totalEpisodes > 0 && watchedEpisodes >= totalEpisodes) {
+		endDateEl.textContent = "Completed";
+		return;
+	}
+
+	if (watchMinutesPerDay <= 0) {
+		endDateEl.textContent = "—";
+		return;
+	}
+
+	const remainingEpisodes = Math.max(0, totalEpisodes - watchedEpisodes);
+	const remainingMinutes = remainingEpisodes * MINUTES_PER_EPISODE;
+	const remainingDays = Math.ceil(remainingMinutes / watchMinutesPerDay);
+	const estimatedEnd = new Date(now.getTime() + remainingDays * 24 * 60 * 60 * 1000);
+
+	endDateEl.textContent = formatDate(estimatedEnd);
 }
 
 function getSeasonEpisodeRange(episodes) {
@@ -129,6 +192,7 @@ function updateProgress() {
 	const validEpisodes = allEpisodes.filter(item => hasEpisodeNumber(item.episodeNumber));
 	const watchedTotal = validEpisodes.filter(item => isWatched(item.watchedRaw)).length;
 	const totalEpisodes = validEpisodes.length;
+	updateJourneyShowcase(watchedTotal, totalEpisodes);
 
 	renderBar("progressTotal", watchedTotal, totalEpisodes);
 	updateStar("starTotal", watchedTotal, totalEpisodes);

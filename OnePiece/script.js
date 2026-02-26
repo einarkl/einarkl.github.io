@@ -7,7 +7,18 @@ let seasonDefinitions = [];
 let pendingFetches = 0;
 
 const body = document.body;
+const loader = document.getElementById("loader");
 body.classList.add("dark");
+
+function showLoader() {
+	if (!loader) return;
+	loader.classList.remove("hidden");
+}
+
+function hideLoader() {
+	if (!loader) return;
+	loader.classList.add("hidden");
+}
 
 function normalize(value) {
 	return String(value ?? "").trim().toLowerCase();
@@ -244,6 +255,7 @@ function fetchSeasonTab(tabName) {
 			pendingFetches--;
 			if (pendingFetches === 0) {
 				updateProgress();
+				hideLoader();
 			}
 		});
 }
@@ -254,6 +266,7 @@ function discoverAndFetchAllTabs() {
 	const tryFetchByIndex = (index) => {
 		if (index >= seasonsSheetCandidates.length) {
 			console.error("No tab-list sheet found. Add a 'Seasons' sheet (or 'Languages') with season tab names in column A.");
+			hideLoader();
 			return;
 		}
 
@@ -293,4 +306,5 @@ function discoverAndFetchAllTabs() {
 	tryFetchByIndex(0);
 }
 
+showLoader();
 discoverAndFetchAllTabs();

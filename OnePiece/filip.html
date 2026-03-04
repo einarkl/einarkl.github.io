@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>One Piece Progress (Filip)</title>
+		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="filip.css" />
+		<link rel="shortcut icon" href="./icons/op.png" type="image/x-icon" />
+	</head>
+	<body>
+		<div id="loader" class="loader">
+			<img id="loaderIcon" src="./icons/rotate-dark.svg" alt="Loading" />
+		</div>
+
+		<header>
+			<h1>One Piece Progress</h1>
+			<img src="./icons/op.png" alt="One Piece" class="header-icon" />
+		</header>
+
+		<section class="journey-showcase" aria-label="Journey showcase">
+			<div class="journey-title">Journey</div>
+			<div class="journey-grid">
+				<div class="journey-item">
+					<div class="journey-label">Started</div>
+					<div class="journey-value" id="journeyStarted">
+						14 Feb 2026
+					</div>
+				</div>
+				<div class="journey-item">
+					<div class="journey-label">Days since start</div>
+					<div class="journey-value" id="journeyDays">0</div>
+				</div>
+				<div class="journey-item">
+					<div class="journey-label">Episodes watched</div>
+					<div class="journey-value" id="journeyEpisodes">0</div>
+				</div>
+				<div class="journey-item">
+					<div class="journey-label">Total watchtime</div>
+					<div class="journey-value" id="journeyTotalTime">0m</div>
+				</div>
+				<div class="journey-item">
+					<div class="journey-label">Watchtime / day</div>
+					<div class="journey-value" id="journeyPerDay">0m/day</div>
+				</div>
+				<div class="journey-item">
+					<div class="journey-label">Estimated end of journey</div>
+					<div class="journey-value" id="journeyEndDate">—</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="ocean-journey" aria-label="Journey at sea">
+			<div class="ocean-lane">
+				<div class="ocean-track" id="oceanTrack">
+					<div class="ocean-fill" id="oceanFill"></div>
+				</div>
+				<img
+					src="./icons/going_merry.png"
+					alt=""
+					class="journey-ship"
+					id="journeyShip"
+					aria-hidden="true"
+				/>
+				<img
+					src="./icons/Filip_scared.png"
+					alt="Filip surprise marker"
+					class="filip-marker"
+					id="filipMarker"
+				/>
+			</div>
+		</section>
+
+		<section class="progress-section" aria-label="Collection progress">
+			<div id="seasonRows"></div>
+		</section>
+
+		<script src="filip.js"></script>
+	</body>
+</html>

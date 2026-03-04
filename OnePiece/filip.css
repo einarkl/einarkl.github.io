@@ -1,0 +1,24 @@
+.filip-marker {
+    position: absolute;
+    left: clamp(20px, var(--filip-left), calc(100% - 20px));
+    top: calc(50% - 26px);
+    width: 36px;
+    height: auto;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
+    transition: left 500ms ease;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.filip-marker.hidden {
+    display: none;
+}
+
+@media (max-width: 420px) {
+    .filip-marker {
+        width: 30px;
+        left: clamp(18px, var(--filip-left), calc(100% - 18px));
+        top: calc(50% - 22px);
+    }
+}

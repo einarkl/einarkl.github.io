@@ -1,10 +1,12 @@
 const SHEET_ID = "1PcgjJ06RIcM2nNJ1CLsfcJ7jdQc4oo1s0eUqnIoJtg8";
 const JOURNEY_START_DATE = new Date("2026-02-14T00:00:00");
 const MINUTES_PER_EPISODE = 20;
+const FILIP_PARAM_KEYS = ["filip", "easter", "scared"];
 
 let allEpisodes = [];
 let seasonDefinitions = [];
 let pendingFetches = 0;
+let filipEpisodeNumber = null;
 
 const body = document.body;
 const loader = document.getElementById("loader");
@@ -30,6 +32,43 @@ function isWatched(value) {
 
 function hasEpisodeNumber(value) {
 	return String(value ?? "").trim() !== "";
+}
+
+function parsePositiveInt(value) {
+	const text = String(value ?? "").trim();
+	if (!text) return null;
+
+	const onlyDigits = text.replace(/[^0-9]/g, "");
+	if (!onlyDigits) return null;
+
+	const parsed = Number.parseInt(onlyDigits, 10);
+	return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function isFilipModeEnabled() {
+	const params = new URLSearchParams(window.location.search);
+	return FILIP_PARAM_KEYS.some(key => {
+		if (!params.has(key)) return false;
+		const value = normalize(params.get(key));
+		return value === "" || value === "1" || value === "true" || value === "yes" || value === "on";
+	});
+}
+
+function ensureFilipMarkerElement() {
+	const lane = document.querySelector(".ocean-lane");
+	if (!lane) return null;
+
+	let marker = document.getElementById("filipMarker");
+	if (marker) return marker;
+
+	marker = document.createElement("img");
+	marker.id = "filipMarker";
+	marker.className = "filip-marker hidden";
+	marker.src = "./icons/Filip_scared.png";
+	marker.alt = "Filip surprise marker";
+	lane.appendChild(marker);
+
+	return marker;
 }
 
 function formatDate(date) {
@@ -106,6 +145,27 @@ function updateOceanJourney(watchedEpisodes, totalEpisodes) {
 	fill.style.width = `${clampedPct}%`;
 	lane.style.setProperty("--ship-left", `${clampedPct}%`);
 	ship.style.left = `${clampedPct}%`;
+}
+
+function updateFilipMarker(totalEpisodes) {
+	if (!isFilipModeEnabled()) return;
+
+	const lane = document.querySelector(".ocean-lane");
+	const marker = ensureFilipMarkerElement();
+	if (!lane || !marker) return;
+
+	if (!Number.isFinite(filipEpisodeNumber) || filipEpisodeNumber <= 0 || totalEpisodes <= 0) {
+		marker.classList.add("hidden");
+		return;
+	}
+
+	const pct = (filipEpisodeNumber / totalEpisodes) * 100;
+	const clampedPct = Math.max(0, Math.min(100, pct));
+
+	lane.style.setProperty("--filip-left", `${clampedPct}%`);
+	marker.style.left = `${clampedPct}%`;
+	marker.title = `Filip marker: episode ${filipEpisodeNumber}`;
+	marker.classList.remove("hidden");
 }
 
 function getSeasonEpisodeRange(episodes) {
@@ -220,6 +280,7 @@ function updateProgress() {
 	const totalEpisodes = validEpisodes.length;
 	updateJourneyShowcase(watchedTotal, totalEpisodes);
 	updateOceanJourney(watchedTotal, totalEpisodes);
+	updateFilipMarker(totalEpisodes);
 
 	seasonDefinitions.forEach(season => {
 		const key = normalize(season.tab).replace(/[^a-z0-9]+/g, "-");
@@ -235,6 +296,25 @@ function updateProgress() {
 		renderBar(`progress-${key}`, watched, total);
 		updateStar(`star-${key}`, watched, total);
 	});
+}
+
+function fetchFilipEpisodeNumber() {
+	if (!isFilipModeEnabled()) return;
+
+	const rangeURL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent("Seasons")}&range=${encodeURIComponent("F2")}`;
+
+	fetch(rangeURL)
+		.then(res => res.text())
+		.then(text => {
+			const json = JSON.parse(text.substring(47).slice(0, -2));
+			const rows = (json.table && json.table.rows) ? json.table.rows : [];
+			const f2Value = rows[0] && rows[0].c && rows[0].c[0] ? rows[0].c[0].v : null;
+			filipEpisodeNumber = parsePositiveInt(f2Value);
+			updateProgress();
+		})
+		.catch(err => {
+			console.error("Error fetching Seasons!F2:", err);
+		});
 }
 
 function fetchSeasonTab(tabName) {
@@ -306,4 +386,5 @@ function discoverAndFetchAllTabs() {
 }
 
 showLoader();
+fetchFilipEpisodeNumber();
 discoverAndFetchAllTabs();

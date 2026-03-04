@@ -281,6 +281,23 @@ header h1 {
     pointer-events: none;
 }
 
+.filip-marker {
+    position: absolute;
+    left: clamp(20px, var(--filip-left), calc(100% - 20px));
+    top: calc(50% - 26px);
+    width: 36px;
+    height: auto;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
+    transition: left 500ms ease;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.filip-marker.hidden {
+    display: none;
+}
+
 @keyframes ship-float {
     0%,
     100% {
@@ -667,6 +684,12 @@ body.dark .progress-fill {
     .journey-ship {
         width: 48px;
         left: clamp(22px, var(--ship-left), calc(100% - 22px));
+    }
+
+    .filip-marker {
+        width: 30px;
+        left: clamp(18px, var(--filip-left), calc(100% - 18px));
+        top: calc(50% - 22px);
     }
 
     .progress-row {

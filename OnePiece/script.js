@@ -278,8 +278,7 @@ function discoverAndFetchAllTabs() {
 			.then(text => {
 				const json = JSON.parse(text.substring(47).slice(0, -2));
 				const rows = (json.table && json.table.rows) ? json.table.rows : [];
-				const dataRows = sheetName === "Seasons" ? rows.slice(1) : rows;
-				const seasons = dataRows
+				const seasons = rows
 					.map(row => {
 						const tab = (row.c && row.c[0] && row.c[0].v) ? String(row.c[0].v).trim() : "";
 						const name = (row.c && row.c[1] && row.c[1].v) ? String(row.c[1].v).trim() : "";
@@ -288,7 +287,7 @@ function discoverAndFetchAllTabs() {
 							name: name || tab
 						};
 					})
-					.filter(season => season.tab);
+					.filter(season => season.tab && normalize(season.tab) !== "season");
 
 				if (seasons.length === 0) {
 					throw new Error(`'${sheetName}' has no season tabs in column A.`);

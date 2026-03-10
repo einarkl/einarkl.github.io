@@ -229,9 +229,20 @@ header h1 {
 }
 
 .ocean-lane {
-    --ship-size: 75px;
-    --filip-size-percent: 90;
-    --filip-size: calc(var(--ship-size) * var(--filip-size-percent) / 100);
+    --ship-size: 100px;
+    --filip-size-percent: 100;
+    --filip-max-size-multiplier: 3;
+    --filip-near: 0;
+    --filip-size: calc(
+        var(--ship-size) * var(--filip-size-percent) / 100 *
+        (1 + var(--filip-near) * (var(--filip-max-size-multiplier) - 1))
+    );
+    --filip-shake-max-x: 12px;
+    --filip-shake-max-y: 8px;
+    --filip-shake-max-rot: 5deg;
+    --filip-shake-x: calc(var(--filip-near) * var(--filip-shake-max-x));
+    --filip-shake-y: calc(var(--filip-near) * var(--filip-shake-max-y));
+    --filip-shake-rot: calc(var(--filip-near) * var(--filip-shake-max-rot));
     position: relative;
     min-height: 64px;
     display: flex;
@@ -293,6 +304,7 @@ header h1 {
     transform: translateX(-50%);
     filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
     transition: left 500ms ease;
+    animation: filip-shake 320ms linear infinite;
     pointer-events: none;
     z-index: 5;
 }
@@ -694,5 +706,26 @@ body.dark .progress-fill {
 
     .progress-text .progress-main {
         font-size: 0.75rem;
+    }
+}
+
+@keyframes filip-shake {
+    0% {
+        transform: translateX(calc(-50% - var(--filip-shake-x))) translateY(calc(-1 * var(--filip-shake-y))) rotate(calc(-1 * var(--filip-shake-rot)));
+    }
+    20% {
+        transform: translateX(calc(-50% + var(--filip-shake-x))) translateY(var(--filip-shake-y)) rotate(var(--filip-shake-rot));
+    }
+    40% {
+        transform: translateX(calc(-50% - var(--filip-shake-x) * 0.65)) translateY(calc(var(--filip-shake-y) * 0.2)) rotate(calc(-1 * var(--filip-shake-rot) * 0.8));
+    }
+    60% {
+        transform: translateX(calc(-50% + var(--filip-shake-x) * 0.75)) translateY(calc(-1 * var(--filip-shake-y) * 0.5)) rotate(calc(var(--filip-shake-rot) * 0.7));
+    }
+    80% {
+        transform: translateX(calc(-50% - var(--filip-shake-x) * 0.25)) translateY(calc(var(--filip-shake-y) * 0.4)) rotate(calc(-1 * var(--filip-shake-rot) * 0.35));
+    }
+    100% {
+        transform: translateX(calc(-50% + var(--filip-shake-x) * 0.3)) translateY(calc(-1 * var(--filip-shake-y) * 0.3)) rotate(calc(var(--filip-shake-rot) * 0.25));
     }
 }

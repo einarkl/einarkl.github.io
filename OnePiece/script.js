@@ -147,7 +147,7 @@ function updateOceanJourney(watchedEpisodes, totalEpisodes) {
 	ship.style.left = `${clampedPct}%`;
 }
 
-function updateFilipMarker(totalEpisodes) {
+function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 	if (!isFilipModeEnabled()) return;
 
 	const lane = document.querySelector(".ocean-lane");
@@ -155,15 +155,23 @@ function updateFilipMarker(totalEpisodes) {
 	if (!lane || !marker) return;
 
 	if (!Number.isFinite(filipEpisodeNumber) || filipEpisodeNumber <= 0 || totalEpisodes <= 0) {
+		lane.style.setProperty("--filip-near", "0");
 		marker.classList.add("hidden");
 		return;
 	}
 
-	const pct = (filipEpisodeNumber / totalEpisodes) * 100;
-	const clampedPct = Math.max(0, Math.min(100, pct));
+	const filipPct = (filipEpisodeNumber / totalEpisodes) * 100;
+	const clampedFilipPct = Math.max(0, Math.min(100, filipPct));
+	const shipPct = totalEpisodes > 0 ? (watchedEpisodes / totalEpisodes) * 100 : 0;
+	const clampedShipPct = Math.max(0, Math.min(100, shipPct));
 
-	lane.style.setProperty("--filip-left", `${clampedPct}%`);
-	marker.style.left = `${clampedPct}%`;
+	const distancePct = Math.abs(clampedShipPct - clampedFilipPct);
+	const proximity = 1 - Math.min(1, distancePct / 100);
+	const clampedProximity = Math.max(0, Math.min(1, proximity));
+
+	lane.style.setProperty("--filip-left", `${clampedFilipPct}%`);
+	lane.style.setProperty("--filip-near", clampedProximity.toFixed(4));
+	marker.style.left = `${clampedFilipPct}%`;
 	marker.title = `Filip marker: episode ${filipEpisodeNumber}`;
 	marker.classList.remove("hidden");
 }
@@ -280,7 +288,7 @@ function updateProgress() {
 	const totalEpisodes = validEpisodes.length;
 	updateJourneyShowcase(watchedTotal, totalEpisodes);
 	updateOceanJourney(watchedTotal, totalEpisodes);
-	updateFilipMarker(totalEpisodes);
+	updateFilipMarker(watchedTotal, totalEpisodes);
 
 	seasonDefinitions.forEach(season => {
 		const key = normalize(season.tab).replace(/[^a-z0-9]+/g, "-");

@@ -2,6 +2,7 @@ const SHEET_ID = "1PcgjJ06RIcM2nNJ1CLsfcJ7jdQc4oo1s0eUqnIoJtg8";
 const JOURNEY_START_DATE = new Date("2026-02-14T00:00:00");
 const MINUTES_PER_EPISODE = 20;
 const FILIP_PARAM_KEYS = ["filip", "easter", "scared"];
+const SHIP_DEBUG_PARAM_KEYS = ["shipProgress", "debugProgress", "ship"];
 
 let allEpisodes = [];
 let seasonDefinitions = [];
@@ -44,6 +45,32 @@ function parsePositiveInt(value) {
 	const parsed = Number.parseInt(onlyDigits, 10);
 	return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
+
+function parsePercentage(value) {
+	const text = String(value ?? "").trim().replace(",", ".");
+	if (!text) return null;
+
+	const parsed = Number.parseFloat(text);
+	if (!Number.isFinite(parsed)) return null;
+
+	return Math.max(0, Math.min(100, parsed));
+}
+
+function getDebugShipProgressPercent() {
+	const params = new URLSearchParams(window.location.search);
+
+	for (const key of SHIP_DEBUG_PARAM_KEYS) {
+		if (!params.has(key)) continue;
+		const percent = parsePercentage(params.get(key));
+		if (percent !== null) {
+			return percent;
+		}
+	}
+
+	return null;
+}
+
+const DEBUG_SHIP_PROGRESS_PERCENT = getDebugShipProgressPercent();
 
 function isFilipModeEnabled() {
 	const params = new URLSearchParams(window.location.search);
@@ -156,6 +183,8 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 
 	if (!Number.isFinite(filipEpisodeNumber) || filipEpisodeNumber <= 0 || totalEpisodes <= 0) {
 		lane.style.setProperty("--filip-near", "0");
+		lane.style.setProperty("--filip-flip-x", "1");
+		marker.classList.remove("is-shaking");
 		marker.classList.add("hidden");
 		return;
 	}
@@ -168,10 +197,14 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 	const distancePct = Math.abs(clampedShipPct - clampedFilipPct);
 	const proximity = 1 - Math.min(1, distancePct / 100);
 	const clampedProximity = Math.max(0, Math.min(1, proximity));
+	const hasSurpassedFilip = clampedShipPct > clampedFilipPct;
+	const shouldShake = clampedProximity > 0;
 
 	lane.style.setProperty("--filip-left", `${clampedFilipPct}%`);
 	lane.style.setProperty("--filip-near", clampedProximity.toFixed(4));
+	lane.style.setProperty("--filip-flip-x", hasSurpassedFilip ? "-1" : "1");
 	marker.style.left = `${clampedFilipPct}%`;
+	marker.classList.toggle("is-shaking", shouldShake);
 	marker.title = `Filip marker: episode ${filipEpisodeNumber}`;
 	marker.classList.remove("hidden");
 }
@@ -286,9 +319,13 @@ function updateProgress() {
 	const validEpisodes = allEpisodes.filter(item => hasEpisodeNumber(item.episodeNumber));
 	const watchedTotal = validEpisodes.filter(item => isWatched(item.watchedRaw)).length;
 	const totalEpisodes = validEpisodes.length;
+	const journeyWatchedEpisodes = DEBUG_SHIP_PROGRESS_PERCENT === null
+		? watchedTotal
+		: (DEBUG_SHIP_PROGRESS_PERCENT / 100) * totalEpisodes;
+
 	updateJourneyShowcase(watchedTotal, totalEpisodes);
-	updateOceanJourney(watchedTotal, totalEpisodes);
-	updateFilipMarker(watchedTotal, totalEpisodes);
+	updateOceanJourney(journeyWatchedEpisodes, totalEpisodes);
+	updateFilipMarker(journeyWatchedEpisodes, totalEpisodes);
 
 	seasonDefinitions.forEach(season => {
 		const key = normalize(season.tab).replace(/[^a-z0-9]+/g, "-");

@@ -229,6 +229,9 @@ header h1 {
 }
 
 .ocean-lane {
+    --ship-size: 75px;
+    --filip-size-percent: 90;
+    --filip-size: calc(var(--ship-size) * var(--filip-size-percent) / 100);
     position: relative;
     min-height: 64px;
     display: flex;
@@ -270,9 +273,9 @@ header h1 {
 
 .journey-ship {
     position: absolute;
-    left: clamp(26px, var(--ship-left), calc(100% - 26px));
+    left: clamp(calc(var(--ship-size) * 0.45), var(--ship-left), calc(100% - (var(--ship-size) * 0.45)));
     top: 50%;
-    width: 58px;
+    width: var(--ship-size);
     height: auto;
     transform: translate(-50%, -52%);
     filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
@@ -283,9 +286,9 @@ header h1 {
 
 .filip-marker {
     position: absolute;
-    left: clamp(20px, var(--filip-left), calc(100% - 20px));
-    top: calc(50% - 26px);
-    width: 36px;
+    left: clamp(calc(var(--filip-size) * 0.54), var(--filip-left), calc(100% - (var(--filip-size) * 0.54)));
+    top: calc(50% - (var(--filip-size) * 0.69));
+    width: var(--filip-size);
     height: auto;
     transform: translateX(-50%);
     filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
@@ -681,15 +684,8 @@ body.dark .progress-fill {
         height: 24px;
     }
 
-    .journey-ship {
-        width: 48px;
-        left: clamp(22px, var(--ship-left), calc(100% - 22px));
-    }
-
-    .filip-marker {
-        width: 30px;
-        left: clamp(18px, var(--filip-left), calc(100% - 18px));
-        top: calc(50% - 22px);
+    .ocean-lane {
+        --ship-size: 48px;
     }
 
     .progress-row {

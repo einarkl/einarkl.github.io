@@ -3,6 +3,7 @@ const JOURNEY_START_DATE = new Date("2026-02-14T00:00:00");
 const MINUTES_PER_EPISODE = 20;
 const FILIP_PARAM_KEYS = ["filip", "easter", "scared"];
 const SHIP_DEBUG_PARAM_KEYS = ["shipProgress", "debugProgress", "ship"];
+const EPISODE_DEBUG_PARAM_KEYS = ["episode", "ep"];
 
 let allEpisodes = [];
 let seasonDefinitions = [];
@@ -46,6 +47,17 @@ function parsePositiveInt(value) {
 	return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function parseNonNegativeInt(value) {
+	const text = String(value ?? "").trim();
+	if (!text) return null;
+
+	const onlyDigits = text.replace(/[^0-9]/g, "");
+	if (!onlyDigits && text !== "0") return null;
+
+	const parsed = Number.parseInt(onlyDigits || "0", 10);
+	return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 function parsePercentage(value) {
 	const text = String(value ?? "").trim().replace(",", ".");
 	if (!text) return null;
@@ -70,7 +82,22 @@ function getDebugShipProgressPercent() {
 	return null;
 }
 
+function getDebugEpisodeOverride() {
+	const params = new URLSearchParams(window.location.search);
+
+	for (const key of EPISODE_DEBUG_PARAM_KEYS) {
+		if (!params.has(key)) continue;
+		const episode = parseNonNegativeInt(params.get(key));
+		if (episode !== null) {
+			return episode;
+		}
+	}
+
+	return null;
+}
+
 const DEBUG_SHIP_PROGRESS_PERCENT = getDebugShipProgressPercent();
+const DEBUG_EPISODE_OVERRIDE = getDebugEpisodeOverride();
 
 function isFilipModeEnabled() {
 	const params = new URLSearchParams(window.location.search);
@@ -317,20 +344,39 @@ function renderBar(containerId, watched, total) {
 
 function updateProgress() {
 	const validEpisodes = allEpisodes.filter(item => hasEpisodeNumber(item.episodeNumber));
-	const watchedTotal = validEpisodes.filter(item => isWatched(item.watchedRaw)).length;
 	const totalEpisodes = validEpisodes.length;
-	const journeyWatchedEpisodes = DEBUG_SHIP_PROGRESS_PERCENT === null
-		? watchedTotal
-		: (DEBUG_SHIP_PROGRESS_PERCENT / 100) * totalEpisodes;
+	const realWatchedTotal = validEpisodes.filter(item => isWatched(item.watchedRaw)).length;
+	const debugEpisodeWatched = DEBUG_EPISODE_OVERRIDE === null
+		? null
+		: Math.max(0, Math.min(totalEpisodes, DEBUG_EPISODE_OVERRIDE));
+	const journeyWatchedEpisodes = debugEpisodeWatched !== null
+		? debugEpisodeWatched
+		: (DEBUG_SHIP_PROGRESS_PERCENT === null
+			? realWatchedTotal
+			: (DEBUG_SHIP_PROGRESS_PERCENT / 100) * totalEpisodes);
 
-	updateJourneyShowcase(watchedTotal, totalEpisodes);
+	updateJourneyShowcase(journeyWatchedEpisodes, totalEpisodes);
 	updateOceanJourney(journeyWatchedEpisodes, totalEpisodes);
 	updateFilipMarker(journeyWatchedEpisodes, totalEpisodes);
+
+	const seasonDebugWatched = new Map();
+	if (debugEpisodeWatched !== null) {
+		const orderedEpisodesForDebug = seasonDefinitions.flatMap(season => (
+			validEpisodes.filter(item => item.season === season.tab)
+		));
+
+		orderedEpisodesForDebug.forEach((item, index) => {
+			if (index >= debugEpisodeWatched) return;
+			seasonDebugWatched.set(item.season, (seasonDebugWatched.get(item.season) || 0) + 1);
+		});
+	}
 
 	seasonDefinitions.forEach(season => {
 		const key = normalize(season.tab).replace(/[^a-z0-9]+/g, "-");
 		const episodes = validEpisodes.filter(item => item.season === season.tab);
-		const watched = episodes.filter(item => isWatched(item.watchedRaw)).length;
+		const watched = debugEpisodeWatched !== null
+			? (seasonDebugWatched.get(season.tab) || 0)
+			: episodes.filter(item => isWatched(item.watchedRaw)).length;
 		const total = episodes.length;
 		const range = getSeasonEpisodeRange(episodes);
 		const label = document.getElementById(`label-${key}`);

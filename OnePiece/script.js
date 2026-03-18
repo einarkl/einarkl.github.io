@@ -453,15 +453,18 @@ function discoverAndFetchAllTabs() {
 					.map(row => {
 						const tab = (row.c && row.c[0] && row.c[0].v) ? String(row.c[0].v).trim() : "";
 						const name = (row.c && row.c[1] && row.c[1].v) ? String(row.c[1].v).trim() : "";
+						const excludeRaw = (row.c && row.c[2] && row.c[2].v) ? String(row.c[2].v).trim() : "";
 						return {
 							tab,
-							name: name || tab
+							name: name || tab,
+							exclude: sheetName === "Seasons" && normalize(excludeRaw) === "x"
 						};
 					})
-					.filter(season => season.tab && normalize(season.tab) !== "season");
+					.filter(season => season.tab && normalize(season.tab) !== "season" && !season.exclude)
+					.map(({ tab, name }) => ({ tab, name }));
 
 				if (seasons.length === 0) {
-					throw new Error(`'${sheetName}' has no season tabs in column A.`);
+					throw new Error(`'${sheetName}' has no included season tabs in column A.`);
 				}
 
 				seasonDefinitions = seasons;

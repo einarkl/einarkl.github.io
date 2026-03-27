@@ -73,7 +73,7 @@ function resetBoard() {
 
 function drawBoard() {
     $("#board").empty();
-    let colors = ["#9c7846", "#ff0000", "#ff9900", "#ffff00", "#3cff00", "#00f7ff", "#0088ff", "#a600ff", "#ff0077", "#453013"];
+    let colors = ["#9c7846", "#ff5b5b", "#ffc164", "#ffff6e", "#9eff80", "#a6fcff", "#74beff", "#d27eff", "#ff7fbb", "#453013"];
     let fill = "#9c7846";
     let size = $("#board").height() / 8;
     let fontsize = $("#board").height() / 20;

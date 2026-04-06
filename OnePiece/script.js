@@ -229,7 +229,7 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 
 	lane.style.setProperty("--filip-left", `${clampedFilipPct}%`);
 	lane.style.setProperty("--filip-near", clampedProximity.toFixed(4));
-	lane.style.setProperty("--filip-flip-x", hasSurpassedFilip ? "-1" : "1");
+	marker.src = hasSurpassedFilip ? "./icons/Filip_scared_flipped.png" : "./icons/Filip_scared.png";
 	marker.style.left = `${clampedFilipPct}%`;
 	marker.classList.toggle("is-shaking", shouldShake);
 	marker.title = `Filip marker: episode ${filipEpisodeNumber}`;

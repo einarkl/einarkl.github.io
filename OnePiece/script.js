@@ -224,7 +224,7 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 	const distancePct = Math.abs(clampedShipPct - clampedFilipPct);
 	const proximity = 1 - Math.min(1, distancePct / 100);
 	const clampedProximity = Math.max(0, Math.min(1, proximity));
-	const hasSurpassedFilip = clampedShipPct > clampedFilipPct;
+	const hasSurpassedFilip = clampedShipPct >= clampedFilipPct;
 	const shouldShake = clampedProximity > 0;
 
 	lane.style.setProperty("--filip-left", `${clampedFilipPct}%`);

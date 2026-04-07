@@ -9,6 +9,8 @@ let allEpisodes = [];
 let seasonDefinitions = [];
 let pendingFetches = 0;
 let filipEpisodeNumber = null;
+let lastShipProgress = 0;
+let lastFilipProgress = 0;
 
 const body = document.body;
 const loader = document.getElementById("loader");
@@ -186,6 +188,71 @@ function updateJourneyShowcase(watchedEpisodes, totalEpisodes) {
 	endDateEl.textContent = formatDate(estimatedEnd);
 }
 
+function ensureProgressGuideElements() {
+	const lane = document.querySelector(".ocean-lane");
+	if (!lane) return { shipGuide: null, filipGuide: null };
+
+	let shipGuide = document.getElementById("shipProgressGuide");
+	if (!shipGuide) {
+		shipGuide = document.createElement("div");
+		shipGuide.id = "shipProgressGuide";
+		shipGuide.className = "progress-guide progress-guide-ship";
+		lane.appendChild(shipGuide);
+	}
+
+	let filipGuide = document.getElementById("filipProgressGuide");
+	if (!filipGuide) {
+		filipGuide = document.createElement("div");
+		filipGuide.id = "filipProgressGuide";
+		filipGuide.className = "progress-guide progress-guide-filip hidden";
+		lane.appendChild(filipGuide);
+	}
+
+	return { shipGuide, filipGuide };
+}
+
+function updateProgressGuidePositions() {
+	const { shipGuide, filipGuide } = ensureProgressGuideElements();
+	if (!shipGuide || !filipGuide) return;
+
+	shipGuide.style.left = `${lastShipProgress}%`;
+	shipGuide.dataset.label = `Ship ${Math.round(lastShipProgress)}%`;
+	shipGuide.classList.remove("hidden");
+
+	filipGuide.style.left = `${lastFilipProgress}%`;
+	filipGuide.dataset.label = `Filip ${Math.round(lastFilipProgress)}%`;
+	filipGuide.classList.toggle("hidden", !Number.isFinite(lastFilipProgress) || lastFilipProgress <= 0 || !isFilipModeEnabled());
+}
+
+function attachProgressGuideHoverHandlers() {
+	const lane = document.querySelector(".ocean-lane");
+	const ship = document.getElementById("journeyShip");
+
+	const showGuides = () => lane?.classList.add("show-progress-guides");
+	const hideGuides = () => lane?.classList.remove("show-progress-guides");
+
+	if (ship) {
+		ship.addEventListener("mouseenter", showGuides);
+		ship.addEventListener("mouseleave", hideGuides);
+	}
+
+	document.addEventListener("mouseover", event => {
+		const target = event.target;
+		if (target instanceof Element && target.closest(".filip-marker")) {
+			showGuides();
+		}
+	});
+
+	document.addEventListener("mouseout", event => {
+		const target = event.target;
+		if (target instanceof Element && target.closest(".filip-marker")) {
+			const related = event.relatedTarget;
+			if (related instanceof Element && related.closest(".filip-marker")) return;
+			hideGuides();
+		}
+	});
+}
+
 function updateOceanJourney(watchedEpisodes, totalEpisodes) {
 	const lane = document.querySelector(".ocean-lane");
 	const track = document.getElementById("oceanTrack");
@@ -196,9 +263,11 @@ function updateOceanJourney(watchedEpisodes, totalEpisodes) {
 	const pct = totalEpisodes > 0 ? (watchedEpisodes / totalEpisodes) * 100 : 0;
 	const clampedPct = Math.max(0, Math.min(100, pct));
 
+	lastShipProgress = clampedPct;
 	fill.style.width = `${clampedPct}%`;
 	lane.style.setProperty("--ship-left", `${clampedPct}%`);
 	ship.style.left = `${clampedPct}%`;
+	updateProgressGuidePositions();
 }
 
 function updateFilipMarker(watchedEpisodes, totalEpisodes) {
@@ -221,6 +290,8 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 	const shipPct = totalEpisodes > 0 ? (watchedEpisodes / totalEpisodes) * 100 : 0;
 	const clampedShipPct = Math.max(0, Math.min(100, shipPct));
 
+	lastFilipProgress = clampedFilipPct;
+
 	const distancePct = Math.abs(clampedShipPct - clampedFilipPct);
 	const proximity = 1 - Math.min(1, distancePct / 100);
 	const clampedProximity = Math.max(0, Math.min(1, proximity));
@@ -234,6 +305,7 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 	marker.classList.toggle("is-shaking", shouldShake);
 	marker.title = `Filip marker: episode ${filipEpisodeNumber}`;
 	marker.classList.remove("hidden");
+	updateProgressGuidePositions();
 }
 
 function getSeasonEpisodeRange(episodes) {
@@ -482,3 +554,4 @@ function discoverAndFetchAllTabs() {
 showLoader();
 fetchFilipEpisodeNumber();
 discoverAndFetchAllTabs();
+attachProgressGuideHoverHandlers();

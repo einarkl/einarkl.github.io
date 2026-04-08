@@ -216,7 +216,7 @@ function updateProgressGuidePositions() {
 	if (!shipGuide || !filipGuide) return;
 
 	shipGuide.style.left = `${lastShipProgress}%`;
-	shipGuide.dataset.label = `Ship ${Math.round(lastShipProgress)}%`;
+	shipGuide.dataset.label = `Einar ${Math.round(lastShipProgress)}%`;
 	shipGuide.classList.remove("hidden");
 
 	filipGuide.style.left = `${lastFilipProgress}%`;

@@ -158,7 +158,7 @@ function updateJourneyShowcase(watchedEpisodes, totalEpisodes) {
 	if (!startedEl || !daysEl || !episodesEl || !totalTimeEl || !perDayEl || !endDateEl) return;
 
 	startedEl.textContent = formatDate(JOURNEY_START_DATE);
-	episodesEl.textContent = `${watchedEpisodes}/${totalEpisodes}` + (totalEpisodes > 0 ? ` (${Math.round((watchedEpisodes / totalEpisodes) * 100)}%)` : "");
+	episodesEl.textContent = `${watchedEpisodes}/${totalEpisodes}` + (totalEpisodes > 0 ? ` (${Math.floor((watchedEpisodes / totalEpisodes) * 100)}%)` : "");
 
 	const totalWatchMinutes = watchedEpisodes * MINUTES_PER_EPISODE;
 	totalTimeEl.textContent = `~${formatDuration(totalWatchMinutes)}`;

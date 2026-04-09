@@ -216,7 +216,7 @@ function updateProgressGuidePositions() {
 	if (!shipGuide || !filipGuide) return;
 
 	shipGuide.style.left = `${lastShipProgress}%`;
-	shipGuide.dataset.label = `Einar ${Math.round(lastShipProgress)}%`;
+	shipGuide.dataset.label = `Ship ${Math.round(lastShipProgress)}%`;
 	shipGuide.classList.remove("hidden");
 
 	filipGuide.style.left = `${lastFilipProgress}%`;
@@ -280,7 +280,9 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 	if (!Number.isFinite(filipEpisodeNumber) || filipEpisodeNumber <= 0 || totalEpisodes <= 0) {
 		lane.style.setProperty("--filip-near", "0");
 		lane.style.setProperty("--filip-flip-x", "1");
+		lane.style.setProperty("--filip-rotation", "0deg");
 		marker.classList.remove("is-shaking");
+		marker.classList.remove("is-pulsing");
 		marker.classList.add("hidden");
 		return;
 	}
@@ -295,14 +297,16 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 	const distancePct = Math.abs(clampedShipPct - clampedFilipPct);
 	const proximity = 1 - Math.min(1, distancePct / 100);
 	const clampedProximity = Math.max(0, Math.min(1, proximity));
-	const hasSurpassedFilip = clampedShipPct >= clampedFilipPct;
-	const shouldShake = clampedProximity > 0;
+	const hasSurpassedFilip = clampedShipPct > clampedFilipPct;
+	const shouldShake = clampedProximity > 0 && clampedShipPct < 100;
 
 	lane.style.setProperty("--filip-left", `${clampedFilipPct}%`);
 	lane.style.setProperty("--filip-near", clampedProximity.toFixed(4));
+	lane.style.setProperty("--filip-rotation", clampedShipPct >= 100 ? "-90deg" : "0deg");
 	marker.src = hasSurpassedFilip ? "./icons/Filip_scared_flipped.png" : "./icons/Filip_scared.png";
 	marker.style.left = `${clampedFilipPct}%`;
 	marker.classList.toggle("is-shaking", shouldShake);
+	marker.classList.toggle("is-pulsing", clampedShipPct >= 100);
 	marker.title = `Filip marker: episode ${filipEpisodeNumber}`;
 	marker.classList.remove("hidden");
 	updateProgressGuidePositions();

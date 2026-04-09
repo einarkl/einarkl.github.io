@@ -244,6 +244,7 @@ header h1 {
     --filip-shake-y: calc(var(--filip-near) * var(--filip-shake-max-y));
     --filip-shake-rot: calc(var(--filip-near) * var(--filip-shake-max-rot));
     --filip-flip-x: 1;
+    --filip-rotation: 0deg;
     position: relative;
     min-height: 64px;
     display: flex;
@@ -303,7 +304,7 @@ header h1 {
     top: calc(50% - (var(--filip-size) * 0.69));
     width: var(--filip-size);
     height: auto;
-    transform: translateX(-50%) scaleX(var(--filip-flip-x));
+    transform: translateX(-50%) scaleX(var(--filip-flip-x)) rotate(var(--filip-rotation));
     filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
     transition: left 500ms ease, opacity 150ms ease;
     animation: none;
@@ -313,6 +314,10 @@ header h1 {
 
 .filip-marker.is-shaking {
     animation: filip-shake 320ms linear infinite;
+}
+
+.filip-marker.is-pulsing {
+    animation: filip-pulse 1s ease-in-out infinite;
 }
 
 .filip-marker.hidden {
@@ -776,5 +781,14 @@ body.dark .progress-fill {
     }
     100% {
         transform: translateX(calc(-50% + var(--filip-shake-x) * 0.3)) translateY(calc(-1 * var(--filip-shake-y) * 0.3)) rotate(calc(var(--filip-shake-rot) * 0.25)) scaleX(var(--filip-flip-x));
+    }
+}
+
+@keyframes filip-pulse {
+    0%, 100% {
+        transform: translateX(-50%) scaleX(var(--filip-flip-x)) rotate(var(--filip-rotation)) scale(1);
+    }
+    50% {
+        transform: translateX(-50%) scaleX(var(--filip-flip-x)) rotate(var(--filip-rotation)) scale(1.1);
     }
 }

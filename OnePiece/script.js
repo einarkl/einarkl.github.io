@@ -55,6 +55,7 @@ function parseNonNegativeInt(value) {
 
 	const onlyDigits = text.replace(/[^0-9]/g, "");
 	if (!onlyDigits && text !== "0") return null;
+	if (!onlyDigits && text !== "0") return null;
 
 	const parsed = Number.parseInt(onlyDigits || "0", 10);
 	return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
@@ -164,7 +165,7 @@ function updateJourneyShowcase(watchedEpisodes, totalEpisodes) {
 
 	const now = new Date();
 	const elapsedMs = Math.max(0, now.getTime() - JOURNEY_START_DATE.getTime());
-	const elapsedDays = Math.max(1, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)) + 1);
+	const elapsedDays = Math.max(0, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)));
 	daysEl.textContent = String(elapsedDays);
 	const watchMinutesPerDay = totalWatchMinutes / elapsedDays;
 

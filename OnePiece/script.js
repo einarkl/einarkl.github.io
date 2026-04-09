@@ -217,11 +217,11 @@ function updateProgressGuidePositions() {
 	if (!shipGuide || !filipGuide) return;
 
 	shipGuide.style.left = `${lastShipProgress}%`;
-	shipGuide.dataset.label = `Ship ${Math.round(lastShipProgress)}%`;
+	shipGuide.dataset.label = `Ship ${Math.floor(lastShipProgress)}%`;
 	shipGuide.classList.remove("hidden");
 
 	filipGuide.style.left = `${lastFilipProgress}%`;
-	filipGuide.dataset.label = `Filip ${Math.round(lastFilipProgress)}%`;
+	filipGuide.dataset.label = `Filip ${Math.floor(lastFilipProgress)}%`;
 	filipGuide.classList.toggle("hidden", !Number.isFinite(lastFilipProgress) || lastFilipProgress <= 0 || !isFilipModeEnabled());
 }
 

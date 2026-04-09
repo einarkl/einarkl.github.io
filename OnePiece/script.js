@@ -183,7 +183,7 @@ function updateJourneyShowcase(watchedEpisodes, totalEpisodes) {
 
 	const remainingEpisodes = Math.max(0, totalEpisodes - watchedEpisodes);
 	const remainingMinutes = remainingEpisodes * MINUTES_PER_EPISODE;
-	const remainingDays = Math.ceil(remainingMinutes / watchMinutesPerDay);
+	const remainingDays = remainingMinutes / watchMinutesPerDay;
 	const estimatedEnd = new Date(now.getTime() + remainingDays * 24 * 60 * 60 * 1000);
 
 	endDateEl.textContent = formatDate(estimatedEnd);

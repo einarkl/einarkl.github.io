@@ -24,7 +24,7 @@ const languageMap = {
 
 const loader = document.getElementById("loader");
 
-const VALID_ORDERS = new Set(["art","release-old","release-new","owned-first","owned-last"]);
+const VALID_ORDERS = new Set(["art", "release-old", "release-new", "owned-first", "owned-last"]);
 
 function getUrlState() {
   const params = new URLSearchParams(window.location.search);
@@ -407,6 +407,12 @@ function sortItems(items) {
 /* =====================
    RENDER
 ===================== */
+function getItemCategory(item) {
+  if (normalize(item.type) === "pack") return "pack";
+  if (item.appearanceType === "Cameo") return "cameo";
+  return "main";
+}
+
 function render() {
   const artImageMap = buildArtImageMap(allItems);
   const grid = document.getElementById("card-grid");
@@ -421,7 +427,31 @@ function render() {
   }
   const items = sortItems(itemsToShow);
 
+  let previousCategory = null;
+
   items.forEach(item => {
+    const currentCategory = getItemCategory(item);
+
+    // Insert gap and header when category changes
+    if (previousCategory !== null && previousCategory !== currentCategory) {
+      const gap = document.createElement("div");
+      gap.className = "category-gap";
+      grid.appendChild(gap);
+    }
+
+    // Insert header at start of each category
+    if (previousCategory !== currentCategory) {
+      const header = document.createElement("div");
+      header.className = "category-header";
+      const categoryLabel = {
+        "main": "Main Cards",
+        "cameo": "Cameo Appearances",
+        "pack": "Packs"
+      }[currentCategory];
+      header.textContent = categoryLabel;
+      grid.appendChild(header);
+    }
+
     let status = "";
     if (normalize(item.inCollection) === "x") {
       status = `<span class="badge owned">Owned</span>`;
@@ -461,6 +491,7 @@ function render() {
     }
 
     grid.appendChild(card);
+    previousCategory = currentCategory;
   });
 
   updateProgress();
@@ -494,7 +525,7 @@ let progressCollapsed = true;
 
 function updateToggleState() {
   const isAllLanguages = currentLanguageFilter === 'all';
-  
+
   if (!isAllLanguages) {
     // When specific language selected, always expand and hide toggle
     progressSection.classList.remove('collapsed');
@@ -518,7 +549,7 @@ function updateToggleState() {
 
 progressToggle.addEventListener('click', () => {
   if (progressToggle.getAttribute('aria-disabled') === 'true') return;
-  
+
   progressCollapsed = !progressCollapsed;
   updateToggleState();
 });

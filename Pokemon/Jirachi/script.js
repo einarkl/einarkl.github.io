@@ -560,9 +560,10 @@ updateToggleState();
 function updateProgress() {
   const valid = allItems.filter(isValidItem);
 
-  // Separate packs from cards for progress tracking
+  // Separate packs, cameos, and main cards for progress tracking
   const packs = valid.filter(i => normalize(i.type) === 'pack');
-  const cards = valid.filter(i => normalize(i.type) !== 'pack');
+  const cameos = valid.filter(i => i.appearanceType === 'Cameo');
+  const cards = valid.filter(i => normalize(i.type) !== 'pack' && i.appearanceType !== 'Cameo');
 
   const totalAll = cards.length;
   const ownedAll = cards.filter(i => normalize(i.inCollection) === 'x').length;
@@ -671,6 +672,38 @@ function updateProgress() {
       overallStar.setAttribute('aria-hidden', 'true');
     }
   }
+
+  // Cameos progress (filtered by language if applicable)
+  let cameosToShow = cameos;
+  if (currentLanguageFilter !== 'all') {
+    const filterLang = languageMap[currentLanguageFilter];
+    if (filterLang) {
+      cameosToShow = cameos.filter(i => i.language === filterLang);
+    }
+  }
+  const totalCameos = cameosToShow.length;
+  const ownedCameos = cameosToShow.filter(i => normalize(i.inCollection) === 'x').length;
+  const boughtCameos = cameosToShow.filter(i => normalize(i.inCollection) === 'k').length;
+
+  const pctCameos = renderBar('progressCameos', ownedCameos, boughtCameos, totalCameos);
+  const rowCameos = document.getElementById('rowCameos');
+  if (rowCameos) rowCameos.style.display = totalCameos > 0 ? 'flex' : 'none';
+
+  function updateCameosStar(starId, pct, owned, bought, total) {
+    const star = document.getElementById(starId);
+    if (!star) return;
+    // Show star only when 100% owned (not counting bought)
+    if (total > 0 && owned === total) {
+      star.textContent = '★';
+      star.setAttribute('aria-hidden', 'false');
+      star.title = `Completed: Owned ${owned}, Total ${total}`;
+      star.setAttribute('aria-label', `Completed: Owned ${owned}, Total ${total}`);
+    } else {
+      star.textContent = '';
+      star.setAttribute('aria-hidden', 'true');
+    }
+  }
+  updateCameosStar('starCameos', pctCameos, ownedCameos, boughtCameos, totalCameos);
 
   // Packs progress bar (always visible, all languages combined)
   const pctPacks = renderBar('progressPacks', ownedPacks, boughtPacks, totalPacks);

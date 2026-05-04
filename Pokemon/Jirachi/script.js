@@ -24,6 +24,47 @@ const languageMap = {
 
 const loader = document.getElementById("loader");
 
+const VALID_ORDERS = new Set(["art","release-old","release-new","owned-first","owned-last"]);
+
+function getUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    order: params.get("order") || "art",
+    language: normalize(params.get("language") || "all")
+  };
+}
+
+function updateUrlParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (currentOrder && currentOrder !== "art") {
+    params.set("order", currentOrder);
+  } else {
+    params.delete("order");
+  }
+
+  if (currentLanguageFilter && currentLanguageFilter !== "all") {
+    params.set("language", currentLanguageFilter);
+  } else {
+    params.delete("language");
+  }
+
+  const query = params.toString();
+  const newUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`;
+  window.history.replaceState({}, "", newUrl);
+}
+
+function applyUrlState() {
+  const { order, language } = getUrlState();
+  if (VALID_ORDERS.has(order)) currentOrder = order;
+  currentLanguageFilter = language;
+
+  const orderSelect = document.getElementById("order");
+  if (orderSelect && VALID_ORDERS.has(currentOrder)) {
+    orderSelect.value = currentOrder;
+  }
+}
+
 /* =====================
    THEME HANDLING
 ===================== */
@@ -31,6 +72,7 @@ const body = document.body;
 // Always use dark theme
 body.classList.add("dark");
 
+applyUrlState();
 showLoader();
 
 /* =====================
@@ -146,6 +188,10 @@ function populateLanguageFilter() {
     option.textContent = tab;
     filterSelect.appendChild(option);
   });
+
+  if ([...filterSelect.options].some(option => option.value === currentLanguageFilter)) {
+    filterSelect.value = currentLanguageFilter;
+  }
 }
 
 function createProgressRows() {
@@ -425,6 +471,7 @@ function render() {
 ===================== */
 document.getElementById("order").addEventListener("change", e => {
   currentOrder = e.target.value;
+  updateUrlParams();
   render();
 });
 
@@ -432,6 +479,7 @@ document.getElementById("order").addEventListener("change", e => {
 document.getElementById('languageFilter').addEventListener('change', e => {
   currentLanguageFilter = e.target.value;
   updateToggleState();
+  updateUrlParams();
   render();
 });
 

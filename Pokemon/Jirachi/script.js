@@ -7,20 +7,50 @@ let currentOrder = "art";
 let currentLanguageFilter = "all";
 
 const languageMap = {
-  "english": "EN",
-  "japanese": "JP",
-  "french": "FR",
-  "german": "DE",
-  "italian": "IT",
-  "russian": "RU",
-  "portuguese-b": "PT-B",
-  "spanish": "ES",
-  "chinese-s": "CN-S",
-  "chinese-t": "CN-T",
-  "korean": "KR",
-  "indonesian": "ID",
-  "thai": "TH"
+  "english": { code: "EN", group: "english" },
+  "japanese": { code: "JP", group: "japanese" },
+  "french": { code: "FR", group: "english" },
+  "german": { code: "DE", group: "english" },
+  "italian": { code: "IT", group: "english" },
+  "russian": { code: "RU", group: "english" },
+  "portuguese-b": { code: "PT-B", group: "english" },
+  "spanish": { code: "ES", group: "english" },
+  "chinese-s": { code: "CN-S", group: "japanese" },
+  "chinese-t": { code: "CN-T", group: "japanese" },
+  "korean": { code: "KR", group: "japanese" },
+  "indonesian": { code: "ID", group: "japanese" },
+  "thai": { code: "TH", group: "japanese" }
 };
+
+const ENGLISH_LANGUAGE_CODES = new Set(Object.values(languageMap)
+  .filter(item => item.group === "english")
+  .map(item => item.code)
+);
+const JAPANESE_LANGUAGE_CODES = new Set(Object.values(languageMap)
+  .filter(item => item.group === "japanese")
+  .map(item => item.code)
+);
+const ENGLISH_MAIN_LANGUAGE = "EN";
+const JAPANESE_MAIN_LANGUAGE = "JP";
+const LANGUAGE_ORDER = ["JP", "EN", "FR", "DE", "IT", "RU", "PT-B", "ES", "CN-S", "CN-T", "KR", "ID", "TH"];
+
+function getLanguageCode(filterKey) {
+  return languageMap[filterKey]?.code || null;
+}
+
+function getLanguageGroupMain(languageCode) {
+  if (ENGLISH_LANGUAGE_CODES.has(languageCode)) return ENGLISH_MAIN_LANGUAGE;
+  if (JAPANESE_LANGUAGE_CODES.has(languageCode)) return JAPANESE_MAIN_LANGUAGE;
+  return null;
+}
+
+function getLanguageGroupCodes(languageCode) {
+  return ENGLISH_LANGUAGE_CODES.has(languageCode)
+    ? ENGLISH_LANGUAGE_CODES
+    : JAPANESE_LANGUAGE_CODES.has(languageCode)
+      ? JAPANESE_LANGUAGE_CODES
+      : new Set();
+}
 
 const loader = document.getElementById("loader");
 
@@ -233,6 +263,25 @@ function normalize(value) {
   return String(value).trim().toLowerCase();
 }
 
+function normalizeCardName(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/[“”‘’'"!?,.:;\-()\[\]\/\\]/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function normalizeRarity(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/\s+/g, ' ');
+}
+
 function isValidItem(item) {
   const v = normalize(item.inCollection);
   return v === "x" || v === "k" || v === "";
@@ -246,29 +295,25 @@ function buildArtImageMap(items) {
   items.forEach(item => {
     if (!item.art || !item.pictureUrl || !item.language) return;
 
-    const lang = item.language;
-    const rank = FALLBACK_LANGUAGE_PRIORITY.indexOf(lang);
-    const priority = rank === -1 ? Infinity : rank;
+    const art = item.art;
+    const rarity = String(item.rarity || '').trim();
+    const rarityNorm = normalizeRarity(item.rarity);
+    const setKey = String(item.set || '').trim();
+    const language = item.language;
 
-    if (!map[item.art]) {
-      map[item.art] = {
-        url: item.pictureUrl,
-        language: lang,
-        priority
-      };
-      return;
+    if (!map[art]) {
+      map[art] = [];
     }
 
-    const current = map[item.art];
-
-    // Lower priority number wins (JP=0, EN=1, others=Infinity)
-    if (priority < current.priority) {
-      map[item.art] = {
-        url: item.pictureUrl,
-        language: lang,
-        priority
-      };
-    }
+    map[art].push({
+      language,
+      set: setKey,
+      rarity,
+      rarityNorm,
+      url: item.pictureUrl,
+      cardName: String(item.cardName || '').trim(),
+      cardNameNorm: normalizeCardName(item.cardName)
+    });
   });
 
   return map;
@@ -276,18 +321,70 @@ function buildArtImageMap(items) {
 
 function resolvePictureUrl(item, artImageMap) {
   if (item.pictureUrl) return { url: item.pictureUrl, sourceLanguage: null };
+
   if (item.art && artImageMap[item.art]) {
-    return {
-      url: artImageMap[item.art].url,
-      sourceLanguage: artImageMap[item.art].language
+    const candidates = artImageMap[item.art];
+    const rarityNorm = normalizeRarity(item.rarity);
+    const setKey = String(item.set || '').trim();
+    const preferredCodes = Array.from(getLanguageGroupCodes(item.language));
+    const preferredGroupMain = getLanguageGroupMain(item.language);
+    const fallbackCodes = preferredGroupMain === ENGLISH_MAIN_LANGUAGE
+      ? Array.from(JAPANESE_LANGUAGE_CODES)
+      : Array.from(ENGLISH_LANGUAGE_CODES);
+
+    const cardNameNorm = normalizeCardName(item.cardName);
+    const findMatch = (codes, exactSet, exactRarity, exactName) => {
+      return candidates.find(entry =>
+        codes.includes(entry.language) &&
+        (exactSet ? entry.set === setKey : true) &&
+        (exactRarity ? entry.rarityNorm === rarityNorm : true) &&
+        (exactName ? entry.cardNameNorm === cardNameNorm : true)
+      );
     };
+
+    // 1. Same group, same rarity, same card name
+    let match = findMatch(preferredCodes, false, true, true);
+    if (match) return { url: match.url, sourceLanguage: match.language };
+
+    // 2. Same group, same rarity, same set
+    match = findMatch(preferredCodes, true, true, false);
+    if (match) return { url: match.url, sourceLanguage: match.language };
+
+    // 3. Same group, same rarity
+    match = findMatch(preferredCodes, false, true, false);
+    if (match) return { url: match.url, sourceLanguage: match.language };
+
+    // 4. Same group, same card name
+    match = findMatch(preferredCodes, false, false, true);
+    if (match) return { url: match.url, sourceLanguage: match.language };
+
+    // 5. Same group, any image
+    match = findMatch(preferredCodes, false, false, false);
+    if (match) return { url: match.url, sourceLanguage: match.language };
+
+    // 6. Opposite group, same rarity
+    match = findMatch(fallbackCodes, false, true, false);
+    if (match) return { url: match.url, sourceLanguage: match.language };
+
+    // 7. Opposite group, same card name
+    match = findMatch(fallbackCodes, false, false, true);
+    if (match) return { url: match.url, sourceLanguage: match.language };
+
+    // 8. Opposite group, any image
+    match = findMatch(fallbackCodes, false, false, false);
+    if (match) return { url: match.url, sourceLanguage: match.language };
+
+    // 9. Any available image for this art
+    match = candidates[0];
+    if (match) return { url: match.url, sourceLanguage: match.language };
   }
+
   return { url: "./icons/385-Jirachi.png", sourceLanguage: null };
 }
 
-function getLanguagePriority(lang) {
-  const idx = FALLBACK_LANGUAGE_PRIORITY.indexOf(lang);
-  return idx === -1 ? Infinity : idx;
+function getLanguageOrderIndex(lang) {
+  const idx = LANGUAGE_ORDER.indexOf(lang);
+  return idx === -1 ? LANGUAGE_ORDER.length : idx;
 }
 
 function showLoader() {
@@ -305,7 +402,7 @@ function buildFirstReleaseByArt(items, activeLanguage) {
     if (!item.art) return;
 
     // respect current language filter
-    if (activeLanguage !== 'all' && item.language !== languageMap[activeLanguage]) return;
+    if (activeLanguage !== 'all' && item.language !== getLanguageCode(activeLanguage)) return;
 
     const art = item.art;
     const year = item.releaseYear || 9999;
@@ -354,14 +451,13 @@ function sortItems(items) {
       const artDiff = aArt - bArt;
       if (artDiff !== 0) return artDiff;
 
-      // 🔹 3. ORDER WITHIN ART BY RELEASE YEAR
+      // 🔹 3. GROUP BY LANGUAGE WITHIN SAME ART
+      const langDiff = getLanguageOrderIndex(a.language) - getLanguageOrderIndex(b.language);
+      if (langDiff !== 0) return langDiff;
+
+      // 🔹 4. ORDER WITHIN LANGUAGE BY RELEASE YEAR
       const yearDiff = (a.releaseYear || 0) - (b.releaseYear || 0);
       if (yearDiff !== 0) return yearDiff;
-
-      // 🔹 4. LANGUAGE PRIORITY (JP → EN → others)
-      const langDiff =
-        getLanguagePriority(a.language) - getLanguagePriority(b.language);
-      if (langDiff !== 0) return langDiff;
 
       // 🔹 5. FINAL STABLE TIE-BREAKERS
       return (
@@ -423,7 +519,7 @@ function render() {
 
   // apply language filter (show only items matching the language selection)
   if (currentLanguageFilter !== 'all') {
-    itemsToShow = itemsToShow.filter(i => i.language === languageMap[currentLanguageFilter]);
+    itemsToShow = itemsToShow.filter(i => i.language === getLanguageCode(currentLanguageFilter));
   }
   const items = sortItems(itemsToShow);
 
@@ -484,9 +580,9 @@ function render() {
         </div>
       </div>
     `;
-    //add style if item.pictureUrl is missing
 
-    if (!item.pictureUrl) {
+    // Gray out missing cards; owned/bought cards keep normal color.
+    if (normalize(item.inCollection) === "") {
       card.classList.add("grayscale");
     }
 
@@ -572,7 +668,7 @@ function updateProgress() {
   // Packs progress (filtered by language if applicable)
   let packsToShow = packs;
   if (currentLanguageFilter !== 'all') {
-    const filterLang = languageMap[currentLanguageFilter];
+    const filterLang = getLanguageCode(currentLanguageFilter);
     if (filterLang) {
       packsToShow = packs.filter(i => i.language === filterLang);
     }
@@ -626,7 +722,7 @@ function updateProgress() {
   // Process each tab's progress (excluding packs)
   allTabs.forEach(tab => {
     const tabNormalized = normalize(tab);
-    const tabItems = cards.filter(i => i.language === languageMap[tabNormalized]);
+    const tabItems = cards.filter(i => i.language === getLanguageCode(tabNormalized));
     const totalTab = tabItems.length;
     const ownedTab = tabItems.filter(i => normalize(i.inCollection) === 'x').length;
     const boughtTab = tabItems.filter(i => normalize(i.inCollection) === 'k').length;
@@ -676,7 +772,7 @@ function updateProgress() {
   // Cameos progress (filtered by language if applicable)
   let cameosToShow = cameos;
   if (currentLanguageFilter !== 'all') {
-    const filterLang = languageMap[currentLanguageFilter];
+    const filterLang = getLanguageCode(currentLanguageFilter);
     if (filterLang) {
       cameosToShow = cameos.filter(i => i.language === filterLang);
     }

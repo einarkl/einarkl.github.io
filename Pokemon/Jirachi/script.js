@@ -46,9 +46,9 @@ function getLanguageGroupMain(languageCode) {
 
 function getLanguageGroupCodes(languageCode) {
   return ENGLISH_LANGUAGE_CODES.has(languageCode)
-    ? ENGLISH_LANGUAGE_CODES
+    ? ["EN", languageCode]
     : JAPANESE_LANGUAGE_CODES.has(languageCode)
-      ? JAPANESE_LANGUAGE_CODES
+      ? ["JP", languageCode]
       : new Set();
 }
 
@@ -343,7 +343,7 @@ function resolvePictureUrl(item, artImageMap) {
     };
 
     // 1. Same group, same rarity, same card name
-    let match = findMatch(preferredCodes, false, true, true);
+    let match = findMatch(preferredCodes, true, true, true);
     if (match) return { url: match.url, sourceLanguage: match.language };
 
     // 2. Same group, same rarity, same set
@@ -358,7 +358,7 @@ function resolvePictureUrl(item, artImageMap) {
     match = findMatch(preferredCodes, false, false, true);
     if (match) return { url: match.url, sourceLanguage: match.language };
 
-    // 5. Same group, any image
+    /* // 5. Same group, any image
     match = findMatch(preferredCodes, false, false, false);
     if (match) return { url: match.url, sourceLanguage: match.language };
 
@@ -376,7 +376,7 @@ function resolvePictureUrl(item, artImageMap) {
 
     // 9. Any available image for this art
     match = candidates[0];
-    if (match) return { url: match.url, sourceLanguage: match.language };
+    if (match) return { url: match.url, sourceLanguage: match.language }; */
   }
 
   return { url: "./icons/385-Jirachi.png", sourceLanguage: null };

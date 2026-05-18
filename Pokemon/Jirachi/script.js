@@ -424,13 +424,24 @@ function sortItems(items) {
 
   return items.sort((a, b) => {
 
-    // Packs last
+    /* // Packs last
     if (a.type === "Pack" && b.type !== "Pack") return 1;
     if (a.type !== "Pack" && b.type === "Pack") return -1;
 
     // Cameos last
     if (a.appearanceType === "Cameo" && b.appearanceType !== "Cameo") return 1;
-    if (a.appearanceType !== "Cameo" && b.appearanceType === "Cameo") return -1;
+    if (a.appearanceType !== "Cameo" && b.appearanceType === "Cameo") return -1; */
+    
+    // Category ordering:
+    // Main cards -> Cameos -> Packs
+    function getCategoryRank(item) {
+      if (normalize(item.type) === "pack") return 2;
+      if (item.appearanceType === "Cameo") return 1;
+      return 0;
+    }
+
+    const categoryDiff = getCategoryRank(a) - getCategoryRank(b);
+    if (categoryDiff !== 0) return categoryDiff;
 
     /* =====================
        ART SORT — MUST BE FIRST

@@ -720,7 +720,8 @@ function updateProgress() {
       text.setAttribute('aria-label', `Progress ${pctTotal} percent. Owned ${owned}, Bought ${bought}, Total ${total}`);
     }
 
-	container.parentNode.setAttribute('data-progress', pctTotal);
+	  container.parentNode.setAttribute('data-progress', pctTotal);
+	  container.parentNode.setAttribute('data-owned', (owned + bought));
 
     return pctOwnedRounded;
   }
@@ -840,8 +841,16 @@ function updateProgress() {
 	const barsToSort = Array.prototype.slice.call(document.getElementById("languageRows").children, 0);
 
 	barsToSort.sort(function(a, b) {
-		var aord = +a.getAttribute("data-progress");
-		var bord = +b.getAttribute("data-progress");
+		const aord = +a.getAttribute("data-progress");
+		const bord = +b.getAttribute("data-progress");
+
+    if (aord === bord) {
+      const aord2 = +a.getAttribute("data-owned");
+		  const bord2 = +b.getAttribute("data-owned");
+
+      return bord2 - aord2;
+    }
+
 		return bord - aord;
 	});
 

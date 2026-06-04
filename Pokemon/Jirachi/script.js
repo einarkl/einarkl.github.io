@@ -720,6 +720,8 @@ function updateProgress() {
       text.setAttribute('aria-label', `Progress ${pctTotal} percent. Owned ${owned}, Bought ${bought}, Total ${total}`);
     }
 
+	container.parentNode.setAttribute('data-progress', pctTotal);
+
     return pctOwnedRounded;
   }
 
@@ -832,4 +834,24 @@ function updateProgress() {
     }
   }
   updatePacksStar('starPacks', pctPacks, ownedPacks, boughtPacks, totalPacks);
+
+  // Sort progress bars by percentage
+  function sortProgressBars() {
+	const barsToSort = Array.prototype.slice.call(document.getElementById("languageRows").children, 0);
+
+	barsToSort.sort(function(a, b) {
+		var aord = +a.getAttribute("data-progress");
+		var bord = +b.getAttribute("data-progress");
+		return bord - aord;
+	});
+
+	const container = document.getElementById('languageRows');
+
+	container.innerHTML = '';
+
+	barsToSort.forEach(tab => {
+		container.appendChild(tab);
+	});
+  }
+  sortProgressBars();
 }

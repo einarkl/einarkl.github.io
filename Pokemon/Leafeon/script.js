@@ -575,7 +575,7 @@ function render() {
       : '';
     card.innerHTML = `
       <div class="card-image-wrapper">
-        <img src="${resolvedImage.url}" alt="${item.cardName}">
+        <img src="${resolvedImage.url}" alt="${item.cardName}" title="${item.art}">
         ${languageOverlay}
       </div>
       <div class="card-content">

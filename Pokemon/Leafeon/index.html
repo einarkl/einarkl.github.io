@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Leafeon Collection</title>
+		<link rel="stylesheet" href="style.css" />
+		<link
+			rel="shortcut icon"
+			href="./icons/leafeon.png"
+			type="image/x-icon"
+		/>
+	</head>
+	<body>
+		<div id="loader" class="loader">
+			<img id="loaderIcon" src="./icons/rotate-dark.svg" alt="Loading" />
+		</div>
+		<header>
+			<h1>Leafeon Collection</h1>
+			<img
+				src="./icons/leafeon.png"
+				alt="Leafeon"
+				class="header-icon"
+			/>
+			<a href="print.html" class="print-button" title="Print cards">
+				<svg
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<polyline points="6 9 6 2 18 2 18 9"></polyline>
+					<path
+						d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+					></path>
+					<rect x="6" y="14" width="12" height="8"></rect>
+				</svg>
+				<span class="print-label">Print</span>
+			</a>
+		</header>
+
+		<div class="controls">
+			<label>
+				Order:
+				<select id="order">
+					<option value="art" selected>Art</option>
+					<option value="release-old">Release old→new</option>
+					<option value="release-new">Release new→old</option>
+					<option value="owned-first">Owned first</option>
+					<option value="owned-last">Missing first</option>
+				</select>
+			</label>
+
+			<label>
+				Language:
+				<select id="languageFilter">
+					<option value="all" selected>All</option>
+				</select>
+			</label>
+		</div>
+
+		<section class="progress-section" aria-label="Collection progress">
+			<div class="progress-row" id="rowAll">
+				<div class="progress-label">Overall</div>
+				<div class="progress" id="progressAll">
+					<div class="progress-fill-bought"></div>
+					<div class="progress-fill-owned"></div>
+					<div class="progress-text"></div>
+				</div>
+				<div
+					class="progress-star"
+					id="starAll"
+					aria-hidden="true"
+					title="Completion star"
+				></div>
+			</div>
+			<div id="languageRows"></div>
+			<div class="progress-row" id="rowCameos">
+				<div class="progress-label">Cameos</div>
+				<div class="progress" id="progressCameos">
+					<div class="progress-fill-bought"></div>
+					<div class="progress-fill-owned"></div>
+					<div class="progress-text"></div>
+				</div>
+				<div
+					class="progress-star"
+					id="starCameos"
+					aria-hidden="true"
+					title="Completion star"
+				></div>
+			</div>
+			<div class="progress-row" id="rowPacks">
+				<div class="progress-label">Pack Arts</div>
+				<div class="progress" id="progressPacks">
+					<div class="progress-fill-bought"></div>
+					<div class="progress-fill-owned"></div>
+					<div class="progress-text"></div>
+				</div>
+				<div
+					class="progress-star"
+					id="starPacks"
+					aria-hidden="true"
+					title="Completion star"
+				></div>
+			</div>
+
+			<div class="progress-toggle-wrap">
+				<button
+					id="progressToggle"
+					class="progress-toggle"
+					aria-expanded="false"
+				>
+					Show languages ▾
+				</button>
+			</div>
+		</section>
+
+		<main>
+			<div id="card-grid" class="grid"></div>
+		</main>
+
+		<script src="script.js"></script>
+	</body>
+</html>

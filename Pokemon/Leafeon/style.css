@@ -316,6 +316,11 @@ header h1 {
     color: #222;
 }
 
+.badge.einar {
+    background: #fb532d;
+    color: #fff;
+}
+
 /* =====================
      PROGRESS BARS
 ===================== */

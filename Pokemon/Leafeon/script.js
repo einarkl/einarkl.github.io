@@ -284,7 +284,7 @@ function normalizeRarity(value) {
 
 function isValidItem(item) {
   const v = normalize(item.inCollection);
-  return v === "x" || v === "k" || v === "";
+  return v === "x" || v === "k" || v === "e" || v === "";
 }
 
 const FALLBACK_LANGUAGE_PRIORITY = ["JP", "EN"];
@@ -483,7 +483,7 @@ function sortItems(items) {
 
     // Collection order
     if (currentOrder === 'owned-first') {
-      const ownedDiff = { x: 0, k: 1, "": 2 }[a.inCollection] - { x: 0, k: 1, "": 2 }[b.inCollection];
+      const ownedDiff = { x: 0, e: 1, k: 2, "": 3 }[a.inCollection] - { x: 0, e: 1, k: 2, "": 3 }[b.inCollection];
       if (ownedDiff !== 0) return ownedDiff;
 
       const yearDiff = (a.releaseYear || 0) - (b.releaseYear || 0);
@@ -493,7 +493,7 @@ function sortItems(items) {
         String(a.number || '').localeCompare(String(b.number || ''));
     }
     if (currentOrder === 'owned-last') {
-      const ownedDiff = { "": 0, k: 1, x: 2 }[a.inCollection] - { "": 0, k: 1, x: 2 }[b.inCollection];
+      const ownedDiff = { "": 0, k: 1, e: 2, x: 3 }[a.inCollection] - { "": 0, k: 1, e: 2, x: 3 }[b.inCollection];
       if (ownedDiff !== 0) return ownedDiff;
 
       const yearDiff = (a.releaseYear || 0) - (b.releaseYear || 0);
@@ -564,6 +564,8 @@ function render() {
       status = `<span class="badge owned">Owned</span>`;
     } else if (normalize(item.inCollection) === "k") {
       status = `<span class="badge bought">Bought</span>`;
+    } else if (normalize(item.inCollection) === "e") {
+      status = `<span class="badge einar">Einar</span>`;
     }
 
     const card = document.createElement("div");
@@ -674,7 +676,7 @@ function updateProgress() {
 
   const totalAll = cards.length;
   const ownedAll = cards.filter(i => normalize(i.inCollection) === 'x').length;
-  const boughtAll = cards.filter(i => normalize(i.inCollection) === 'k').length;
+  const boughtAll = cards.filter(i => normalize(i.inCollection) === 'k').length + cards.filter(i => normalize(i.inCollection) === 'e').length;
 
   // Packs progress (filtered by language if applicable)
   let packsToShow = packs;
@@ -686,7 +688,7 @@ function updateProgress() {
   }
   const totalPacks = packsToShow.length;
   const ownedPacks = packsToShow.filter(i => normalize(i.inCollection) === 'x').length;
-  const boughtPacks = packsToShow.filter(i => normalize(i.inCollection) === 'k').length;
+  const boughtPacks = packsToShow.filter(i => normalize(i.inCollection) === 'k').length + packsToShow.filter(i => normalize(i.inCollection) === 'e').length;
 
   function renderBar(containerId, owned, bought, total) {
     const container = document.getElementById(containerId);
@@ -739,7 +741,7 @@ function updateProgress() {
     const tabItems = cards.filter(i => i.language === getLanguageCode(tabNormalized));
     const totalTab = tabItems.length;
     const ownedTab = tabItems.filter(i => normalize(i.inCollection) === 'x').length;
-    const boughtTab = tabItems.filter(i => normalize(i.inCollection) === 'k').length;
+    const boughtTab = tabItems.filter(i => normalize(i.inCollection) === 'k').length + tabItems.filter(i => normalize(i.inCollection) === 'e').length;
 
     const rowId = `row${tabNormalized}`;
     const progressId = `progress${tabNormalized}`;
@@ -793,7 +795,7 @@ function updateProgress() {
   }
   const totalCameos = cameosToShow.length;
   const ownedCameos = cameosToShow.filter(i => normalize(i.inCollection) === 'x').length;
-  const boughtCameos = cameosToShow.filter(i => normalize(i.inCollection) === 'k').length;
+  const boughtCameos = cameosToShow.filter(i => normalize(i.inCollection) === 'k').length + cameosToShow.filter(i => normalize(i.inCollection) === 'e').length;
 
   const pctCameos = renderBar('progressCameos', ownedCameos, boughtCameos, totalCameos);
   const rowCameos = document.getElementById('rowCameos');

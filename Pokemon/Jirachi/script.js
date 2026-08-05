@@ -33,7 +33,7 @@ const JAPANESE_LANGUAGE_CODES = new Set(Object.values(languageMap)
 );
 const ENGLISH_MAIN_LANGUAGE = "EN";
 const JAPANESE_MAIN_LANGUAGE = "JP";
-const LANGUAGE_ORDER = ["JP", "EN", "FR", "DE", "IT", "RU", "PT-B", "ES", "CN-S", "CN-T", "KR", "ID", "TH"];
+const LANGUAGE_ORDER = ["JP", "EN", "FR", "DE", "IT", "RU", "PT-B", "ES", "ES-L", "CN-S", "CN-T", "KR", "ID", "TH"];
 
 function getLanguageCode(filterKey) {
   return languageMap[filterKey]?.code || null;

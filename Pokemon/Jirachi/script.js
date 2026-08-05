@@ -15,6 +15,7 @@ const languageMap = {
   "russian": { code: "RU", group: "english" },
   "portuguese-b": { code: "PT-B", group: "english" },
   "spanish": { code: "ES", group: "english" },
+  "spanish-l": { code: "ES-L", group: "english" },
   "chinese-s": { code: "CN-S", group: "japanese" },
   "chinese-t": { code: "CN-T", group: "japanese" },
   "korean": { code: "KR", group: "japanese" },

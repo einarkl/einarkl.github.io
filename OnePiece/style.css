@@ -301,13 +301,14 @@ header h1 {
 .filip-marker {
     position: absolute;
     left: clamp(calc(var(--filip-size) * 0.54), var(--filip-left), calc(100% - (var(--filip-size) * 0.54)));
-    top: calc(50% - (var(--filip-size) * 0.69));
+    /* top: calc(50% - (var(--filip-size) * 0.69)); */
+    top: 50%;
     width: var(--filip-size);
     height: auto;
     transform: translateX(-50%) scaleX(var(--filip-flip-x)) rotate(var(--filip-rotation));
     filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.55));
     transition: left 500ms ease, opacity 150ms ease;
-    animation: none;
+    animation: ship-float 2.8s ease-in-out infinite;
     pointer-events: auto;
     z-index: 5;
 }

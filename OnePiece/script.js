@@ -301,13 +301,14 @@ function updateFilipMarker(watchedEpisodes, totalEpisodes) {
 	const hasSurpassedFilip = clampedShipPct > clampedFilipPct;
 	const shouldShake = clampedProximity > 0 && clampedShipPct < 100;
 
-	lane.style.setProperty("--filip-left", `${clampedFilipPct}%`);
-	lane.style.setProperty("--filip-near", clampedProximity.toFixed(4));
-	lane.style.setProperty("--filip-rotation", clampedShipPct >= 100 ? "-90deg" : "0deg");
-	marker.src = hasSurpassedFilip ? "./icons/Filip_scared_flipped.png" : "./icons/Filip_scared.png";
+	// lane.style.setProperty("--filip-left", `${clampedFilipPct}%`);
+	// lane.style.setProperty("--filip-near", clampedProximity.toFixed(4));
+	// lane.style.setProperty("--filip-rotation", clampedShipPct >= 100 ? "-90deg" : "0deg");
+	// marker.src = hasSurpassedFilip ? "./icons/Filip_scared_flipped.png" : "./icons/Filip_scared.png";
+	marker.src = hasSurpassedFilip ? "./icons/Filip_right.png" : "./icons/Filip_left.png";
 	marker.style.left = `${clampedFilipPct}%`;
-	marker.classList.toggle("is-shaking", shouldShake);
-	marker.classList.toggle("is-pulsing", clampedShipPct >= 100);
+	// marker.classList.toggle("is-shaking", shouldShake);
+	// marker.classList.toggle("is-pulsing", clampedShipPct >= 100);
 	marker.title = `Filip marker: episode ${filipEpisodeNumber}`;
 	marker.classList.remove("hidden");
 	updateProgressGuidePositions();
